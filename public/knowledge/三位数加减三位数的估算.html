@@ -462,6 +462,7 @@
     }
 
     let currentCards = [];      // 未配对卡片 { text, estimated, icon, detail }
+    let roundNumbers = [];      // 当前关卡的所有估算篮子
     let currentScore = 0;
     let totalCount = 0;
 
@@ -486,6 +487,8 @@
     function resetAndNewGame() {
         const rawCards = getRandomEquations(7);
         currentCards = shuffleArray(rawCards);
+        roundNumbers = [...new Set(currentCards.map(c => c.estimated))];
+        roundNumbers.sort((a,b) => a-b);
         currentScore = 0;
         totalCount = currentCards.length;
         renderGame();
@@ -530,12 +533,10 @@
         bindDragEvents();
     }
 
-    // 根据当前卡片动态生成篮子（只显示当前卡片中出现的估算结果）
+    // 根据当前关卡初始卡片，创建对应的估算结果篮子
     function rebuildBaskets() {
-        const uniqueEstimates = [...new Set(currentCards.map(c => c.estimated))];
-        uniqueEstimates.sort((a,b) => a-b);
         basketsContainer.innerHTML = '';
-        uniqueEstimates.forEach(num => {
+        roundNumbers.forEach(num => {
             const basket = document.createElement('div');
             basket.className = 'basket';
             basket.setAttribute('data-basket-num', num);
@@ -621,7 +622,7 @@
                         else messageDiv.innerHTML = '🏆 全对！ 估算小英雄就是你！ 🏆';
                     }, 900);
                     renderGame();
-                    rebuildBaskets();  // 更新篮子，移除已经配对的得数篮子
+                    // rebuildBaskets(); // 不再在正确配对后移除篮子，保持稳定
                 } else {
                     messageDiv.innerHTML = '🤔 卡片不见了，请点新游戏~';
                 }

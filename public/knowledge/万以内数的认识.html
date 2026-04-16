@@ -452,6 +452,7 @@
     }
 
     let currentCards = [];      // 未配对的卡片 { description, number, icon }
+    let roundNumbers = [];      // 当前关卡的所有数字篮子
     let currentScore = 0;
     let totalCount = 0;
 
@@ -476,6 +477,8 @@
     function resetAndNewGame() {
         const rawCards = getRandomQuestions(7);
         currentCards = shuffleArray(rawCards);
+        roundNumbers = [...new Set(currentCards.map(c => c.number))];
+        roundNumbers.sort((a,b) => a-b);
         currentScore = 0;
         totalCount = currentCards.length;
         renderGame();
@@ -518,12 +521,10 @@
         bindDragEvents();
     }
 
-    // 根据当前剩余卡片，动态创建对应的数字篮子（只显示剩余卡片中涉及的数字）
+    // 根据当前关卡初始卡片，创建对应的数字篮子
     function rebuildBaskets() {
-        const uniqueNumbers = [...new Set(currentCards.map(c => c.number))];
-        uniqueNumbers.sort((a,b) => a-b);
         basketsContainer.innerHTML = '';
-        uniqueNumbers.forEach(num => {
+        roundNumbers.forEach(num => {
             const basket = document.createElement('div');
             basket.className = 'basket';
             basket.setAttribute('data-basket-num', num);
@@ -609,7 +610,7 @@
                         else messageDiv.innerHTML = '🏆 全对！ 万以内数完全掌握！ 🏆';
                     }, 900);
                     renderGame();
-                    rebuildBaskets();
+                    // rebuildBaskets(); // 不再在正确配对后移除篮子，保持稳定
                 } else {
                     messageDiv.innerHTML = '🤔 卡片不见了，请点新游戏~';
                 }
