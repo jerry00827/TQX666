@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>立体图形小侦探 | 拖拽配对游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免拖拽时选中文字/图片 */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #fef5e9;
+            font-family: 'Comic Neue', 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI Emoji', system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 主课程卡片 */
+        .course-container {
+            max-width: 1350px;
+            width: 100%;
+            background: #fffffa;
+            border-radius: 70px 60px 70px 60px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.08), 0 8px 18px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        /* 左右布局 */
+        .split-layout {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* ========= 左侧：知识点区 ========= */
+        .knowledge-area {
+            flex: 1.2;
+            min-width: 250px;
+            background: #fffdf7;
+            padding: 28px 22px;
+            border-right: 4px solid #ffbc6e;
+        }
+
+        .knowledge-area h1 {
+            font-size: 1.9rem;
+            color: #e67e22;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 14px solid #ffaa55;
+            padding-left: 18px;
+            margin-bottom: 8px;
+        }
+
+        .sub {
+            color: #c95a0f;
+            margin-bottom: 24px;
+            padding-left: 32px;
+            font-size: 1rem;
+        }
+
+        .shape-intro {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin: 20px 0;
+        }
+
+        .shape-card {
+            background: #fff2e4;
+            border-radius: 32px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            transition: 0.1s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.02);
+        }
+
+        .shape-icon {
+            font-size: 2.8rem;
+            background: #ffebd2;
+            width: 70px;
+            height: 70px;
+            border-radius: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .shape-desc {
+            flex: 1;
+        }
+
+        .shape-desc strong {
+            font-size: 1.2rem;
+            color: #c4410c;
+        }
+
+        .shape-desc p {
+            font-size: 0.85rem;
+            color: #7b4a2a;
+            margin-top: 4px;
+        }
+
+        .fact-tip {
+            background: #ffe6cf;
+            border-radius: 30px;
+            padding: 14px 18px;
+            margin-top: 18px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #aa5a1c;
+        }
+
+        /* ========= 右侧：游戏区 ========= */
+        .game-area {
+            flex: 2;
+            min-width: 290px;
+            background: #fffbf5;
+            padding: 24px 22px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            background: #ffefdc;
+            border-radius: 50px;
+            padding: 10px 22px;
+            margin-bottom: 24px;
+            gap: 12px;
+        }
+
+        .score-board, .remain-board {
+            background: #f39c12;
+            border-radius: 40px;
+            padding: 6px 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: inset 0 -2px 0 #c56a00;
+        }
+
+        .remain-board {
+            background: #2ecc71;
+            box-shadow: inset 0 -2px 0 #1f8f4a;
+        }
+
+        .new-game-btn {
+            background: #3498db;
+            border: none;
+            font-size: 1rem;
+            padding: 8px 24px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 5px 0 #1f618d;
+            transition: 0.05s linear;
+        }
+
+        .new-game-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1f618d;
+        }
+
+        /* 拖拽卡片区 */
+        .drag-zone {
+            background: #fef3e8;
+            border-radius: 48px;
+            padding: 20px 16px;
+            margin-bottom: 28px;
+            border: 3px dashed #ffbc6e;
+            min-height: 240px;
+        }
+
+        .drag-zone p {
+            text-align: center;
+            font-weight: bold;
+            color: #b85c1a;
+            margin-bottom: 18px;
+            font-size: 1.1rem;
+        }
+
+        .cards-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #fff5e8, #ffe6d0);
+            width: 130px;
+            padding: 18px 8px;
+            text-align: center;
+            border-radius: 48px;
+            font-size: 1.7rem;
+            font-weight: bold;
+            color: #c4410c;
+            box-shadow: 0 10px 0 #e0a45a;
+            cursor: grab;
+            touch-action: none;
+            transition: 0.05s;
+            border: 2px solid #ffcd94;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .drag-card span {
+            font-size: 1rem;
+            background: #ffefdd;
+            padding: 4px 12px;
+            border-radius: 30px;
+            color: #b45f2b;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        /* 篮子区 */
+        .baskets-area {
+            background: #ffefdd;
+            border-radius: 48px;
+            padding: 18px 14px;
+        }
+
+        .baskets-area h3 {
+            text-align: center;
+            margin-bottom: 18px;
+            color: #c2410c;
+            font-size: 1.2rem;
+        }
+
+        .baskets-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 18px;
+        }
+
+        .basket {
+            background: #ffedd5;
+            width: 105px;
+            padding: 14px 8px;
+            text-align: center;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #e67e22;
+            box-shadow: 0 8px 0 #d9b48b;
+            transition: 0.1s;
+            border: 2px solid #f7bc6c;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .basket .basket-icon {
+            font-size: 1.8rem;
+        }
+
+        .basket span {
+            font-size: 0.9rem;
+            background: white;
+            padding: 2px 8px;
+            border-radius: 40px;
+            color: #a65d2a;
+        }
+
+        .message-area {
+            margin-top: 20px;
+            background: #f7e1b0;
+            border-radius: 36px;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            color: #b85c1a;
+            font-size: 0.95rem;
+        }
+
+        /* 拖拽克隆样式 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.25));
+            opacity: 0.9;
+            pointer-events: none;
+            transform: scale(1.05) rotate(2deg);
+            width: 130px;
+            background: linear-gradient(145deg, #fff5e8, #ffe6d0);
+            text-align: center;
+            border-radius: 48px;
+            font-size: 1.7rem;
+            font-weight: bold;
+            color: #c4410c;
+            padding: 18px 8px;
+            border: 3px solid #ffb347;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .drag-clone span {
+            font-size: 1rem;
+            background: #ffefdd;
+            padding: 4px 12px;
+            border-radius: 30px;
+        }
+
+        /* 动画 */
+        .correct-pop {
+            animation: bounceHappy 0.35s ease;
+        }
+
+        @keyframes bounceHappy {
+            0% { transform: scale(1); background: #d9f0cd; }
+            70% { transform: scale(1.08); background: #b2e0a0; }
+            100% { transform: scale(1); background: #ffedd5; }
+        }
+
+        .wrong-shake {
+            animation: shakeBad 0.3s ease 0s 2;
+            background-color: #ffe0e0;
+        }
+
+        @keyframes shakeBad {
+            0%,100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* 响应式 */
+        @media (max-width: 780px) {
+            .knowledge-area {
+                border-right: none;
+                border-bottom: 4px solid #ffbc6e;
+            }
+            .drag-card, .drag-clone {
+                width: 105px;
+                font-size: 1.4rem;
+                padding: 12px 4px;
+            }
+            .drag-card span, .drag-clone span {
+                font-size: 0.8rem;
+            }
+            .basket {
+                width: 85px;
+                font-size: 1rem;
+            }
+            .basket .basket-icon {
+                font-size: 1.5rem;
+            }
+            .shape-icon {
+                width: 55px;
+                height: 55px;
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .drag-card, .drag-clone {
+                width: 90px;
+                font-size: 1.2rem;
+            }
+            .basket {
+                width: 75px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="course-container">
+    <div class="split-layout">
+        <!-- 左侧：立体图形知识点 -->
+        <div class="knowledge-area">
+            <h1>🧊 立体图形乐园</h1>
+            <div class="sub">—— 它们都有“体积”，摸得到！</div>
+            <div class="shape-intro">
+                <div class="shape-card">
+                    <div class="shape-icon">🧊</div>
+                    <div class="shape-desc"><strong>正方体</strong><p>6个面都是正方形，方方正正，像骰子🎲</p></div>
+                </div>
+                <div class="shape-card">
+                    <div class="shape-icon">📦</div>
+                    <div class="shape-desc"><strong>长方体</strong><p>长长的，有6个面，对面相等，像鞋盒👟</p></div>
+                </div>
+                <div class="shape-card">
+                    <div class="shape-icon">🥫</div>
+                    <div class="shape-desc"><strong>圆柱</strong><p>上下两个圆面，侧面滚一滚，像罐头🥫</p></div>
+                </div>
+                <div class="shape-card">
+                    <div class="shape-icon">⚽</div>
+                    <div class="shape-desc"><strong>球</strong><p>圆滚滚，任何方向都能滚，像足球⚽</p></div>
+                </div>
+                <div class="shape-card">
+                    <div class="shape-icon">🎩</div>
+                    <div class="shape-desc"><strong>圆锥</strong><p>一个圆底 + 一个尖尖的顶，像小帽子🎩</p></div>
+                </div>
+            </div>
+            <div class="fact-tip">
+                ✨ 生活中的立体图形：魔方(正方体)、冰箱(长方体)、易拉罐(圆柱)、皮球(球)、圣诞帽(圆锥)
+            </div>
+        </div>
+
+        <!-- 右侧：拖拽配对游戏 -->
+        <div class="game-area">
+            <div class="game-header">
+                <div class="score-board">⭐ 配对: <span id="scoreValue">0</span></div>
+                <div class="remain-board">🎯 剩余: <span id="remainValue">0</span></div>
+                <button class="new-game-btn" id="resetGameBtn">🔄 新的一关</button>
+            </div>
+
+            <div class="drag-zone">
+                <p>🐣 按住卡片，拖到对应的立体图形篮子里！</p>
+                <div id="cardsContainer" class="cards-grid">
+                    <!-- 动态生成可拖拽卡片 -->
+                </div>
+            </div>
+
+            <div class="baskets-area">
+                <h3>📦 拖拽到这里 → 立体图形篮子</h3>
+                <div id="basketsContainer" class="baskets-grid">
+                    <!-- 动态生成篮子: 正方体 长方体 圆柱 球 圆锥 -->
+                </div>
+            </div>
+
+            <div id="gameMessage" class="message-area">
+                🧸 把每个立体图形拖到正确的篮子里吧！ 全部配对成功就胜利啦~
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- 立体图形配对游戏 ----------
+    // 定义初始卡片数据 (立体图形名称、显示图标、匹配目标)
+    const fullShapes = [
+        { name: "正方体", icon: "🧊", matchKey: "正方体" },
+        { name: "长方体", icon: "📦", matchKey: "长方体" },
+        { name: "圆柱", icon: "🥫", matchKey: "圆柱" },
+        { name: "球", icon: "⚽", matchKey: "球" },
+        { name: "圆锥", icon: "🎩", matchKey: "圆锥" }
+    ];
+
+    // 篮子数据（固定5个）
+    const basketsData = [
+        { label: "正方体", icon: "🧊" },
+        { label: "长方体", icon: "📦" },
+        { label: "圆柱", icon: "🥫" },
+        { label: "球", icon: "⚽" },
+        { label: "圆锥", icon: "🎩" }
+    ];
+
+    let currentCards = [];      // 剩余未配对的卡片 (存储对象)
+    let currentScore = 0;       // 已配对数量
+    let totalCount = 0;          // 初始卡片总数
+
+    // DOM 元素
+    const cardsContainer = document.getElementById('cardsContainer');
+    const basketsContainer = document.getElementById('basketsContainer');
+    const scoreSpan = document.getElementById('scoreValue');
+    const remainSpan = document.getElementById('remainValue');
+    const messageDiv = document.getElementById('gameMessage');
+    const resetBtn = document.getElementById('resetGameBtn');
+
+    // ---------- 辅助：随机打乱数组 ----------
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // 重置/新游戏：重新生成乱序卡片，重置分数
+    function resetAndNewGame() {
+        // 复制全部立体图形作为卡片池
+        currentCards = fullShapes.map(shape => ({ ...shape }));
+        currentCards = shuffleArray(currentCards);
+        currentScore = 0;
+        totalCount = currentCards.length;
+        renderGame();
+        messageDiv.innerHTML = '🎈 新的一轮！拖拽卡片到正确的篮子，学习立体图形~ 🎈';
+        messageDiv.style.background = '#f7e1b0';
+        // 如果之前有拖拽状态，强制清理（全局拖拽清理）
+        if (isDragging) stopDrag();
+    }
+
+    // 渲染游戏界面：卡片 + 分数/剩余
+    function renderGame() {
+        // 渲染卡片区
+        cardsContainer.innerHTML = '';
+        currentCards.forEach((card, idx) => {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'drag-card';
+            cardDiv.setAttribute('data-match', card.matchKey);
+            cardDiv.setAttribute('data-name', card.name);
+            cardDiv.setAttribute('data-idx', idx);
+            // 内部HTML：大图标+文字
+            cardDiv.innerHTML = `
+                <div style="font-size:2.2rem;">${card.icon}</div>
+                <span>${card.name}</span>
+            `;
+            cardsContainer.appendChild(cardDiv);
+        });
+
+        // 更新分数/剩余
+        const remainCount = currentCards.length;
+        remainSpan.innerText = remainCount;
+        scoreSpan.innerText = currentScore;
+
+        if (remainCount === 0 && totalCount > 0) {
+            messageDiv.innerHTML = '🎉🎉 完美配对！ 你认识所有立体图形啦！ 点“新的一关”继续玩 🎉🎉';
+            messageDiv.style.background = '#c8f0d1';
+        } else {
+            if (messageDiv.innerHTML.includes('完美配对')) {
+                messageDiv.innerHTML = '🐣 继续拖拽配对，加油小侦探！';
+                messageDiv.style.background = '#f7e1b0';
+            }
+        }
+
+        // 每次重新渲染后需要重新绑定拖拽事件
+        bindDragEvents();
+    }
+
+    // 创建篮子区域 (固定)
+    function buildBaskets() {
+        basketsContainer.innerHTML = '';
+        basketsData.forEach(b => {
+            const basket = document.createElement('div');
+            basket.className = 'basket';
+            basket.setAttribute('data-basket-key', b.label);
+            basket.innerHTML = `
+                <div class="basket-icon">${b.icon}</div>
+                <span>${b.label}</span>
+            `;
+            basketsContainer.appendChild(basket);
+        });
+    }
+
+    // ---------- 自定义拖拽系统 (鼠标 + 触摸，克隆跟随) ----------
+    let isDragging = false;
+    let draggedCardElement = null;   // 原始卡片DOM
+    let cloneCard = null;            // 克隆体
+    let dragStartX = 0, dragStartY = 0;
+    let currentMatchKey = null;      // 被拖拽卡片的匹配key
+
+    function removeClone() {
+        if (cloneCard && cloneCard.parentNode) cloneCard.parentNode.removeChild(cloneCard);
+        cloneCard = null;
+    }
+
+    function stopDrag() {
+        if (!isDragging) return;
+        isDragging = false;
+        removeClone();
+        document.removeEventListener('mousemove', onGlobalMouseMove);
+        document.removeEventListener('mouseup', onGlobalMouseUp);
+        document.removeEventListener('touchmove', onGlobalTouchMove);
+        document.removeEventListener('touchend', onGlobalTouchEnd);
+        document.body.style.userSelect = '';
+        draggedCardElement = null;
+        currentMatchKey = null;
+    }
+
+    function onGlobalMouseMove(e) {
+        if (!cloneCard) return;
+        e.preventDefault();
+        const clientX = e.clientX;
+        const clientY = e.clientY;
+        cloneCard.style.left = (clientX - cloneCard.offsetWidth / 2) + 'px';
+        cloneCard.style.top = (clientY - cloneCard.offsetHeight / 2) + 'px';
+    }
+
+    function onGlobalTouchMove(e) {
+        if (!cloneCard) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const clientX = touch.clientX;
+        const clientY = touch.clientY;
+        cloneCard.style.left = (clientX - cloneCard.offsetWidth / 2) + 'px';
+        cloneCard.style.top = (clientY - cloneCard.offsetHeight / 2) + 'px';
+    }
+
+    // 结束拖拽，判断是否配对
+    function finishDrag(endX, endY) {
+        if (!draggedCardElement || !isDragging) {
+            stopDrag();
+            return;
+        }
+
+        // 获取拖拽终点下方的元素
+        const elemUnderPointer = document.elementsFromPoint(endX, endY);
+        let targetBasket = null;
+        for (let el of elemUnderPointer) {
+            if (el.classList && el.classList.contains('basket')) {
+                targetBasket = el;
+                break;
+            }
+        }
+
+        const expectedMatch = currentMatchKey;   // 例如 "正方体"
+        let isCorrect = false;
+
+        if (targetBasket) {
+            const basketKey = targetBasket.getAttribute('data-basket-key');
+            if (basketKey === expectedMatch) {
+                isCorrect = true;
+                // 配对正确：从 currentCards 中删除匹配的卡片
+                const cardName = draggedCardElement.querySelector('span')?.innerText || draggedCardElement.getAttribute('data-name');
+                const index = currentCards.findIndex(c => c.matchKey === expectedMatch && c.name === cardName);
+                if (index !== -1) {
+                    currentCards.splice(index, 1);
+                    currentScore++;
+                    // 正确动画效果
+                    targetBasket.classList.add('correct-pop');
+                    setTimeout(() => targetBasket.classList.remove('correct-pop'), 350);
+                    messageDiv.innerHTML = '✅ 配对正确！ 太厉害了！ +1分 ✅';
+                    messageDiv.style.background = '#c8e6b5';
+                    setTimeout(() => {
+                        if (currentCards.length !== 0) messageDiv.style.background = '#f7e1b0';
+                        else messageDiv.innerHTML = '🏆 全配对！ 你是立体图形冠军！ 🏆';
+                    }, 900);
+                    // 重新渲染游戏 (卡片列表更新)
+                    renderGame();
+                } else {
+                    // 理论上一定存在，若出错提示刷新
+                    messageDiv.innerHTML = '🤔 出错了，试试新游戏吧~';
+                    isCorrect = false;
+                }
+            } else {
+                // 配对错误
+                messageDiv.innerHTML = `❌ 不对哦！ ${draggedCardElement.querySelector('span')?.innerText || ''} 不属于“${basketKey}”篮子，再观察一下图形特征吧~ ❌`;
+                messageDiv.style.background = '#ffe0e0';
+                setTimeout(() => {
+                    if (currentCards.length !== 0 && messageDiv.innerHTML.includes('不对哦')) messageDiv.style.background = '#f7e1b0';
+                }, 1000);
+                // 错误抖动效果
+                draggedCardElement.classList.add('wrong-shake');
+                setTimeout(() => draggedCardElement.classList.remove('wrong-shake'), 500);
+            }
+        } else {
+            messageDiv.innerHTML = '🧸 要拖拽到正确的立体图形篮子上方再松开哟！ 再试试看~';
+            messageDiv.style.background = '#ffefcf';
+            setTimeout(() => {
+                if (currentCards.length !== 0 && messageDiv.innerHTML.includes('拖拽到正确')) messageDiv.style.background = '#f7e1b0';
+            }, 800);
+        }
+
+        // 结束拖拽
+        stopDrag();
+    }
+
+    function onGlobalMouseUp(e) {
+        if (!isDragging) return;
+        finishDrag(e.clientX, e.clientY);
+    }
+
+    function onGlobalTouchEnd(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        const touch = e.changedTouches[0];
+        finishDrag(touch.clientX, touch.clientY);
+    }
+
+    function startDrag(cardElement, startClientX, startClientY) {
+        if (isDragging) stopDrag();
+        draggedCardElement = cardElement;
+        // 获取匹配关键字
+        currentMatchKey = cardElement.getAttribute('data-match');
+        if (!currentMatchKey) {
+            // 容错
+            const nameSpan = cardElement.querySelector('span');
+            if (nameSpan) {
+                const name = nameSpan.innerText;
+                const found = fullShapes.find(s => s.name === name);
+                currentMatchKey = found ? found.matchKey : null;
+            }
+        }
+        if (!currentMatchKey) return;
+
+        const rect = cardElement.getBoundingClientRect();
+        // 克隆卡片样式
+        cloneCard = cardElement.cloneNode(true);
+        cloneCard.classList.add('drag-clone');
+        cloneCard.style.position = 'fixed';
+        cloneCard.style.left = rect.left + 'px';
+        cloneCard.style.top = rect.top + 'px';
+        cloneCard.style.width = rect.width + 'px';
+        cloneCard.style.margin = '0';
+        cloneCard.style.pointerEvents = 'none';
+        document.body.appendChild(cloneCard);
+
+        isDragging = true;
+        document.addEventListener('mousemove', onGlobalMouseMove);
+        document.addEventListener('mouseup', onGlobalMouseUp);
+        document.addEventListener('touchmove', onGlobalTouchMove, { passive: false });
+        document.addEventListener('touchend', onGlobalTouchEnd);
+        document.body.style.userSelect = 'none';
+    }
+
+    // 为所有卡片绑定拖拽启动事件 (鼠标 + 触摸)
+    function bindDragEvents() {
+        const cards = document.querySelectorAll('.drag-card');
+        cards.forEach(card => {
+            // 鼠标
+            card.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                startDrag(card, e.clientX, e.clientY);
+            });
+            // 触摸
+            card.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                startDrag(card, touch.clientX, touch.clientY);
+            });
+            // 禁用原生拖拽
+            card.addEventListener('dragstart', (e) => e.preventDefault());
+        });
+    }
+
+    // ---------- 初始化 ----------
+    function init() {
+        buildBaskets();          // 创建篮子 (5个)
+        resetAndNewGame();       // 生成卡片并渲染
+        resetBtn.addEventListener('click', () => {
+            if (isDragging) stopDrag();
+            resetAndNewGame();
+        });
+    }
+
+    init();
+</script>
+</body>
+</html>

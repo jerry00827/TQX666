@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>三位数加减三位数的估算 | 小小估算师 | 拖拽游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #fef5ea;
+            font-family: 'Comic Neue', 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI Emoji', system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .course-container {
+            max-width: 1400px;
+            width: 100%;
+            background: #fffffb;
+            border-radius: 70px 60px 70px 60px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.08), 0 8px 18px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .split-layout {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* 左侧知识点区 */
+        .knowledge-side {
+            flex: 1.2;
+            min-width: 260px;
+            background: #fffef8;
+            padding: 28px 24px;
+            border-right: 4px solid #ffbc6e;
+        }
+
+        .knowledge-side h1 {
+            font-size: 2rem;
+            color: #e67e22;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 14px solid #ffaa55;
+            padding-left: 18px;
+            margin-bottom: 8px;
+        }
+
+        .sub {
+            color: #c95a0f;
+            margin-bottom: 24px;
+            padding-left: 32px;
+            font-size: 1rem;
+        }
+
+        .intro-card {
+            background: #fff0e0;
+            border-radius: 48px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .big-example {
+            font-size: 1.4rem;
+            text-align: center;
+            margin: 12px 0;
+            color: #e67e22;
+            font-weight: bold;
+            background: #fff3e6;
+            padding: 10px;
+            border-radius: 32px;
+        }
+
+        .rule-list {
+            background: #fff3e6;
+            border-radius: 36px;
+            padding: 16px 20px;
+            margin: 20px 0;
+        }
+
+        .rule-list p {
+            margin: 10px 0;
+            font-size: 1rem;
+            color: #7b3f00;
+        }
+
+        .example-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        .example-item {
+            background: white;
+            border-radius: 32px;
+            padding: 6px 16px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #c4410c;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .game-tip {
+            background: #ffe1b9;
+            border-radius: 30px;
+            padding: 14px 16px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #aa5a1c;
+        }
+
+        /* 右侧游戏区 */
+        .game-side {
+            flex: 2;
+            min-width: 300px;
+            background: #fffbf5;
+            padding: 24px 22px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            background: #ffefdc;
+            border-radius: 50px;
+            padding: 10px 22px;
+            margin-bottom: 24px;
+            gap: 12px;
+        }
+
+        .score-board, .remain-board {
+            background: #f39c12;
+            border-radius: 40px;
+            padding: 6px 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: inset 0 -2px 0 #c56a00;
+        }
+
+        .remain-board {
+            background: #2ecc71;
+            box-shadow: inset 0 -2px 0 #1f8f4a;
+        }
+
+        .new-game-btn {
+            background: #3498db;
+            border: none;
+            font-size: 1rem;
+            padding: 8px 24px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 5px 0 #1f618d;
+            transition: 0.05s linear;
+        }
+
+        .new-game-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1f618d;
+        }
+
+        /* 拖拽卡片区 */
+        .drag-zone {
+            background: #fef3e8;
+            border-radius: 48px;
+            padding: 20px 16px;
+            margin-bottom: 28px;
+            border: 3px dashed #ffbc6e;
+            min-height: 260px;
+        }
+
+        .drag-zone p {
+            text-align: center;
+            font-weight: bold;
+            color: #b85c1a;
+            margin-bottom: 18px;
+            font-size: 1.1rem;
+        }
+
+        .cards-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #fff5e8, #ffe6d0);
+            width: 155px;
+            padding: 18px 8px;
+            text-align: center;
+            border-radius: 48px;
+            box-shadow: 0 10px 0 #e0a45a;
+            cursor: grab;
+            touch-action: none;
+            transition: 0.05s;
+            border: 2px solid #ffcd94;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #c4410c;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        /* 篮子区 (估算结果篮子) 动态生成 */
+        .baskets-area {
+            background: #ffefdd;
+            border-radius: 48px;
+            padding: 18px 14px;
+        }
+
+        .baskets-area h3 {
+            text-align: center;
+            margin-bottom: 18px;
+            color: #c2410c;
+            font-size: 1.2rem;
+        }
+
+        .baskets-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 14px;
+        }
+
+        .basket {
+            background: #ffedd5;
+            width: 90px;
+            padding: 12px 0;
+            text-align: center;
+            border-radius: 50px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #e67e22;
+            box-shadow: 0 6px 0 #d9b48b;
+            transition: 0.1s;
+            border: 2px solid #f7bc6c;
+            cursor: pointer;
+        }
+
+        .basket span {
+            display: block;
+            font-size: 0.7rem;
+            color: #a65d2a;
+        }
+
+        .message-area {
+            margin-top: 20px;
+            background: #f7e1b0;
+            border-radius: 36px;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            color: #b85c1a;
+            font-size: 0.95rem;
+        }
+
+        /* 拖拽克隆样式 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.25));
+            opacity: 0.9;
+            pointer-events: none;
+            transform: scale(1.05) rotate(2deg);
+            width: 155px;
+            background: linear-gradient(145deg, #fff5e8, #ffe6d0);
+            border-radius: 48px;
+            padding: 18px 8px;
+            border: 3px solid #ffb347;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            color: #c4410c;
+        }
+
+        /* 动画 */
+        .correct-pop {
+            animation: bounceHappy 0.35s ease;
+        }
+
+        @keyframes bounceHappy {
+            0% { transform: scale(1); background: #d9f0cd; }
+            70% { transform: scale(1.08); background: #b2e0a0; }
+            100% { transform: scale(1); background: #ffedd5; }
+        }
+
+        .wrong-shake {
+            animation: shakeBad 0.3s ease 0s 2;
+            background-color: #ffe0e0;
+        }
+
+        @keyframes shakeBad {
+            0%,100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* 响应式 */
+        @media (max-width: 850px) {
+            .knowledge-side {
+                border-right: none;
+                border-bottom: 4px solid #ffbc6e;
+            }
+            .drag-card, .drag-clone {
+                width: 130px;
+                font-size: 1rem;
+                padding: 14px 4px;
+            }
+            .basket {
+                width: 80px;
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .drag-card, .drag-clone {
+                width: 115px;
+                font-size: 0.9rem;
+                padding: 12px 2px;
+            }
+            .basket {
+                width: 70px;
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="course-container">
+    <div class="split-layout">
+        <!-- 左侧：三位数加减三位数的估算知识点 -->
+        <div class="knowledge-side">
+            <h1>🔢 三位数加减法<br>估算小妙招</h1>
+            <div class="sub">—— 四舍五入，整百整十</div>
+            <div class="intro-card">
+                <div class="big-example">
+                    498 + 302 ≈ 500 + 300 = 800<br>
+                    725 - 489 ≈ 700 - 500 = 200
+                </div>
+                <p>✨ <strong>估算方法</strong>：</p>
+                <p>1️⃣ 把每个三位数看成与它最接近的整百数或几百几十数。<br>
+                2️⃣ 再计算整百数或几百几十数的加减法，得到近似结果。<br>
+                3️⃣ 用“≈”表示约等于。</p>
+                <p>📖 例如：398+204 ≈ 400+200=600；<br>615-312 ≈ 600-300=300。</p>
+            </div>
+            <div class="rule-list">
+                <p>🎈 小口诀：</p>
+                <p>✔️ 看个位，四舍五入到整百。<br>
+                ✔️ 估算快，结果大概不出错。<br>
+                ✔️ 生活中，估算帮我们快速判断。</p>
+                <div class="example-group">
+                    <div class="example-item">317+289≈600</div>
+                    <div class="example-item">562-248≈300</div>
+                    <div class="example-item">805-397≈400</div>
+                    <div class="example-item">459+336≈800</div>
+                </div>
+            </div>
+            <div class="game-tip">
+                🎮 游戏玩法：<br>
+                右边每个卡片上有一个三位数加减三位数的算式。<br>
+                先估算出大约等于几百（或几百几十），再把卡片拖到正确的得数篮子里。<br>
+                全部配对成功就胜利啦！✨ 成为估算小高手！
+            </div>
+        </div>
+
+        <!-- 右侧：拖拽游戏区 -->
+        <div class="game-side">
+            <div class="game-header">
+                <div class="score-board">⭐ 配对: <span id="scoreValue">0</span></div>
+                <div class="remain-board">🎯 剩余: <span id="remainValue">0</span></div>
+                <button class="new-game-btn" id="resetGameBtn">🔄 新的一关</button>
+            </div>
+
+            <div class="drag-zone">
+                <p>🐣 按住算式卡片，拖到正确的估算结果篮子里！</p>
+                <div id="cardsContainer" class="cards-grid">
+                    <!-- 动态生成算式卡片 -->
+                </div>
+            </div>
+
+            <div class="baskets-area">
+                <h3>📦 估算结果篮子 (整百数)</h3>
+                <div id="basketsContainer" class="baskets-grid">
+                    <!-- 动态生成篮子 -->
+                </div>
+            </div>
+
+            <div id="gameMessage" class="message-area">
+                🧸 把算式拖到正确的估算结果篮子里，练习三位数加减法估算！
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- 游戏核心：三位数加减三位数的估算 (结果整百，范围100~900) ----------
+    // 预定义算式库，每个算式包含两个三位数，以及估算后最接近的整百结果（近似到百位）
+    // 估算规则：将每个数四舍五入到最接近的整百数，然后计算
+    const ESTIMATION_BANK = [
+        { text: "398 + 204", estimated: 600, icon: "🐣", detail: "400+200=600" },
+        { text: "512 - 298", estimated: 200, icon: "🐰", detail: "500-300=200" },
+        { text: "705 + 189", estimated: 900, icon: "🦊", detail: "700+200=900" },
+        { text: "623 - 417", estimated: 200, icon: "🐸", detail: "600-400=200" },
+        { text: "456 + 339", estimated: 800, icon: "🐨", detail: "500+300=800" },
+        { text: "847 - 562", estimated: 300, icon: "🐥", detail: "800-600=200? 实际847≈800, 562≈600, 800-600=200，但更精确846≈800，562≈600得200，这里取200更合理？调整到200" },
+        { text: "748 - 321", estimated: 400, icon: "🦄", detail: "700-300=400" },
+        { text: "289 + 476", estimated: 800, icon: "🐙", detail: "300+500=800" },
+        { text: "935 - 408", estimated: 500, icon: "🐳", detail: "900-400=500" },
+        { text: "617 + 182", estimated: 800, icon: "🍎", detail: "600+200=800" },
+        { text: "503 - 287", estimated: 200, icon: "🍭", detail: "500-300=200" },
+        { text: "799 + 198", estimated: 1000, icon: "🧸", detail: "800+200=1000" },
+        { text: "664 - 289", estimated: 400, icon: "⭐", detail: "700-300=400" },
+        { text: "458 + 347", estimated: 800, icon: "🌟", detail: "500+300=800" },
+        { text: "276 + 528", estimated: 800, icon: "🐝", detail: "300+500=800" },
+        { text: "813 - 495", estimated: 300, icon: "🐞", detail: "800-500=300" },
+        { text: "907 - 682", estimated: 200, icon: "🦋", detail: "900-700=200" },
+        { text: "145 + 678", estimated: 800, icon: "🐌", detail: "100+700=800" }
+    ];
+
+    // 修正个别估算结果使其更合理（确保都是整百）
+    // 手动修正847-562: 847≈800, 562≈600, 800-600=200
+    // 更新库中对应项
+    const FIXED_BANK = ESTIMATION_BANK.map(item => {
+        if (item.text === "847 - 562") return { ...item, estimated: 200, detail: "800-600=200" };
+        if (item.text === "799 + 198") return { ...item, estimated: 1000, detail: "800+200=1000" };
+        if (item.text === "145 + 678") return { ...item, estimated: 800, detail: "100+700=800" };
+        return item;
+    });
+
+    // 随机选取6~8个不重复算式
+    function getRandomEquations(maxCount = 7) {
+        const shuffled = [...FIXED_BANK];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        const qCount = Math.min(maxCount, shuffled.length);
+        return shuffled.slice(0, qCount);
+    }
+
+    let currentCards = [];      // 未配对卡片 { text, estimated, icon, detail }
+    let currentScore = 0;
+    let totalCount = 0;
+
+    // DOM 元素
+    const cardsContainer = document.getElementById('cardsContainer');
+    const basketsContainer = document.getElementById('basketsContainer');
+    const scoreSpan = document.getElementById('scoreValue');
+    const remainSpan = document.getElementById('remainValue');
+    const messageDiv = document.getElementById('gameMessage');
+    const resetBtn = document.getElementById('resetGameBtn');
+
+    // 洗牌函数
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // 重置游戏
+    function resetAndNewGame() {
+        const rawCards = getRandomEquations(7);
+        currentCards = shuffleArray(rawCards);
+        currentScore = 0;
+        totalCount = currentCards.length;
+        renderGame();
+        rebuildBaskets();
+        messageDiv.innerHTML = '🎈 新的一关！ 先估算，再把算式拖到正确的得数篮子！ 🎈';
+        messageDiv.style.background = '#f7e1b0';
+        if (isDragging) stopDrag();
+    }
+
+    // 渲染卡片（显示算式和可爱小图标）
+    function renderCard(card) {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'drag-card';
+        cardDiv.setAttribute('data-estimated', card.estimated);
+        cardDiv.setAttribute('data-text', card.text);
+        cardDiv.innerHTML = `
+            <div style="font-size:0.9rem; margin-bottom:5px;">${card.icon}</div>
+            <div>${card.text}</div>
+            <div style="font-size:0.7rem; margin-top:4px; color:#b85c1a;">≈ ?</div>
+        `;
+        return cardDiv;
+    }
+
+    function renderGame() {
+        cardsContainer.innerHTML = '';
+        currentCards.forEach(card => {
+            cardsContainer.appendChild(renderCard(card));
+        });
+        const remainCount = currentCards.length;
+        remainSpan.innerText = remainCount;
+        scoreSpan.innerText = currentScore;
+
+        if (remainCount === 0 && totalCount > 0) {
+            messageDiv.innerHTML = '🎉🎉 完美！ 你完全掌握了三位数加减法估算！ 点“新的一关”继续挑战 🎉🎉';
+            messageDiv.style.background = '#c8f0d1';
+        } else {
+            if (messageDiv.innerHTML.includes('完美')) {
+                messageDiv.innerHTML = '🐣 继续拖拽配对，成为估算小高手！';
+                messageDiv.style.background = '#f7e1b0';
+            }
+        }
+        bindDragEvents();
+    }
+
+    // 根据当前卡片动态生成篮子（只显示当前卡片中出现的估算结果）
+    function rebuildBaskets() {
+        const uniqueEstimates = [...new Set(currentCards.map(c => c.estimated))];
+        uniqueEstimates.sort((a,b) => a-b);
+        basketsContainer.innerHTML = '';
+        uniqueEstimates.forEach(num => {
+            const basket = document.createElement('div');
+            basket.className = 'basket';
+            basket.setAttribute('data-basket-num', num);
+            basket.innerHTML = `${num}<span>篮子</span>`;
+            basketsContainer.appendChild(basket);
+        });
+    }
+
+    // ---------- 自定义拖拽系统 (鼠标+触摸) ----------
+    let isDragging = false;
+    let draggedCardElem = null;
+    let cloneElem = null;
+    let draggedEstimated = null;
+
+    function removeClone() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.parentNode.removeChild(cloneElem);
+        cloneElem = null;
+    }
+
+    function stopDrag() {
+        if (!isDragging) return;
+        isDragging = false;
+        removeClone();
+        document.removeEventListener('mousemove', onGlobalMove);
+        document.removeEventListener('mouseup', onGlobalUp);
+        document.removeEventListener('touchmove', onGlobalTouchMove);
+        document.removeEventListener('touchend', onGlobalTouchEnd);
+        document.body.style.userSelect = '';
+        draggedCardElem = null;
+        draggedEstimated = null;
+    }
+
+    function onGlobalMove(e) {
+        if (!cloneElem) return;
+        e.preventDefault();
+        const x = e.clientX;
+        const y = e.clientY;
+        cloneElem.style.left = (x - cloneElem.offsetWidth / 2) + 'px';
+        cloneElem.style.top = (y - cloneElem.offsetHeight / 2) + 'px';
+    }
+
+    function onGlobalTouchMove(e) {
+        if (!cloneElem) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const x = touch.clientX;
+        const y = touch.clientY;
+        cloneElem.style.left = (x - cloneElem.offsetWidth / 2) + 'px';
+        cloneElem.style.top = (y - cloneElem.offsetHeight / 2) + 'px';
+    }
+
+    function finishDrag(endX, endY) {
+        if (!draggedCardElem || !isDragging) {
+            stopDrag();
+            return;
+        }
+
+        const elemUnderPointer = document.elementsFromPoint(endX, endY);
+        let targetBasket = null;
+        for (let el of elemUnderPointer) {
+            if (el.classList && el.classList.contains('basket')) {
+                targetBasket = el;
+                break;
+            }
+        }
+
+        let isCorrect = false;
+        if (targetBasket) {
+            const basketNum = parseInt(targetBasket.getAttribute('data-basket-num'));
+            if (basketNum === draggedEstimated) {
+                isCorrect = true;
+                const cardText = draggedCardElem.getAttribute('data-text');
+                const index = currentCards.findIndex(c => c.text === cardText && c.estimated === draggedEstimated);
+                if (index !== -1) {
+                    currentCards.splice(index, 1);
+                    currentScore++;
+                    targetBasket.classList.add('correct-pop');
+                    setTimeout(() => targetBasket.classList.remove('correct-pop'), 350);
+                    messageDiv.innerHTML = `✅ 正确！ ${draggedCardElem.innerText.split('≈')[0].trim()} ≈ ${draggedEstimated}  ✅ +1分`;
+                    messageDiv.style.background = '#c8e6b5';
+                    setTimeout(() => {
+                        if (currentCards.length !== 0) messageDiv.style.background = '#f7e1b0';
+                        else messageDiv.innerHTML = '🏆 全对！ 估算小英雄就是你！ 🏆';
+                    }, 900);
+                    renderGame();
+                    rebuildBaskets();  // 更新篮子，移除已经配对的得数篮子
+                } else {
+                    messageDiv.innerHTML = '🤔 卡片不见了，请点新游戏~';
+                }
+            } else {
+                messageDiv.innerHTML = `❌ 不对哦！ ${draggedCardElem.innerText.split('≈')[0].trim()} 的估算结果不是 ${basketNum}，再想想四舍五入到整百！ ❌`;
+                messageDiv.style.background = '#ffe0e0';
+                setTimeout(() => {
+                    if (currentCards.length !== 0 && messageDiv.innerHTML.includes('不对哦')) messageDiv.style.background = '#f7e1b0';
+                }, 1000);
+                draggedCardElem.classList.add('wrong-shake');
+                setTimeout(() => draggedCardElem.classList.remove('wrong-shake'), 500);
+            }
+        } else {
+            messageDiv.innerHTML = '🧸 要把算式卡片拖到数字篮子上方再松开哟！ 试试看~';
+            messageDiv.style.background = '#ffefcf';
+            setTimeout(() => {
+                if (currentCards.length !== 0 && messageDiv.innerHTML.includes('拖到数字篮子')) messageDiv.style.background = '#f7e1b0';
+            }, 800);
+        }
+        stopDrag();
+    }
+
+    function onGlobalUp(e) {
+        if (!isDragging) return;
+        finishDrag(e.clientX, e.clientY);
+    }
+
+    function onGlobalTouchEnd(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        const touch = e.changedTouches[0];
+        finishDrag(touch.clientX, touch.clientY);
+    }
+
+    function startDrag(cardElement, startX, startY) {
+        if (isDragging) stopDrag();
+        draggedCardElem = cardElement;
+        const estimatedAttr = cardElement.getAttribute('data-estimated');
+        if (estimatedAttr) {
+            draggedEstimated = parseInt(estimatedAttr);
+        } else {
+            const text = cardElement.innerText.trim().split('≈')[0].trim();
+            const found = currentCards.find(c => c.text === text);
+            if (found) draggedEstimated = found.estimated;
+        }
+        if (draggedEstimated === undefined || isNaN(draggedEstimated)) return;
+
+        const rect = cardElement.getBoundingClientRect();
+        cloneElem = cardElement.cloneNode(true);
+        cloneElem.classList.add('drag-clone');
+        cloneElem.style.position = 'fixed';
+        cloneElem.style.left = rect.left + 'px';
+        cloneElem.style.top = rect.top + 'px';
+        cloneElem.style.width = rect.width + 'px';
+        cloneElem.style.margin = '0';
+        cloneElem.style.pointerEvents = 'none';
+        document.body.appendChild(cloneElem);
+
+        isDragging = true;
+        document.addEventListener('mousemove', onGlobalMove);
+        document.addEventListener('mouseup', onGlobalUp);
+        document.addEventListener('touchmove', onGlobalTouchMove, { passive: false });
+        document.addEventListener('touchend', onGlobalTouchEnd);
+        document.body.style.userSelect = 'none';
+    }
+
+    function bindDragEvents() {
+        const cards = document.querySelectorAll('.drag-card');
+        cards.forEach(card => {
+            card.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                startDrag(card, e.clientX, e.clientY);
+            });
+            card.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                startDrag(card, touch.clientX, touch.clientY);
+            });
+            card.addEventListener('dragstart', (e) => e.preventDefault());
+        });
+    }
+
+    // 初始化
+    resetAndNewGame();
+    resetBtn.addEventListener('click', () => {
+        if (isDragging) stopDrag();
+        resetAndNewGame();
+    });
+</script>
+</body>
+</html>
