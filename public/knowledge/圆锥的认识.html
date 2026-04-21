@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🎩 圆锥认识小英雄 | 拖拽配对学圆锥</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免拖拽时选中文字/图片，提升触屏体验 */
+        }
+
+        body {
+            background: #F8F6F0;
+            font-family: 'Comic Neue', 'Segoe UI Emoji', 'Chalkboard SE', 'Poppins', 'Comic Sans MS', cursive, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 主课程卡片 */
+        .cone-lab {
+            max-width: 1350px;
+            width: 100%;
+            background: #FFFFFFF2;
+            backdrop-filter: blur(2px);
+            border-radius: 68px 52px 68px 52px;
+            box-shadow: 0 25px 40px rgba(70, 60, 40, 0.12);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* 左右布局 */
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* 左侧知识点区域 */
+        .knowledge-side {
+            flex: 1.2;
+            min-width: 260px;
+            background: #FEFCF5;
+            padding: 32px 24px;
+            border-right: 4px dashed #D9E2CC;
+        }
+
+        .knowledge-side h2 {
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #E9A36B, #F5C28E);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 8px solid #F3B27A;
+            padding-left: 18px;
+        }
+
+        .info-card {
+            background: #FEF7E8;
+            border-radius: 40px 24px 40px 24px;
+            padding: 22px;
+            margin: 20px 0;
+            box-shadow: 0 8px 0 #F0E3CF;
+        }
+
+        .info-card p {
+            font-size: 1rem;
+            margin: 14px 0;
+            color: #5C452A;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .math-badge {
+            background: #FFEFD3;
+            padding: 5px 14px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #C26E2E;
+            display: inline-block;
+            margin: 4px 4px 0 0;
+        }
+
+        .tip-area {
+            background: #FFF4E6;
+            border-radius: 32px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .tip-area li {
+            margin-left: 24px;
+            margin-bottom: 8px;
+            color: #9C683E;
+        }
+
+        /* 右侧游戏区 */
+        .game-side {
+            flex: 2;
+            min-width: 300px;
+            background: #FFFCF7;
+            padding: 28px 24px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #F3E1CA;
+            padding-bottom: 12px;
+        }
+
+        .game-header h3 {
+            font-size: 1.8rem;
+            color: #E28B4A;
+        }
+
+        .stats {
+            display: flex;
+            gap: 12px;
+            background: #FFF2E4;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #C16E38;
+            align-items: center;
+        }
+
+        .reset-btn {
+            background: #F2E3CE;
+            border: none;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-family: inherit;
+            color: #9B6A3A;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: 8px;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.96);
+            background: #EAD5B0;
+        }
+
+        /* 圆锥示意图区域 */
+        .cone-display {
+            background: #FFF9F0;
+            border-radius: 56px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 28px;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.04);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background: #FFFFFF;
+            border-radius: 32px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+            width: 100%;
+            height: auto;
+            max-width: 240px;
+        }
+
+        .diagram-note {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: #BC885A;
+            background: #FFF2E4;
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 60px;
+        }
+
+        /* 配对游戏区 */
+        .gameplay-area {
+            background: #FEF5EA;
+            border-radius: 56px;
+            padding: 20px 16px;
+            margin-top: 12px;
+        }
+
+        .targets-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #B87A44;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 目标放置区 (描述盒子) */
+        .targets-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 28px;
+        }
+
+        .target-slot {
+            flex: 1;
+            min-width: 170px;
+            background: #FFF8F0;
+            border-radius: 40px;
+            padding: 16px 12px;
+            text-align: center;
+            border: 2px solid #F7DDB5;
+            transition: all 0.2s;
+            box-shadow: 0 5px 0 #EED9BD;
+        }
+
+        .target-slot.matched {
+            background: #E4F3D6;
+            border-color: #8FC65A;
+            box-shadow: 0 4px 0 #B6D99B;
+        }
+
+        .target-description {
+            font-weight: bold;
+            color: #9F673B;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+
+        .target-match-status {
+            font-size: 0.85rem;
+            color: #BC8F60;
+            min-height: 40px;
+        }
+
+        .target-slot.matched .target-match-status {
+            color: #427E1A;
+            font-weight: bold;
+        }
+
+        /* 可拖拽卡片区 */
+        .drag-area {
+            margin-top: 8px;
+        }
+
+        .drag-title {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #AF6F3C;
+            margin-bottom: 12px;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: center;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #FFFFFF, #FFF1E2);
+            border-radius: 60px;
+            padding: 14px 22px;
+            min-width: 110px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #A5612A;
+            box-shadow: 0 10px 16px -6px rgba(100, 70, 30, 0.15);
+            cursor: grab;
+            transition: 0.05s linear;
+            border: 2px solid #FDD6A5;
+            touch-action: none;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        .drag-card.dragging-source {
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+
+        .drag-card.matched-card {
+            visibility: hidden;
+            display: none;
+        }
+
+        /* 拖拽克隆体 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0,0,0,0.25));
+            transform: scale(1.02) rotate(1deg);
+            pointer-events: none;
+            background: #FFFCF0;
+            border-radius: 60px;
+            padding: 14px 22px;
+            min-width: 110px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #A5612A;
+            border: 2px solid #FCC37A;
+            backdrop-filter: blur(6px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+        }
+
+        .message-panel {
+            background: #FFF1E2;
+            border-radius: 60px;
+            padding: 12px;
+            margin-top: 24px;
+            text-align: center;
+            font-weight: bold;
+            color: #C17A3E;
+            transition: 0.1s;
+        }
+
+        .win-glow {
+            animation: cheerPop 0.6s ease;
+            background: #DAEFC4 !important;
+        }
+
+        @keyframes cheerPop {
+            0% { transform: scale(1); background: #FFEAC6; }
+            50% { transform: scale(1.01); background: #FFE0AE; box-shadow: 0 0 0 5px rgba(150, 200, 100, 0.4);}
+            100% { transform: scale(1); }
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 14px;
+            background: #FBF8EF;
+            color: #BB8A60;
+        }
+
+        @media (max-width: 780px) {
+            .knowledge-side {
+                border-right: none;
+                border-bottom: 4px dashed #D9E2CC;
+            }
+            .target-slot {
+                min-width: 140px;
+            }
+            .drag-card {
+                padding: 10px 18px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="cone-lab">
+    <div class="flex-row">
+        <!-- 左侧知识点区：圆锥的认识 -->
+        <div class="knowledge-side">
+            <h2>🎩 圆锥的秘密 · 认识圆锥</h2>
+            <div class="info-card">
+                <p>📌 <strong>圆锥有什么特征？</strong><br>
+                ▪ 底面是一个<span class="math-badge">圆形</span><br>
+                ▪ 侧面是<span class="math-badge">曲面</span>，展开是一个扇形<br>
+                ▪ 有一个<span class="math-badge">顶点</span><br>
+                ▪ <span class="math-badge">高</span>：从顶点到底面圆心的垂直距离</p>
+                <p>🎯 小知识：圆锥的底面半径、高和母线构成直角三角形，体积是等底等高圆柱的三分之一。</p>
+            </div>
+            <div class="tip-area">
+                <span>🧸 圆锥在生活中：</span>
+                <ul>
+                    <li>🍦 冰淇淋蛋筒</li>
+                    <li>🎉 派对帽子</li>
+                    <li>⛺ 帐篷顶部</li>
+                </ul>
+                <p style="margin-top: 12px; background:#F8EFE2; border-radius: 28px; padding: 8px;">🎮 右边游戏：将圆锥各部分名称拖拽到正确的描述框里，全部配对成功就能成为圆锥小专家！</p>
+            </div>
+        </div>
+
+        <!-- 右侧游戏区：拖拽配对 -->
+        <div class="game-side">
+            <div class="game-header">
+                <h3>🧩 圆锥零件工坊 · 拖拽配对</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="stats">🏆 配对 <span id="matchCount">0</span> / <span id="totalTargets">4</span></span>
+                    <button class="reset-btn" id="resetGameBtn">🔄 重新挑战</button>
+                </div>
+            </div>
+
+            <!-- 圆锥示意图 canvas -->
+            <div class="cone-display">
+                <canvas id="coneCanvas" width="220" height="190" style="width:220px; height:190px;"></canvas>
+                <div class="diagram-note">🎨 圆锥示意图 | 顶点、底面、高</div>
+            </div>
+
+            <!-- 配对目标区 (描述放置区) -->
+            <div class="gameplay-area">
+                <div class="targets-title">📦 把正确的名称卡片拖拽到对应的特征盒子里</div>
+                <div class="targets-grid" id="targetsGrid">
+                    <!-- 四个目标槽，分别对应底面、侧面、顶点、高 -->
+                </div>
+
+                <!-- 可拖拽卡片区 -->
+                <div class="drag-area">
+                    <div class="drag-title">✨ 可拖拽卡片（按住拖到上方盒子里）</div>
+                    <div class="cards-container" id="cardsContainer"></div>
+                </div>
+            </div>
+            <div id="gameMessage" class="message-panel">
+                🌟 观察圆锥的特征，把每个零件卡片拖到正确的描述框上！
+            </div>
+        </div>
+    </div>
+    <footer>💡 小技巧：圆锥的底面是圆形，侧面是曲面，顶点是尖尖的点，高是从顶点垂直到底面圆心的距离。把卡片拖到对应的盒子里吧！</footer>
+</div>
+
+<script>
+    // ----- 圆锥配对数据 -----
+    // 目标区域数据 (描述)
+    const targetData = [
+        { id: "base", name: "底面", description: "圆形底面", matchKeyword: "底面", matched: false, correctCard: "底面" },
+        { id: "side", name: "侧面", description: "弯曲的曲面 (展开是扇形)", matchKeyword: "侧面", matched: false, correctCard: "侧面" },
+        { id: "vertex", name: "顶点", description: "尖尖的顶部 (圆锥的尖端)", matchKeyword: "顶点", matched: false, correctCard: "顶点" },
+        { id: "height", name: "高", description: "从顶点到底面圆心的垂直距离", matchKeyword: "高", matched: false, correctCard: "高" }
+    ];
+    
+    // 卡片数据 (可拖拽)
+    let cardsData = [
+        { id: "card_base", name: "底面", text: "🔴 底面", targetId: "base", matched: false },
+        { id: "card_side", name: "侧面", text: "🌀 侧面", targetId: "side", matched: false },
+        { id: "card_vertex", name: "顶点", text: "🔺 顶点", targetId: "vertex", matched: false },
+        { id: "card_height", name: "高", text: "📏 高", targetId: "height", matched: false }
+    ];
+    
+    let currentMatchCount = 0;
+    const totalTargets = targetData.length;
+    
+    // 拖拽全局变量
+    let dragActive = false;
+    let sourceCardElem = null;
+    let sourceCardId = null;
+    let cloneElem = null;
+    let startX = 0, startY = 0;
+    
+    // DOM 元素
+    const targetsGrid = document.getElementById('targetsGrid');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const matchCountSpan = document.getElementById('matchCount');
+    const totalTargetsSpan = document.getElementById('totalTargets');
+    const resetBtn = document.getElementById('resetGameBtn');
+    const gameMessage = document.getElementById('gameMessage');
+    const coneCanvas = document.getElementById('coneCanvas');
+    const ctx = coneCanvas.getContext('2d');
+    
+    totalTargetsSpan.innerText = totalTargets;
+    
+    // 绘制圆锥示意图 (带标注)
+    function drawCone() {
+        const w = coneCanvas.width;
+        const h = coneCanvas.height;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = "#FFF9F0";
+        ctx.fillRect(0, 0, w, h);
+        // 画圆锥
+        const centerX = w/2;
+        const bottomY = 150;
+        const radius = 65;
+        const topY = 30;
+        // 侧面线条
+        ctx.beginPath();
+        ctx.moveTo(centerX - radius, bottomY);
+        ctx.lineTo(centerX, topY);
+        ctx.lineTo(centerX + radius, bottomY);
+        ctx.closePath();
+        ctx.fillStyle = "#FEE2C5";
+        ctx.fill();
+        ctx.strokeStyle = "#DBA576";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        // 底面椭圆
+        ctx.beginPath();
+        ctx.ellipse(centerX, bottomY, radius, 12, 0, 0, Math.PI*2);
+        ctx.fillStyle = "#FFE2C1";
+        ctx.fill();
+        ctx.stroke();
+        // 顶点标注
+        ctx.fillStyle = "#B45F2A";
+        ctx.font = "bold 12px 'Segoe UI Emoji'";
+        ctx.fillText("顶点", centerX-15, topY-5);
+        // 高 (虚线)
+        ctx.beginPath();
+        ctx.setLineDash([5, 6]);
+        ctx.moveTo(centerX, topY+3);
+        ctx.lineTo(centerX, bottomY-8);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#C2763A";
+        ctx.font = "italic 11px monospace";
+        ctx.fillText("高", centerX+8, (topY+bottomY)/2);
+        // 底面标注
+        ctx.fillStyle = "#B45F2A";
+        ctx.font = "bold 11px 'Segoe UI Emoji'";
+        ctx.fillText("底面", centerX+radius-20, bottomY+5);
+        // 侧面标注
+        ctx.fillText("侧面", centerX-35, (topY+bottomY)/2 + 10);
+    }
+    
+    // 渲染配对游戏UI (目标区 + 卡片区)
+    function renderGame() {
+        // 渲染目标区域
+        targetsGrid.innerHTML = '';
+        targetData.forEach(target => {
+            const slot = document.createElement('div');
+            slot.className = 'target-slot';
+            if (target.matched) slot.classList.add('matched');
+            slot.setAttribute('data-target-id', target.id);
+            slot.setAttribute('data-correct-card', target.correctCard);
+            
+            const descDiv = document.createElement('div');
+            descDiv.className = 'target-description';
+            descDiv.innerText = target.description;
+            
+            const statusDiv = document.createElement('div');
+            statusDiv.className = 'target-match-status';
+            if (target.matched) {
+                statusDiv.innerHTML = `✅ 已配对: ${target.name}`;
+            } else {
+                statusDiv.innerHTML = `⬅️ 等待配对 ➡️`;
+            }
+            slot.appendChild(descDiv);
+            slot.appendChild(statusDiv);
+            targetsGrid.appendChild(slot);
+        });
+        
+        // 渲染卡片 (只显示未配对的)
+        cardsContainer.innerHTML = '';
+        cardsData.forEach(card => {
+            if (!card.matched) {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'drag-card';
+                cardDiv.setAttribute('data-card-id', card.id);
+                cardDiv.setAttribute('data-target-id', card.targetId);
+                cardDiv.setAttribute('data-card-name', card.name);
+                cardDiv.innerText = card.text;
+                cardsContainer.appendChild(cardDiv);
+            }
+        });
+        
+        // 更新计分板
+        matchCountSpan.innerText = currentMatchCount;
+        if (currentMatchCount === totalTargets) {
+            gameMessage.innerHTML = "🎉🎉 完美配对！ 圆锥的每个部分你都认识了！ 🎉🎉<br> ✨ 点击「重新挑战」可以再玩一次 ✨";
+            gameMessage.style.background = "#DAEFC4";
+            gameMessage.classList.add('win-glow');
+            setTimeout(() => gameMessage.classList.remove('win-glow'), 800);
+        } else {
+            if (!gameMessage.innerHTML.includes("错误") && !gameMessage.innerHTML.includes("配对成功")) {
+                gameMessage.innerHTML = "🐣 把卡片拖拽到对应的特征盒子上松手，全部配对成功就能获得圆锥小英雄称号！";
+                gameMessage.style.background = "#FFF1E2";
+            }
+        }
+    }
+    
+    // 配对逻辑
+    function attemptMatch(cardElem, targetSlotElem) {
+        if (!cardElem || !targetSlotElem) return false;
+        const cardId = cardElem.getAttribute('data-card-id');
+        const card = cardsData.find(c => c.id === cardId);
+        if (!card || card.matched) return false;
+        
+        const targetId = targetSlotElem.getAttribute('data-target-id');
+        const target = targetData.find(t => t.id === targetId);
+        if (!target || target.matched) return false;
+        
+        // 校验卡片与目标是否匹配
+        if (card.targetId !== targetId) return false;
+        
+        // 配对成功
+        card.matched = true;
+        target.matched = true;
+        currentMatchCount++;
+        renderGame();  // 重新渲染，卡片消失、目标槽变绿
+        drawCone();    // 重绘圆锥图
+        
+        // 显示短暂成功消息
+        gameMessage.innerHTML = `✅ 配对成功！ “${card.text}” 配对了 ${target.description} ✅`;
+        gameMessage.style.background = "#E0F2CE";
+        setTimeout(() => {
+            if (currentMatchCount !== totalTargets) {
+                gameMessage.innerHTML = "🐣 继续拖拽卡片，把剩下的圆锥零件配对完成！";
+                gameMessage.style.background = "#FFF1E2";
+            } else {
+                // 保持胜利消息
+                gameMessage.innerHTML = "🎉🎉 完美配对！ 圆锥的每个部分你都认识了！ 🎉🎉<br> ✨ 点击「重新挑战」可以再玩一次 ✨";
+                gameMessage.style.background = "#DAEFC4";
+            }
+        }, 1200);
+        return true;
+    }
+    
+    // ---------- 拖拽实现 (完全支持鼠标+触摸) ----------
+    function startDrag(e, cardElem) {
+        if (dragActive) return;
+        const cardId = cardElem.getAttribute('data-card-id');
+        const card = cardsData.find(c => c.id === cardId);
+        if (!card || card.matched) return;
+        
+        e.preventDefault();
+        let clientX, clientY;
+        if (e.type === 'mousedown') {
+            clientX = e.clientX;
+            clientY = e.clientY;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        } else {
+            const touch = e.touches[0];
+            clientX = touch.clientX;
+            clientY = touch.clientY;
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+            document.addEventListener('touchcancel', onTouchCancel);
+        }
+        
+        dragActive = true;
+        sourceCardElem = cardElem;
+        sourceCardId = cardId;
+        sourceCardElem.classList.add('dragging-source');
+        
+        // 创建克隆体
+        cloneElem = document.createElement('div');
+        cloneElem.className = 'drag-clone';
+        cloneElem.innerText = cardElem.innerText;
+        cloneElem.style.left = (clientX - 35) + 'px';
+        cloneElem.style.top = (clientY - 30) + 'px';
+        cloneElem.style.width = sourceCardElem.offsetWidth + 'px';
+        document.body.appendChild(cloneElem);
+        
+        startX = clientX;
+        startY = clientY;
+    }
+    
+    function onMouseMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        moveClone(e.clientX, e.clientY);
+    }
+    
+    function onTouchMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveClone(touch.clientX, touch.clientY);
+    }
+    
+    function moveClone(clientX, clientY) {
+        if (!cloneElem) return;
+        cloneElem.style.left = (clientX - cloneElem.offsetWidth / 2) + 'px';
+        cloneElem.style.top = (clientY - cloneElem.offsetHeight / 2) + 'px';
+    }
+    
+    function finishDrag(clientX, clientY) {
+        if (!dragActive) return;
+        // 获取释放点下方的元素，寻找目标槽
+        const elemUnderPointer = document.elementsFromPoint(clientX, clientY);
+        let targetSlot = null;
+        for (let el of elemUnderPointer) {
+            if (el.classList && el.classList.contains('target-slot')) {
+                targetSlot = el;
+                break;
+            }
+        }
+        
+        let success = false;
+        if (targetSlot && sourceCardElem) {
+            const targetMatched = targetSlot.classList.contains('matched');
+            if (!targetMatched) {
+                success = attemptMatch(sourceCardElem, targetSlot);
+                if (!success) {
+                    gameMessage.innerHTML = "😲 配对错误！ 这个卡片不属于这个圆锥特征，再观察一下～";
+                    gameMessage.style.background = "#FFE0D0";
+                    setTimeout(() => {
+                        if (currentMatchCount !== totalTargets) {
+                            gameMessage.innerHTML = "🐣 把卡片拖拽到对应的特征盒子上，加油！";
+                            gameMessage.style.background = "#FFF1E2";
+                        }
+                    }, 1200);
+                }
+            } else {
+                gameMessage.innerHTML = "⛔ 这个特征盒子已经配对过了！不能重复配对哦";
+                gameMessage.style.background = "#FFE0D0";
+                setTimeout(() => {
+                    if (currentMatchCount !== totalTargets) gameMessage.style.background = "#FFF1E2";
+                }, 1000);
+            }
+        } else {
+            if (sourceCardElem) {
+                gameMessage.innerHTML = "💡 要把卡片拖拽到浅色的「特征盒子」上松手才算配对哦！";
+                setTimeout(() => {
+                    if (currentMatchCount !== totalTargets && gameMessage.innerHTML.includes("特征盒子")) {
+                        gameMessage.innerHTML = "🐣 继续拖拽卡片，把圆锥零件配对正确！";
+                        gameMessage.style.background = "#FFF1E2";
+                    }
+                }, 1000);
+            }
+        }
+        endDragCleanup();
+        if (!success && sourceCardElem) {
+            sourceCardElem.classList.remove('dragging-source');
+        }
+        if (currentMatchCount === totalTargets) renderGame();
+    }
+    
+    function endDragCleanup() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.remove();
+        if (sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+        document.removeEventListener('touchcancel', onTouchCancel);
+        dragActive = false;
+        sourceCardElem = null;
+        cloneElem = null;
+        sourceCardId = null;
+    }
+    
+    function onMouseUp(e) {
+        if (!dragActive) return;
+        finishDrag(e.clientX, e.clientY);
+    }
+    
+    function onTouchEnd(e) {
+        if (!dragActive) return;
+        let clientX, clientY;
+        if (e.changedTouches && e.changedTouches.length) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        } else {
+            clientX = startX;
+            clientY = startY;
+        }
+        finishDrag(clientX, clientY);
+    }
+    
+    function onTouchCancel(e) {
+        if (dragActive) endDragCleanup();
+    }
+    
+    // 绑定拖拽事件委托 (卡片容器)
+    function bindDragEvents() {
+        cardsContainer.addEventListener('mousedown', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        });
+        cardsContainer.addEventListener('touchstart', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        }, { passive: false });
+    }
+    
+    // 重置游戏
+    function resetGame() {
+        if (dragActive) endDragCleanup();
+        // 重置配对状态
+        targetData.forEach(t => t.matched = false);
+        cardsData.forEach(c => c.matched = false);
+        currentMatchCount = 0;
+        renderGame();
+        drawCone();
+        gameMessage.innerHTML = "✨ 游戏已重置！ 重新配对圆锥的各个部分吧 ✨";
+        gameMessage.style.background = "#FFF1E2";
+        gameMessage.classList.remove('win-glow');
+    }
+    
+    // 初始化
+    function init() {
+        drawCone();
+        renderGame();
+        bindDragEvents();
+        resetBtn.addEventListener('click', resetGame);
+        window.addEventListener('resize', () => drawCone());
+    }
+    
+    init();
+</script>
+</body>
+</html>

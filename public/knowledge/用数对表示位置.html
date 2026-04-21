@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>📍 数对寻宝记 | 用数对表示位置</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免拖拽时选中文字/图片，提升触屏体验 */
+        }
+
+        body {
+            background: #F0F5EA;
+            font-family: 'Comic Neue', 'Segoe UI Emoji', 'Chalkboard SE', 'Poppins', 'Comic Sans MS', cursive, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 主课程卡片 */
+        .coordinate-lab {
+            max-width: 1350px;
+            width: 100%;
+            background: #FFFFFFF2;
+            backdrop-filter: blur(2px);
+            border-radius: 68px 52px 68px 52px;
+            box-shadow: 0 25px 40px rgba(70, 60, 40, 0.12);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* 左右布局 */
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* 左侧知识点区域 */
+        .knowledge-side {
+            flex: 1.2;
+            min-width: 260px;
+            background: #FEFCF5;
+            padding: 32px 24px;
+            border-right: 4px dashed #D4E2C6;
+        }
+
+        .knowledge-side h2 {
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #79A85A, #B2D48B);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 8px solid #8DC26F;
+            padding-left: 18px;
+        }
+
+        .info-card {
+            background: #F4F9EF;
+            border-radius: 40px 24px 40px 24px;
+            padding: 22px;
+            margin: 20px 0;
+            box-shadow: 0 8px 0 #DFEAD4;
+        }
+
+        .info-card p {
+            font-size: 1rem;
+            margin: 14px 0;
+            color: #3F5A2B;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .math-badge {
+            background: #E5F0DB;
+            padding: 5px 14px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #558C2F;
+            display: inline-block;
+            margin: 4px 4px 0 0;
+        }
+
+        .tip-area {
+            background: #FEF5E6;
+            border-radius: 32px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .tip-area li {
+            margin-left: 24px;
+            margin-bottom: 8px;
+            color: #A5662C;
+        }
+
+        /* 右侧游戏区 */
+        .game-side {
+            flex: 2;
+            min-width: 300px;
+            background: #FFFCF7;
+            padding: 28px 24px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #E1F0D2;
+            padding-bottom: 12px;
+        }
+
+        .game-header h3 {
+            font-size: 1.8rem;
+            color: #6F9E3F;
+        }
+
+        .stats {
+            display: flex;
+            gap: 12px;
+            background: #F1F7EA;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #54862C;
+            align-items: center;
+        }
+
+        .reset-btn {
+            background: #F2E3CE;
+            border: none;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-family: inherit;
+            color: #9B6A3A;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: 8px;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.96);
+            background: #EAD5B0;
+        }
+
+        /* 网格区域 */
+        .grid-container {
+            background: #FEF9F0;
+            border-radius: 48px;
+            padding: 20px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        .coordinate-grid {
+            display: inline-grid;
+            grid-template-columns: repeat(5, 70px);
+            grid-template-rows: repeat(5, 70px);
+            gap: 8px;
+            background: #FFF4E8;
+            padding: 12px;
+            border-radius: 32px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+        }
+
+        .grid-cell {
+            background: #FFFFFF;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #A76F3E;
+            border: 2px solid #F7DDB5;
+            transition: all 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            position: relative;
+        }
+
+        .grid-cell.matched {
+            background: #E4F3D6;
+            border-color: #8FC65A;
+            color: #427E1A;
+            transform: scale(0.98);
+        }
+
+        .grid-cell .coord-text {
+            font-size: 0.8rem;
+            font-family: monospace;
+            background: #FFF2E4;
+            padding: 2px 8px;
+            border-radius: 30px;
+            margin-top: 4px;
+        }
+
+        .grid-cell.matched .coord-text {
+            background: #D9F0C3;
+        }
+
+        .grid-cell .treasure-icon {
+            font-size: 1.6rem;
+        }
+
+        /* 可拖拽卡片区 */
+        .cards-area {
+            background: #FEF5EA;
+            border-radius: 56px;
+            padding: 20px 16px;
+        }
+
+        .cards-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #B87A44;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #FFFFFF, #FFF1E2);
+            border-radius: 60px;
+            padding: 16px 24px;
+            min-width: 110px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #A5612A;
+            box-shadow: 0 12px 18px -6px rgba(100, 70, 30, 0.15);
+            cursor: grab;
+            transition: 0.05s linear;
+            border: 2px solid #FDD6A5;
+            touch-action: none;
+            font-family: monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        .drag-card.dragging-source {
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+
+        .drag-card.matched-card {
+            display: none;
+        }
+
+        .card-emoji {
+            font-size: 1.5rem;
+        }
+
+        /* 克隆拖拽体 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0,0,0,0.25));
+            transform: scale(1.02) rotate(1deg);
+            pointer-events: none;
+            background: #FFFCF0;
+            border-radius: 60px;
+            padding: 16px 24px;
+            min-width: 110px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #A5612A;
+            border: 2px solid #FCC37A;
+            backdrop-filter: blur(6px);
+            font-family: monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+        }
+
+        .message-panel {
+            background: #FFF1E2;
+            border-radius: 60px;
+            padding: 12px;
+            margin-top: 24px;
+            text-align: center;
+            font-weight: bold;
+            color: #C17A3E;
+            transition: 0.1s;
+        }
+
+        .win-glow {
+            animation: cheerPop 0.6s ease;
+            background: #DAEFC4 !important;
+        }
+
+        @keyframes cheerPop {
+            0% { transform: scale(1); background: #FFEAC6; }
+            50% { transform: scale(1.01); background: #FFE0AE; box-shadow: 0 0 0 5px rgba(150, 200, 100, 0.4);}
+            100% { transform: scale(1); }
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 14px;
+            background: #FBF8EF;
+            color: #BB8A60;
+        }
+
+        @media (max-width: 780px) {
+            .knowledge-side {
+                border-right: none;
+                border-bottom: 4px dashed #D4E2C6;
+            }
+            .coordinate-grid {
+                grid-template-columns: repeat(5, 55px);
+                grid-template-rows: repeat(5, 55px);
+                gap: 6px;
+            }
+            .grid-cell .treasure-icon {
+                font-size: 1.2rem;
+            }
+            .grid-cell .coord-text {
+                font-size: 0.65rem;
+            }
+            .drag-card {
+                padding: 12px 18px;
+                font-size: 1.1rem;
+                min-width: 90px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="coordinate-lab">
+    <div class="flex-row">
+        <!-- 左侧知识点：用数对表示位置 -->
+        <div class="knowledge-side">
+            <h2>📍 数对寻宝 · 确定位置</h2>
+            <div class="info-card">
+                <p>📌 <strong>什么是数对？</strong><br>
+                用 <span class="math-badge">(列, 行)</span> 表示一个位置，先写列数，再写行数。</p>
+                <p>🎯 <strong>小秘诀</strong><br>
+                列 → 竖着数（从左到右）<br>
+                行 → 横着数（从下往上）<br>
+                就像电影院的座位号！</p>
+                <p>🧸 例子：<span class="math-badge">(2,3)</span> 表示第2列、第3行。</p>
+                <p>✨ 右边的网格是5列×5行，每个格子都有对应的数对。把下面的数对卡片拖到正确的格子里，全部配对成功就能获得宝藏！</p>
+            </div>
+            <div class="tip-area">
+                <span>🧭 数对读法：</span>
+                <ul>
+                    <li>📌 先读列，再读行，中间用逗号隔开</li>
+                    <li>🔢 列从左边开始数1,2,3,4,5</li>
+                    <li>📏 行从下边开始数1,2,3,4,5（网格中已经标好）</li>
+                </ul>
+                <p style="margin-top: 12px; background:#F8EFE2; border-radius: 28px; padding: 8px;">🎮 游戏玩法：把数对卡片拖拽到对应的网格格子里，配对正确格子会变成绿色，卡片消失！</p>
+            </div>
+        </div>
+
+        <!-- 右侧游戏区 -->
+        <div class="game-side">
+            <div class="game-header">
+                <h3>🗺️ 数对寻宝 · 拖拽配对</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="stats">🏆 配对 <span id="matchCount">0</span> / <span id="totalCards">5</span></span>
+                    <button class="reset-btn" id="resetGameBtn">🔄 新的一局</button>
+                </div>
+            </div>
+
+            <!-- 5x5 网格 -->
+            <div class="grid-container">
+                <div class="coordinate-grid" id="coordinateGrid"></div>
+            </div>
+
+            <!-- 可拖拽卡片区（5个数对卡片） -->
+            <div class="cards-area">
+                <div class="cards-title">🎴 可拖拽数对卡片（拖到正确的格子里）</div>
+                <div class="cards-container" id="cardsContainer"></div>
+            </div>
+            <div id="gameMessage" class="message-panel">
+                🌟 把下面的数对卡片拖拽到网格中对应的格子里！例如 (1,1) 要拖到最左下角的格子。
+            </div>
+        </div>
+    </div>
+    <footer>💡 小提示：网格左下角是 (1,1)，向右列数增加，向上行数增加。拖拽卡片到格子中央松手即可配对！</footer>
+</div>
+
+<script>
+    // ---------- 游戏配置 ----------
+    const GRID_SIZE = 5;        // 5x5 网格
+    // 预定义5个要配对的数对 (列,行)  范围1-5，不重复，随机或固定
+    // 为了有趣，选择5个不同位置的宝藏
+    const targetCoordinates = [
+        { col: 1, row: 1, label: "(1,1)", emoji: "🏆" },
+        { col: 2, row: 3, label: "(2,3)", emoji: "🔮" },
+        { col: 3, row: 5, label: "(3,5)", emoji: "💎" },
+        { col: 4, row: 2, label: "(4,2)", emoji: "⭐" },
+        { col: 5, row: 4, label: "(5,4)", emoji: "🪙" }
+    ];
+    
+    // 卡片数据（初始顺序打乱）
+    let cards = [];
+    // 网格配对状态：记录每个格子是否已配对（用 key "col,row"）
+    let matchedCells = new Set();
+    let currentMatchCount = 0;
+    const totalMatches = targetCoordinates.length;
+    
+    // 拖拽全局变量
+    let dragActive = false;
+    let sourceCardElem = null;
+    let sourceCardId = null;
+    let sourceCardCoord = null;
+    let cloneElem = null;
+    let startX = 0, startY = 0;
+    
+    // DOM 元素
+    const coordinateGrid = document.getElementById('coordinateGrid');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const matchCountSpan = document.getElementById('matchCount');
+    const totalCardsSpan = document.getElementById('totalCards');
+    const resetBtn = document.getElementById('resetGameBtn');
+    const gameMessage = document.getElementById('gameMessage');
+    
+    totalCardsSpan.innerText = totalMatches;
+    
+    // 初始化卡片数组（打乱顺序）
+    function initCards() {
+        let rawCards = targetCoordinates.map((coord, idx) => ({
+            id: `card_${idx}`,
+            col: coord.col,
+            row: coord.row,
+            label: coord.label,
+            emoji: coord.emoji,
+            matched: false
+        }));
+        // 随机打乱顺序
+        for (let i = rawCards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [rawCards[i], rawCards[j]] = [rawCards[j], rawCards[i]];
+        }
+        cards = rawCards;
+    }
+    
+    // 渲染网格 (5x5，左下角为(1,1))
+    function renderGrid() {
+        coordinateGrid.innerHTML = '';
+        // 行从高到低显示，让(1,1)在左下角视觉效果
+        for (let row = GRID_SIZE; row >= 1; row--) {
+            for (let col = 1; col <= GRID_SIZE; col++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                const key = `${col},${row}`;
+                if (matchedCells.has(key)) {
+                    cell.classList.add('matched');
+                }
+                cell.setAttribute('data-col', col);
+                cell.setAttribute('data-row', row);
+                // 检查这个格子是否是目标宝藏格子
+                const target = targetCoordinates.find(t => t.col === col && t.row === row);
+                // 显示图标和坐标
+                const iconSpan = document.createElement('div');
+                iconSpan.className = 'treasure-icon';
+                if (target && matchedCells.has(key)) {
+                    iconSpan.innerText = target.emoji; // 配对成功后显示宝藏图标
+                } else if (target) {
+                    iconSpan.innerText = '❓'; // 未配对的宝藏格子显示问号
+                } else {
+                    iconSpan.innerText = '⬜';
+                }
+                const coordSpan = document.createElement('div');
+                coordSpan.className = 'coord-text';
+                coordSpan.innerText = `(${col},${row})`;
+                cell.appendChild(iconSpan);
+                cell.appendChild(coordSpan);
+                coordinateGrid.appendChild(cell);
+            }
+        }
+    }
+    
+    // 渲染卡片（只显示未配对的）
+    function renderCards() {
+        cardsContainer.innerHTML = '';
+        cards.forEach(card => {
+            if (!card.matched) {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'drag-card';
+                cardDiv.setAttribute('data-card-id', card.id);
+                cardDiv.setAttribute('data-col', card.col);
+                cardDiv.setAttribute('data-row', card.row);
+                const emojiSpan = document.createElement('span');
+                emojiSpan.className = 'card-emoji';
+                emojiSpan.innerText = card.emoji;
+                const textSpan = document.createElement('span');
+                textSpan.innerText = card.label;
+                cardDiv.appendChild(emojiSpan);
+                cardDiv.appendChild(textSpan);
+                cardsContainer.appendChild(cardDiv);
+            }
+        });
+    }
+    
+    // 更新得分和胜利信息
+    function updateScoreUI() {
+        matchCountSpan.innerText = currentMatchCount;
+        if (currentMatchCount === totalMatches) {
+            gameMessage.innerHTML = "🎉🎉 恭喜！所有数对都找到了正确的宝藏位置！你已是数对小英雄 🎉🎉<br> ✨ 点击「新的一局」可以再玩一次 ✨";
+            gameMessage.style.background = "#DAEFC4";
+            gameMessage.classList.add('win-glow');
+            setTimeout(() => gameMessage.classList.remove('win-glow'), 800);
+        } else {
+            if (!gameMessage.innerHTML.includes("错误") && !gameMessage.innerHTML.includes("配对成功")) {
+                gameMessage.innerHTML = "🐣 把数对卡片拖拽到网格中对应的格子里，全部配对成功就能找到宝藏！";
+                gameMessage.style.background = "#FFF1E2";
+            }
+        }
+    }
+    
+    // 配对逻辑
+    function attemptMatch(cardElem, targetCell) {
+        const cardId = cardElem.getAttribute('data-card-id');
+        const card = cards.find(c => c.id === cardId);
+        if (!card || card.matched) return false;
+        
+        const col = parseInt(targetCell.getAttribute('data-col'));
+        const row = parseInt(targetCell.getAttribute('data-row'));
+        const key = `${col},${row}`;
+        
+        // 检查这个格子是否已经是宝藏配对目标并且卡片数对匹配
+        const targetTreasure = targetCoordinates.find(t => t.col === col && t.row === row);
+        if (!targetTreasure) {
+            // 不是宝藏格子，不能配对
+            return false;
+        }
+        if (card.col !== col || card.row !== row) {
+            return false;
+        }
+        if (matchedCells.has(key)) {
+            return false; // 已经配对过
+        }
+        
+        // 配对成功
+        card.matched = true;
+        matchedCells.add(key);
+        currentMatchCount++;
+        
+        // 重新渲染网格和卡片
+        renderGrid();
+        renderCards();
+        updateScoreUI();
+        
+        const dirName = `(${col},${row})`;
+        gameMessage.innerHTML = `✅ 配对成功！ 数对 ${card.label} 找到了宝藏 ${targetTreasure.emoji} ✅`;
+        gameMessage.style.background = "#E0F2CE";
+        setTimeout(() => {
+            if (currentMatchCount !== totalMatches) {
+                gameMessage.innerHTML = "🐣 继续拖拽其他数对卡片到正确的格子里！";
+                gameMessage.style.background = "#FFF1E2";
+            } else {
+                gameMessage.innerHTML = "🎉🎉 恭喜！所有数对都找到了正确的宝藏位置！你已是数对小英雄 🎉🎉<br> ✨ 点击「新的一局」可以再玩一次 ✨";
+                gameMessage.style.background = "#DAEFC4";
+            }
+        }, 1200);
+        return true;
+    }
+    
+    // ---------- 自定义拖拽实现 (支持鼠标+触摸) ----------
+    function startDrag(e, cardElem) {
+        if (dragActive) return;
+        const cardId = cardElem.getAttribute('data-card-id');
+        const card = cards.find(c => c.id === cardId);
+        if (!card || card.matched) return;
+        e.preventDefault();
+        let clientX, clientY;
+        if (e.type === 'mousedown') {
+            clientX = e.clientX;
+            clientY = e.clientY;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        } else {
+            const touch = e.touches[0];
+            clientX = touch.clientX;
+            clientY = touch.clientY;
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+            document.addEventListener('touchcancel', onTouchCancel);
+        }
+        dragActive = true;
+        sourceCardElem = cardElem;
+        sourceCardId = cardId;
+        sourceCardCoord = { col: card.col, row: card.row };
+        sourceCardElem.classList.add('dragging-source');
+        
+        // 创建克隆体
+        cloneElem = document.createElement('div');
+        cloneElem.className = 'drag-clone';
+        // 复制内容
+        const emojiClone = document.createElement('span');
+        emojiClone.className = 'card-emoji';
+        emojiClone.innerText = cardElem.querySelector('.card-emoji')?.innerText || '';
+        const textClone = document.createElement('span');
+        textClone.innerText = cardElem.innerText.replace(cardElem.querySelector('.card-emoji')?.innerText || '', '').trim();
+        cloneElem.appendChild(emojiClone);
+        cloneElem.appendChild(textClone);
+        cloneElem.style.left = (clientX - 40) + 'px';
+        cloneElem.style.top = (clientY - 40) + 'px';
+        cloneElem.style.width = sourceCardElem.offsetWidth + 'px';
+        document.body.appendChild(cloneElem);
+        startX = clientX;
+        startY = clientY;
+        
+        // 高亮所有未配对的网格格子
+        document.querySelectorAll('.grid-cell').forEach(cell => {
+            if (!cell.classList.contains('matched')) {
+                cell.style.transform = 'scale(1.02)';
+                cell.style.transition = '0.1s';
+                cell.style.boxShadow = '0 0 0 2px #8FC65A';
+            }
+        });
+    }
+    
+    function onMouseMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        moveClone(e.clientX, e.clientY);
+    }
+    function onTouchMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveClone(touch.clientX, touch.clientY);
+    }
+    function moveClone(clientX, clientY) {
+        if (cloneElem) {
+            cloneElem.style.left = (clientX - cloneElem.offsetWidth / 2) + 'px';
+            cloneElem.style.top = (clientY - cloneElem.offsetHeight / 2) + 'px';
+        }
+    }
+    function finishDrag(clientX, clientY) {
+        if (!dragActive) return;
+        const elemUnder = document.elementsFromPoint(clientX, clientY);
+        let targetCell = null;
+        for (let el of elemUnder) {
+            if (el.classList && el.classList.contains('grid-cell')) {
+                targetCell = el;
+                break;
+            }
+        }
+        let success = false;
+        if (targetCell && sourceCardElem) {
+            const cellMatched = targetCell.classList.contains('matched');
+            if (!cellMatched) {
+                success = attemptMatch(sourceCardElem, targetCell);
+                if (!success) {
+                    gameMessage.innerHTML = "😲 配对错误！ 这个数对和格子不匹配，再检查一下列和行～";
+                    gameMessage.style.background = "#FFE0D0";
+                    setTimeout(() => {
+                        if (currentMatchCount !== totalMatches) {
+                            gameMessage.innerHTML = "🐣 继续拖拽数对卡片到正确的格子里！";
+                            gameMessage.style.background = "#FFF1E2";
+                        }
+                    }, 1200);
+                }
+            } else {
+                gameMessage.innerHTML = "⛔ 这个格子已经找到宝藏了！不能重复配对";
+                gameMessage.style.background = "#FFE0D0";
+                setTimeout(() => {
+                    if (currentMatchCount !== totalMatches) gameMessage.style.background = "#FFF1E2";
+                }, 1000);
+            }
+        } else if (sourceCardElem) {
+            gameMessage.innerHTML = "💡 要把卡片拖拽到网格中的格子里松手哦！";
+            setTimeout(() => {
+                if (currentMatchCount !== totalMatches && gameMessage.innerHTML.includes("格子")) {
+                    gameMessage.innerHTML = "🐣 继续拖拽数对卡片到正确的格子里！";
+                    gameMessage.style.background = "#FFF1E2";
+                }
+            }, 1000);
+        }
+        endDragCleanup();
+        if (!success && sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        if (currentMatchCount === totalMatches) {
+            renderGrid();
+            renderCards();
+        }
+    }
+    function endDragCleanup() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.remove();
+        if (sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+        document.removeEventListener('touchcancel', onTouchCancel);
+        dragActive = false;
+        sourceCardElem = null;
+        cloneElem = null;
+        // 恢复网格样式
+        document.querySelectorAll('.grid-cell').forEach(cell => {
+            cell.style.transform = '';
+            cell.style.boxShadow = '';
+        });
+    }
+    function onMouseUp(e) { if (dragActive) finishDrag(e.clientX, e.clientY); }
+    function onTouchEnd(e) {
+        if (!dragActive) return;
+        let clientX, clientY;
+        if (e.changedTouches && e.changedTouches.length) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        } else { clientX = startX; clientY = startY; }
+        finishDrag(clientX, clientY);
+    }
+    function onTouchCancel(e) { endDragCleanup(); }
+    
+    function bindDragEvents() {
+        cardsContainer.addEventListener('mousedown', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        });
+        cardsContainer.addEventListener('touchstart', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        }, { passive: false });
+    }
+    
+    // 重置游戏
+    function resetGame() {
+        if (dragActive) endDragCleanup();
+        matchedCells.clear();
+        currentMatchCount = 0;
+        initCards();       // 重新初始化并打乱卡片
+        renderGrid();
+        renderCards();
+        updateScoreUI();
+        gameMessage.innerHTML = "✨ 游戏已重置！ 把新的数对卡片拖到正确的宝藏格子里 ✨";
+        gameMessage.style.background = "#FFF1E2";
+        gameMessage.classList.remove('win-glow');
+    }
+    
+    // 初始化
+    function init() {
+        initCards();
+        renderGrid();
+        renderCards();
+        bindDragEvents();
+        updateScoreUI();
+        resetBtn.addEventListener('click', resetGame);
+    }
+    
+    init();
+</script>
+</body>
+</html>

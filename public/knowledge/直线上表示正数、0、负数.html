@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>数轴上的正数、0、负数 | 数轴小侦探 | 拖拽游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #fef5ea;
+            font-family: 'Comic Neue', 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI Emoji', system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .course-card {
+            max-width: 1300px;
+            width: 100%;
+            background: #fffffb;
+            border-radius: 70px 60px 70px 60px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.08), 0 8px 18px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .two-columns {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* 左侧知识点区 */
+        .knowledge-panel {
+            flex: 1.2;
+            min-width: 260px;
+            background: #fffef8;
+            padding: 28px 24px;
+            border-right: 4px solid #ffbc6e;
+        }
+
+        .knowledge-panel h1 {
+            font-size: 2rem;
+            color: #e67e22;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 14px solid #ffaa55;
+            padding-left: 18px;
+            margin-bottom: 8px;
+        }
+
+        .sub {
+            color: #c95a0f;
+            margin-bottom: 24px;
+            padding-left: 32px;
+            font-size: 1rem;
+        }
+
+        .intro-card {
+            background: #fff0e0;
+            border-radius: 48px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .big-example {
+            font-size: 1.2rem;
+            text-align: center;
+            margin: 12px 0;
+            color: #e67e22;
+            font-weight: bold;
+            background: #fff3e6;
+            padding: 10px;
+            border-radius: 32px;
+        }
+
+        .rule-list {
+            background: #fff3e6;
+            border-radius: 36px;
+            padding: 16px 20px;
+            margin: 20px 0;
+        }
+
+        .rule-list p {
+            margin: 10px 0;
+            font-size: 1rem;
+            color: #7b3f00;
+        }
+
+        .example-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        .example-item {
+            background: white;
+            border-radius: 32px;
+            padding: 6px 16px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #c4410c;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .game-tip {
+            background: #ffe1b9;
+            border-radius: 30px;
+            padding: 14px 16px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #aa5a1c;
+        }
+
+        /* 右侧游戏区 */
+        .game-panel {
+            flex: 2;
+            min-width: 300px;
+            background: #fffbf5;
+            padding: 24px 22px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            background: #ffefdc;
+            border-radius: 50px;
+            padding: 10px 22px;
+            margin-bottom: 24px;
+            gap: 12px;
+        }
+
+        .score-board, .remain-board {
+            background: #f39c12;
+            border-radius: 40px;
+            padding: 6px 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: inset 0 -2px 0 #c56a00;
+        }
+
+        .remain-board {
+            background: #2ecc71;
+            box-shadow: inset 0 -2px 0 #1f8f4a;
+        }
+
+        .new-game-btn {
+            background: #3498db;
+            border: none;
+            font-size: 1rem;
+            padding: 8px 24px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 5px 0 #1f618d;
+            transition: 0.05s linear;
+        }
+
+        .new-game-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1f618d;
+        }
+
+        /* 数轴画板区域 */
+        .canvas-container {
+            background: #fef3e8;
+            border-radius: 48px;
+            padding: 20px;
+            margin-bottom: 28px;
+            border: 2px solid #ffcd94;
+            text-align: center;
+        }
+
+        .canvas-container p {
+            font-weight: bold;
+            color: #b85c1a;
+            margin-bottom: 15px;
+        }
+
+        canvas {
+            background: #fffef7;
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* 数字卡片区 */
+        .drag-cards-area {
+            background: #ffefdd;
+            border-radius: 48px;
+            padding: 18px 14px;
+            margin-top: 10px;
+        }
+
+        .drag-cards-area p {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #b85c1a;
+        }
+
+        .cards-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 18px;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #fff5e8, #ffe6d0);
+            width: 90px;
+            padding: 14px 8px;
+            text-align: center;
+            border-radius: 60px;
+            box-shadow: 0 8px 0 #e0a45a;
+            cursor: grab;
+            touch-action: none;
+            transition: 0.05s;
+            border: 2px solid #ffcd94;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #c4410c;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        .message-area {
+            margin-top: 20px;
+            background: #f7e1b0;
+            border-radius: 36px;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            color: #b85c1a;
+            font-size: 0.95rem;
+        }
+
+        /* 拖拽克隆样式 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.25));
+            opacity: 0.9;
+            pointer-events: none;
+            transform: scale(1.05) rotate(2deg);
+            width: 90px;
+            background: linear-gradient(145deg, #fff5e8, #ffe6d0);
+            border-radius: 60px;
+            padding: 14px 8px;
+            border: 3px solid #ffb347;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            color: #c4410c;
+        }
+
+        /* 动画 */
+        .correct-pop {
+            animation: bounceHappy 0.35s ease;
+        }
+
+        @keyframes bounceHappy {
+            0% { transform: scale(1); background: #d9f0cd; }
+            70% { transform: scale(1.08); background: #b2e0a0; }
+            100% { transform: scale(1); background: #ffedd5; }
+        }
+
+        /* 响应式 */
+        @media (max-width: 850px) {
+            .knowledge-panel {
+                border-right: none;
+                border-bottom: 4px solid #ffbc6e;
+            }
+            .drag-card, .drag-clone {
+                width: 80px;
+                font-size: 1.2rem;
+                padding: 12px 4px;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .drag-card, .drag-clone {
+                width: 70px;
+                font-size: 1rem;
+                padding: 10px 2px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="course-card">
+    <div class="two-columns">
+        <!-- 左侧：数轴知识点 -->
+        <div class="knowledge-panel">
+            <h1>📏 数轴上的数</h1>
+            <div class="sub">—— 正数、0、负数的位置</div>
+            <div class="intro-card">
+                <div class="big-example">
+                    ← -3  -2  -1   0   1   2   3 →
+                </div>
+                <p>✨ <strong>数轴的三要素</strong>：原点、正方向、单位长度。</p>
+                <p>📖 数轴是一条直线，原点（0）把数轴分成左右两边：</p>
+                <p>✔️ 0的右边是正数，越往右越大。<br>
+                ✔️ 0的左边是负数，越往左越小。<br>
+                ✔️ 正数 > 0 > 负数。</p>
+                <p>🎯 例如：-3 在 0 的左边，2 在 0 的右边。</p>
+            </div>
+            <div class="rule-list">
+                <p>🎈 小口诀：</p>
+                <p>✔️ 画直线，定原点，向右箭头正方向。<br>
+                ✔️ 单位长度要相等，正数右边负数左。<br>
+                ✔️ 数轴好比温度计，上正下负要分清。</p>
+                <div class="example-group">
+                    <div class="example-item">-2 在 0 的左边</div>
+                    <div class="example-item">+3 在 0 的右边</div>
+                    <div class="example-item">0 是分界点</div>
+                </div>
+            </div>
+            <div class="game-tip">
+                🎮 游戏玩法：<br>
+                右边数轴上有几个空缺的位置（❓），下面是数字卡片。<br>
+                把数字卡片拖拽到数轴上正确的位置（空缺圆圈处）。<br>
+                全部配对成功就胜利啦！✨ 成为数轴小侦探！
+            </div>
+        </div>
+
+        <!-- 右侧：游戏区 -->
+        <div class="game-panel">
+            <div class="game-header">
+                <div class="score-board">⭐ 配对: <span id="scoreValue">0</span></div>
+                <div class="remain-board">🎯 剩余: <span id="remainValue">0</span></div>
+                <button class="new-game-btn" id="resetGameBtn">🔄 新的一关</button>
+            </div>
+
+            <!-- 数轴画板 -->
+            <div class="canvas-container">
+                <p>🐣 把数字卡片拖到数轴上正确的位置（❓圆圈）</p>
+                <canvas id="numberLineCanvas" width="800" height="200" style="width:100%; height:auto; max-width:800px; aspect-ratio:800/200"></canvas>
+            </div>
+
+            <!-- 可拖拽数字卡片 -->
+            <div class="drag-cards-area">
+                <p>📦 拖拽下方数字卡片到数轴的空缺处</p>
+                <div id="cardsContainer" class="cards-grid">
+                    <!-- 动态生成数字卡片 -->
+                </div>
+            </div>
+
+            <div id="gameMessage" class="message-area">
+                🧸 观察数轴，把数字拖到对应的❓位置！
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- 游戏核心：数轴填空拖拽配对 ----------
+    // 定义数轴上的空缺位置（数值和对应的x坐标比例）
+    // 为了动态适配不同宽度，我们根据canvas实际尺寸计算坐标
+    // 设定数轴范围从 -4 到 4，单位长度间距 = 总宽度 / (max-min)
+    // 空缺位置数组：每个空缺包含 { value, x比例(0~1) 实际动态计算, 是否已填 }
+    let gaps = [
+        { value: -3, filled: false, element: null },
+        { value: -1, filled: false, element: null },
+        { value: 2, filled: false, element: null },
+        { value: 3, filled: false, element: null }
+    ];
+    
+    // 可拖拽数字卡片（初始为未配对状态）
+    let currentCards = [
+        { value: -3, icon: "❄️" },
+        { value: -1, icon: "🔹" },
+        { value: 2, icon: "🔸" },
+        { value: 3, icon: "⭐" }
+    ];
+    
+    let currentScore = 0;
+    let totalCount = gaps.length;
+    
+    // DOM 元素
+    const canvas = document.getElementById('numberLineCanvas');
+    const ctx = canvas.getContext('2d');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const scoreSpan = document.getElementById('scoreValue');
+    const remainSpan = document.getElementById('remainValue');
+    const messageDiv = document.getElementById('gameMessage');
+    const resetBtn = document.getElementById('resetGameBtn');
+    
+    let canvasWidth, canvasHeight;
+    let xStart, xEnd, yAxis;  // 数轴绘制区域
+    let gapPositions = [];      // 存储每个空缺的像素坐标 { x, y, value, radius, filled }
+    
+    // 拖拽系统变量
+    let isDragging = false;
+    let draggedCardElem = null;
+    let cloneElem = null;
+    let draggedValue = null;
+    let startX = 0, startY = 0;
+    
+    // 初始化/重置游戏
+    function resetGame() {
+        // 重置空缺状态
+        gaps.forEach(g => { g.filled = false; g.element = null; });
+        // 重置卡片数组（打乱顺序）
+        const shuffledCards = [...currentCards];
+        for (let i = shuffledCards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledCards[i], shuffledCards[j]] = [shuffledCards[j], shuffledCards[i]];
+        }
+        currentCards = shuffledCards;
+        currentScore = 0;
+        updateScoreUI();
+        renderCards();
+        drawNumberLine();
+        messageDiv.innerHTML = '🎈 新的一关！ 把数字拖到数轴上正确的位置！ 🎈';
+        messageDiv.style.background = '#f7e1b0';
+        if (isDragging) stopDrag();
+    }
+    
+    function updateScoreUI() {
+        const filledCount = gaps.filter(g => g.filled).length;
+        currentScore = filledCount;
+        scoreSpan.innerText = currentScore;
+        const remain = totalCount - filledCount;
+        remainSpan.innerText = remain;
+        if (filledCount === totalCount && totalCount > 0) {
+            messageDiv.innerHTML = '🎉🎉 完美！ 你完全掌握了数轴上的数的位置！ 点“新的一关”继续挑战 🎉🎉';
+            messageDiv.style.background = '#c8f0d1';
+        } else {
+            if (messageDiv.innerHTML.includes('完美')) {
+                messageDiv.innerHTML = '🐣 继续拖拽配对，成为数轴小侦探！';
+                messageDiv.style.background = '#f7e1b0';
+            }
+        }
+    }
+    
+    // 绘制数轴和空缺圆圈
+    function drawNumberLine() {
+        if (!canvas || !ctx) return;
+        // 获取实际尺寸（CSS大小可能缩放，但canvas绘图尺寸是固定的800x200）
+        canvas.width = 800;
+        canvas.height = 200;
+        canvasWidth = 800;
+        canvasHeight = 200;
+        
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        
+        // 定义绘制区域：左右边距80，上下居中
+        const leftMargin = 60;
+        const rightMargin = 60;
+        const axisY = canvasHeight / 2;
+        yAxis = axisY;
+        xStart = leftMargin;
+        xEnd = canvasWidth - rightMargin;
+        const rangeMin = -4;
+        const rangeMax = 4;
+        const totalLength = xEnd - xStart;
+        const unitLength = totalLength / (rangeMax - rangeMin);
+        
+        // 绘制箭头和轴线
+        ctx.beginPath();
+        ctx.moveTo(xStart, axisY);
+        ctx.lineTo(xEnd, axisY);
+        ctx.strokeStyle = '#c4410c';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        // 画箭头
+        ctx.beginPath();
+        ctx.moveTo(xEnd - 8, axisY - 4);
+        ctx.lineTo(xEnd, axisY);
+        ctx.lineTo(xEnd - 8, axisY + 4);
+        ctx.fillStyle = '#c4410c';
+        ctx.fill();
+        
+        // 绘制刻度、数字和空缺圆圈
+        for (let val = -4; val <= 4; val++) {
+            const x = xStart + (val - rangeMin) * unitLength;
+            // 画刻度线
+            ctx.beginPath();
+            ctx.moveTo(x, axisY - 6);
+            ctx.lineTo(x, axisY + 6);
+            ctx.strokeStyle = '#b85c1a';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            // 标数字（非空缺位置直接标数字，空缺位置显示❓）
+            const gap = gaps.find(g => g.value === val);
+            if (gap && !gap.filled) {
+                // 空缺处显示问号圆圈
+                ctx.beginPath();
+                ctx.arc(x, axisY - 18, 18, 0, 2 * Math.PI);
+                ctx.fillStyle = '#fff0dd';
+                ctx.fill();
+                ctx.strokeStyle = '#f7bc6c';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.fillStyle = '#e67e22';
+                ctx.font = 'bold 18px "Comic Neue", "Comic Sans MS"';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('?', x, axisY - 18);
+                // 存储空缺坐标信息
+                const existingIdx = gapPositions.findIndex(p => p.value === val);
+                if (existingIdx !== -1) {
+                    gapPositions[existingIdx] = { x, y: axisY - 18, value: val, radius: 18, filled: false };
+                } else {
+                    gapPositions.push({ x, y: axisY - 18, value: val, radius: 18, filled: false });
+                }
+            } else {
+                // 正常显示数字
+                ctx.fillStyle = '#c4410c';
+                ctx.font = 'bold 16px "Comic Neue", "Comic Sans MS"';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(val, x, axisY - 10);
+                // 如果已经填过了，还要在圆圈上显示填的数字
+                if (gap && gap.filled && gap.element) {
+                    ctx.beginPath();
+                    ctx.arc(x, axisY - 18, 18, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#d9f0cd';
+                    ctx.fill();
+                    ctx.strokeStyle = '#2ecc71';
+                    ctx.stroke();
+                    ctx.fillStyle = '#2c6e2c';
+                    ctx.font = 'bold 18px "Comic Neue", "Comic Sans MS"';
+                    ctx.fillText(gap.element, x, axisY - 18);
+                }
+            }
+        }
+        // 更新gapPositions中filled状态
+        gapPositions.forEach(pos => {
+            const gap = gaps.find(g => g.value === pos.value);
+            if (gap && gap.filled) {
+                pos.filled = true;
+            } else {
+                pos.filled = false;
+            }
+        });
+    }
+    
+    // 渲染可拖拽数字卡片
+    function renderCards() {
+        cardsContainer.innerHTML = '';
+        currentCards.forEach(card => {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'drag-card';
+            cardDiv.setAttribute('data-value', card.value);
+            cardDiv.setAttribute('data-icon', card.icon);
+            cardDiv.innerHTML = `
+                <div style="font-size:0.9rem;">${card.icon}</div>
+                <div>${card.value}</div>
+            `;
+            cardsContainer.appendChild(cardDiv);
+        });
+        bindDragToCards();
+    }
+    
+    // 拖拽系统
+    function removeClone() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.parentNode.removeChild(cloneElem);
+        cloneElem = null;
+    }
+    
+    function stopDrag() {
+        if (!isDragging) return;
+        isDragging = false;
+        removeClone();
+        document.removeEventListener('mousemove', onGlobalMove);
+        document.removeEventListener('mouseup', onGlobalUp);
+        document.removeEventListener('touchmove', onGlobalTouchMove);
+        document.removeEventListener('touchend', onGlobalTouchEnd);
+        document.body.style.userSelect = '';
+        draggedCardElem = null;
+        draggedValue = null;
+    }
+    
+    function onGlobalMove(e) {
+        if (!cloneElem) return;
+        e.preventDefault();
+        const x = e.clientX;
+        const y = e.clientY;
+        cloneElem.style.left = (x - cloneElem.offsetWidth / 2) + 'px';
+        cloneElem.style.top = (y - cloneElem.offsetHeight / 2) + 'px';
+    }
+    
+    function onGlobalTouchMove(e) {
+        if (!cloneElem) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const x = touch.clientX;
+        const y = touch.clientY;
+        cloneElem.style.left = (x - cloneElem.offsetWidth / 2) + 'px';
+        cloneElem.style.top = (y - cloneElem.offsetHeight / 2) + 'px';
+    }
+    
+    function finishDrag(endX, endY) {
+        if (!draggedCardElem || !isDragging) {
+            stopDrag();
+            return;
+        }
+        // 获取canvas上的点击坐标
+        const canvasRect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / canvasRect.width;   // canvas实际绘图尺寸800 / 显示宽度
+        const scaleY = canvas.height / canvasRect.height;
+        const canvasX = (endX - canvasRect.left) * scaleX;
+        const canvasY = (endY - canvasRect.top) * scaleY;
+        
+        let matchedGap = null;
+        // 遍历空缺位置，检测是否点中圆圈
+        for (let pos of gapPositions) {
+            if (pos.filled) continue;
+            const dx = canvasX - pos.x;
+            const dy = canvasY - pos.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist <= pos.radius) {
+                matchedGap = pos;
+                break;
+            }
+        }
+        
+        let isCorrect = false;
+        if (matchedGap && draggedValue === matchedGap.value) {
+            isCorrect = true;
+            // 配对成功：从卡片中移除该卡片，标记空缺已填
+            const cardIndex = currentCards.findIndex(c => c.value === draggedValue);
+            if (cardIndex !== -1) {
+                currentCards.splice(cardIndex, 1);
+                const gapIndex = gaps.findIndex(g => g.value === matchedGap.value);
+                if (gapIndex !== -1) {
+                    gaps[gapIndex].filled = true;
+                    gaps[gapIndex].element = draggedValue;
+                }
+                updateScoreUI();
+                drawNumberLine();
+                renderCards();
+                messageDiv.innerHTML = `✅ 正确！ ${draggedValue} 在数轴上的位置正确 ✅ +1分`;
+                messageDiv.style.background = '#c8e6b5';
+                setTimeout(() => {
+                    if (currentCards.length !== 0) messageDiv.style.background = '#f7e1b0';
+                    else messageDiv.innerHTML = '🏆 全对！ 数轴小侦探就是你！ 🏆';
+                }, 900);
+            } else {
+                messageDiv.innerHTML = '🤔 卡片不见了，请点新游戏~';
+            }
+        } else {
+            if (matchedGap) {
+                messageDiv.innerHTML = `❌ 不对哦！ ${draggedValue} 的位置不是这个圆圈，再观察数轴~ ❌`;
+            } else {
+                messageDiv.innerHTML = `❌ 没有拖拽到空缺圆圈上，再试试！ ❌`;
+            }
+            messageDiv.style.background = '#ffe0e0';
+            setTimeout(() => {
+                if (currentCards.length !== 0 && messageDiv.innerHTML.includes('不对哦')) messageDiv.style.background = '#f7e1b0';
+            }, 1000);
+            draggedCardElem.classList.add('wrong-shake');
+            setTimeout(() => draggedCardElem.classList.remove('wrong-shake'), 500);
+        }
+        stopDrag();
+    }
+    
+    function onGlobalUp(e) {
+        if (!isDragging) return;
+        finishDrag(e.clientX, e.clientY);
+    }
+    
+    function onGlobalTouchEnd(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        const touch = e.changedTouches[0];
+        finishDrag(touch.clientX, touch.clientY);
+    }
+    
+    function startDrag(cardElement, startX, startY) {
+        if (isDragging) stopDrag();
+        draggedCardElem = cardElement;
+        draggedValue = parseInt(cardElement.getAttribute('data-value'));
+        const rect = cardElement.getBoundingClientRect();
+        cloneElem = cardElement.cloneNode(true);
+        cloneElem.classList.add('drag-clone');
+        cloneElem.style.position = 'fixed';
+        cloneElem.style.left = rect.left + 'px';
+        cloneElem.style.top = rect.top + 'px';
+        cloneElem.style.width = rect.width + 'px';
+        cloneElem.style.margin = '0';
+        cloneElem.style.pointerEvents = 'none';
+        document.body.appendChild(cloneElem);
+        
+        isDragging = true;
+        document.addEventListener('mousemove', onGlobalMove);
+        document.addEventListener('mouseup', onGlobalUp);
+        document.addEventListener('touchmove', onGlobalTouchMove, { passive: false });
+        document.addEventListener('touchend', onGlobalTouchEnd);
+        document.body.style.userSelect = 'none';
+    }
+    
+    function bindDragToCards() {
+        const cards = document.querySelectorAll('.drag-card');
+        cards.forEach(card => {
+            card.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                startDrag(card, e.clientX, e.clientY);
+            });
+            card.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                startDrag(card, touch.clientX, touch.clientY);
+            });
+            card.addEventListener('dragstart', (e) => e.preventDefault());
+        });
+    }
+    
+    // 窗口调整时重新绘制数轴（坐标可能会变，但canvas尺寸固定，坐标不变，不需要额外处理）
+    // 但为了确保canvas显示正常，加一个resize监听重新绘制（但canvas的尺寸是固定的800，不受影响，但绘制依赖gapPositions，reset时会重绘）
+    window.addEventListener('resize', () => {
+        drawNumberLine();
+    });
+    
+    // 初始化
+    resetGame();
+    resetBtn.addEventListener('click', () => {
+        if (isDragging) stopDrag();
+        resetGame();
+    });
+</script>
+</body>
+</html>

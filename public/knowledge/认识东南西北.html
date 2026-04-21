@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🧭 认识东南西北 | 方向小英雄</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免拖拽时选中文字/图片，提升触屏体验 */
+        }
+
+        body {
+            background: #EFF5EC;
+            font-family: 'Comic Neue', 'Segoe UI Emoji', 'Chalkboard SE', 'Poppins', 'Comic Sans MS', cursive, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 主课程卡片 */
+        .compass-lab {
+            max-width: 1300px;
+            width: 100%;
+            background: #FFFFFFF2;
+            backdrop-filter: blur(2px);
+            border-radius: 68px 52px 68px 52px;
+            box-shadow: 0 25px 40px rgba(70, 60, 40, 0.12);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* 左右布局 */
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* 左侧知识点区域 */
+        .knowledge-side {
+            flex: 1.2;
+            min-width: 260px;
+            background: #FEFCF5;
+            padding: 32px 24px;
+            border-right: 4px dashed #D4E2C6;
+        }
+
+        .knowledge-side h2 {
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #79A85A, #B2D48B);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 8px solid #8DC26F;
+            padding-left: 18px;
+        }
+
+        .info-card {
+            background: #F4F9EF;
+            border-radius: 40px 24px 40px 24px;
+            padding: 22px;
+            margin: 20px 0;
+            box-shadow: 0 8px 0 #DFEAD4;
+        }
+
+        .info-card p {
+            font-size: 1rem;
+            margin: 14px 0;
+            color: #3F5A2B;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .math-badge {
+            background: #E5F0DB;
+            padding: 5px 14px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #558C2F;
+            display: inline-block;
+            margin: 4px 4px 0 0;
+        }
+
+        .tip-area {
+            background: #FEF5E6;
+            border-radius: 32px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .tip-area li {
+            margin-left: 24px;
+            margin-bottom: 8px;
+            color: #A5662C;
+        }
+
+        /* 右侧游戏区 */
+        .game-side {
+            flex: 2;
+            min-width: 300px;
+            background: #FFFCF7;
+            padding: 28px 24px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #E1F0D2;
+            padding-bottom: 12px;
+        }
+
+        .game-header h3 {
+            font-size: 1.8rem;
+            color: #6F9E3F;
+        }
+
+        .stats {
+            display: flex;
+            gap: 12px;
+            background: #F1F7EA;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #54862C;
+            align-items: center;
+        }
+
+        .reset-btn {
+            background: #F2E3CE;
+            border: none;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-family: inherit;
+            color: #9B6A3A;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: 8px;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.96);
+            background: #EAD5B0;
+        }
+
+        /* 指南针区域 */
+        .compass-area {
+            background: #FEF9F0;
+            border-radius: 56px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.04);
+        }
+
+        .compass-title {
+            font-size: 1rem;
+            color: #BC885A;
+            margin-bottom: 16px;
+            background: #FFF2E4;
+            display: inline-block;
+            padding: 4px 18px;
+            border-radius: 60px;
+        }
+
+        .compass-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .compass-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 8px 0;
+        }
+
+        .direction-slot {
+            width: 100px;
+            height: 100px;
+            background: #FFF8F0;
+            border-radius: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #F7DDB5;
+            transition: all 0.2s;
+            box-shadow: 0 6px 0 #EED9BD;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #C17A3E;
+        }
+
+        .direction-slot.matched {
+            background: #E4F3D6;
+            border-color: #8FC65A;
+            box-shadow: 0 4px 0 #B6D99B;
+            color: #427E1A;
+        }
+
+        .slot-label {
+            font-size: 1rem;
+            margin-top: 6px;
+        }
+
+        .compass-center {
+            width: 110px;
+            height: 110px;
+            background: #FFEEDD;
+            border-radius: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.8rem;
+            color: #A76F3E;
+            border: 3px solid #F7DDB5;
+            box-shadow: 0 6px 0 #EED9BD;
+            margin: 0 20px;
+        }
+
+        /* 可拖拽卡片区 */
+        .cards-area {
+            background: #FEF5EA;
+            border-radius: 56px;
+            padding: 20px 16px;
+        }
+
+        .cards-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #B87A44;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #FFFFFF, #FFF1E2);
+            border-radius: 60px;
+            padding: 16px 28px;
+            min-width: 110px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.4rem;
+            color: #A5612A;
+            box-shadow: 0 12px 18px -6px rgba(100, 70, 30, 0.15);
+            cursor: grab;
+            transition: 0.05s linear;
+            border: 2px solid #FDD6A5;
+            touch-action: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        .drag-card.dragging-source {
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+
+        .drag-card.matched-card {
+            display: none;
+        }
+
+        .card-emoji {
+            font-size: 1.6rem;
+        }
+
+        /* 克隆拖拽体 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0,0,0,0.25));
+            transform: scale(1.02) rotate(1deg);
+            pointer-events: none;
+            background: #FFFCF0;
+            border-radius: 60px;
+            padding: 16px 28px;
+            min-width: 110px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.4rem;
+            color: #A5612A;
+            border: 2px solid #FCC37A;
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+        }
+
+        .message-panel {
+            background: #FFF1E2;
+            border-radius: 60px;
+            padding: 12px;
+            margin-top: 24px;
+            text-align: center;
+            font-weight: bold;
+            color: #C17A3E;
+            transition: 0.1s;
+        }
+
+        .win-glow {
+            animation: cheerPop 0.6s ease;
+            background: #DAEFC4 !important;
+        }
+
+        @keyframes cheerPop {
+            0% { transform: scale(1); background: #FFEAC6; }
+            50% { transform: scale(1.01); background: #FFE0AE; box-shadow: 0 0 0 5px rgba(150, 200, 100, 0.4);}
+            100% { transform: scale(1); }
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 14px;
+            background: #FBF8EF;
+            color: #BB8A60;
+        }
+
+        @media (max-width: 780px) {
+            .knowledge-side {
+                border-right: none;
+                border-bottom: 4px dashed #D4E2C6;
+            }
+            .direction-slot {
+                width: 70px;
+                height: 70px;
+                font-size: 1rem;
+            }
+            .compass-center {
+                width: 80px;
+                height: 80px;
+                font-size: 1.3rem;
+            }
+            .drag-card {
+                padding: 12px 20px;
+                font-size: 1.2rem;
+                min-width: 90px;
+            }
+            .compass-row {
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="compass-lab">
+    <div class="flex-row">
+        <!-- 左侧知识点：认识东南西北 -->
+        <div class="knowledge-side">
+            <h2>🧭 认识东南西北 · 方向魔法</h2>
+            <div class="info-card">
+                <p>📌 <strong>辨认方向小口诀</strong><br>
+                早晨起床，面向太阳，<br>
+                前面是<span class="math-badge">东</span>，后面是<span class="math-badge">西</span>，<br>
+                左面是<span class="math-badge">北</span>，右面是<span class="math-badge">南</span>。</p>
+                <p>🗺️ <strong>地图上的方向</strong><br>
+                通常<span class="math-badge">上北下南，左西右东</span>。</p>
+                <p>🧸 指南针的红色指针永远指向北方。</p>
+                <p>✨ 生活中的方向：太阳东升西落，北极星指向北方。</p>
+            </div>
+            <div class="tip-area">
+                <span>🧭 方向小挑战：</span>
+                <ul>
+                    <li>🌅 太阳升起的方向是？ → 东</li>
+                    <li>🌇 太阳落山的方向是？ → 西</li>
+                    <li>❄️ 冬天刮北风，风从哪个方向来？ → 北</li>
+                    <li>☀️ 中午影子朝向？ → 北</li>
+                </ul>
+                <p style="margin-top: 12px; background:#F8EFE2; border-radius: 28px; padding: 8px;">🎮 右边游戏：把方向卡片拖拽到指南针上正确的位置，全部配对成功就能成为方向小英雄！</p>
+            </div>
+        </div>
+
+        <!-- 右侧游戏区 -->
+        <div class="game-side">
+            <div class="game-header">
+                <h3>🧭 指南针工坊 · 拖拽配对</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="stats">🏆 配对 <span id="matchCount">0</span> / <span id="totalSlots">4</span></span>
+                    <button class="reset-btn" id="resetGameBtn">🔄 重新挑战</button>
+                </div>
+            </div>
+
+            <!-- 指南针区域（四个方向槽位 + 中心） -->
+            <div class="compass-area">
+                <div class="compass-title">🧭 指南针 · 把方向卡片拖到正确的位置</div>
+                <div class="compass-container">
+                    <div class="compass-row">
+                        <div class="direction-slot" data-direction="north" id="slotNorth">
+                            <span>⬆️</span>
+                            <span class="slot-label">❓ 北</span>
+                        </div>
+                    </div>
+                    <div class="compass-row">
+                        <div class="direction-slot" data-direction="west" id="slotWest">
+                            <span>⬅️</span>
+                            <span class="slot-label">❓ 西</span>
+                        </div>
+                        <div class="compass-center">
+                            🧭<br>指南针
+                        </div>
+                        <div class="direction-slot" data-direction="east" id="slotEast">
+                            <span>➡️</span>
+                            <span class="slot-label">❓ 东</span>
+                        </div>
+                    </div>
+                    <div class="compass-row">
+                        <div class="direction-slot" data-direction="south" id="slotSouth">
+                            <span>⬇️</span>
+                            <span class="slot-label">❓ 南</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 可拖拽方向卡片 -->
+            <div class="cards-area">
+                <div class="cards-title">🎴 可拖拽方向卡片（拖到指南针的正确位置上）</div>
+                <div class="cards-container" id="cardsContainer"></div>
+            </div>
+            <div id="gameMessage" class="message-panel">
+                🌟 把下面的方向卡片拖到指南针上对应的方位框里！上北下南，左西右东。
+            </div>
+        </div>
+    </div>
+    <footer>💡 小秘诀：北在上，南在下，西在左，东在右。把“东”卡片拖到右边框，“西”拖到左边框，“北”拖到上边框，“南”拖到下边框。</footer>
+</div>
+
+<script>
+    // ---------- 游戏配置 ----------
+    // 四个方向槽位对应的正确方向
+    const slotsConfig = [
+        { id: "slotNorth", direction: "north", name: "北", correctCard: "北" },
+        { id: "slotSouth", direction: "south", name: "南", correctCard: "南" },
+        { id: "slotWest", direction: "west", name: "西", correctCard: "西" },
+        { id: "slotEast", direction: "east", name: "东", correctCard: "东" }
+    ];
+
+    // 卡片数据（四个方向卡片，初始顺序随机）
+    let cardsData = [
+        { id: "card_north", name: "北", emoji: "⬆️", direction: "north", matched: false },
+        { id: "card_south", name: "南", emoji: "⬇️", direction: "south", matched: false },
+        { id: "card_west", name: "西", emoji: "⬅️", direction: "west", matched: false },
+        { id: "card_east", name: "东", emoji: "➡️", direction: "east", matched: false }
+    ];
+
+    let currentMatchCount = 0;
+    const totalSlots = slotsConfig.length;
+
+    // 槽位匹配状态
+    let slotMatched = {
+        north: false,
+        south: false,
+        west: false,
+        east: false
+    };
+
+    // 拖拽全局变量
+    let dragActive = false;
+    let sourceCardElem = null;
+    let sourceCardId = null;
+    let cloneElem = null;
+    let startX = 0, startY = 0;
+
+    // DOM 元素
+    const cardsContainer = document.getElementById('cardsContainer');
+    const slotNorth = document.getElementById('slotNorth');
+    const slotSouth = document.getElementById('slotSouth');
+    const slotWest = document.getElementById('slotWest');
+    const slotEast = document.getElementById('slotEast');
+    const matchCountSpan = document.getElementById('matchCount');
+    const totalSlotsSpan = document.getElementById('totalSlots');
+    const resetBtn = document.getElementById('resetGameBtn');
+    const gameMessage = document.getElementById('gameMessage');
+
+    totalSlotsSpan.innerText = totalSlots;
+
+    // 随机打乱卡片顺序
+    function shuffleCards() {
+        for (let i = cardsData.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [cardsData[i], cardsData[j]] = [cardsData[j], cardsData[i]];
+        }
+    }
+
+    // 初始化卡片状态（重置时调用）
+    function initCards() {
+        // 重置所有卡片匹配状态
+        cardsData.forEach(card => {
+            card.matched = false;
+        });
+        shuffleCards(); // 打乱顺序，增加趣味
+    }
+
+    // 更新槽位UI样式和显示内容
+    function updateSlotsUI() {
+        // 北槽
+        if (slotMatched.north) {
+            slotNorth.classList.add('matched');
+            slotNorth.innerHTML = '<span>⬆️</span><span class="slot-label">北 ✓</span>';
+        } else {
+            slotNorth.classList.remove('matched');
+            slotNorth.innerHTML = '<span>⬆️</span><span class="slot-label">❓ 北</span>';
+        }
+        // 南槽
+        if (slotMatched.south) {
+            slotSouth.classList.add('matched');
+            slotSouth.innerHTML = '<span>⬇️</span><span class="slot-label">南 ✓</span>';
+        } else {
+            slotSouth.classList.remove('matched');
+            slotSouth.innerHTML = '<span>⬇️</span><span class="slot-label">❓ 南</span>';
+        }
+        // 西槽
+        if (slotMatched.west) {
+            slotWest.classList.add('matched');
+            slotWest.innerHTML = '<span>⬅️</span><span class="slot-label">西 ✓</span>';
+        } else {
+            slotWest.classList.remove('matched');
+            slotWest.innerHTML = '<span>⬅️</span><span class="slot-label">❓ 西</span>';
+        }
+        // 东槽
+        if (slotMatched.east) {
+            slotEast.classList.add('matched');
+            slotEast.innerHTML = '<span>➡️</span><span class="slot-label">东 ✓</span>';
+        } else {
+            slotEast.classList.remove('matched');
+            slotEast.innerHTML = '<span>➡️</span><span class="slot-label">❓ 东</span>';
+        }
+    }
+
+    // 渲染可拖拽卡片（只显示未匹配的）
+    function renderCards() {
+        cardsContainer.innerHTML = '';
+        cardsData.forEach(card => {
+            if (!card.matched) {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'drag-card';
+                cardDiv.setAttribute('data-card-id', card.id);
+                cardDiv.setAttribute('data-direction', card.direction);
+                cardDiv.setAttribute('data-name', card.name);
+                const emojiSpan = document.createElement('span');
+                emojiSpan.className = 'card-emoji';
+                emojiSpan.innerText = card.emoji;
+                const textSpan = document.createElement('span');
+                textSpan.innerText = card.name;
+                cardDiv.appendChild(emojiSpan);
+                cardDiv.appendChild(textSpan);
+                cardsContainer.appendChild(cardDiv);
+            }
+        });
+    }
+
+    // 更新得分和胜利信息
+    function updateScoreUI() {
+        matchCountSpan.innerText = currentMatchCount;
+        if (currentMatchCount === totalSlots) {
+            gameMessage.innerHTML = "🎉🎉 太棒啦！所有方向都配对正确！你已经是方向小英雄啦 🎉🎉<br> ✨ 点击「重新挑战」可以再玩一次 ✨";
+            gameMessage.style.background = "#DAEFC4";
+            gameMessage.classList.add('win-glow');
+            setTimeout(() => gameMessage.classList.remove('win-glow'), 800);
+        } else {
+            if (!gameMessage.innerHTML.includes("错误") && !gameMessage.innerHTML.includes("配对成功")) {
+                gameMessage.innerHTML = "🐣 把方向卡片拖到指南针上正确的位置！北在上，南在下，西在左，东在右。";
+                gameMessage.style.background = "#FFF1E2";
+            }
+        }
+    }
+
+    // 配对逻辑
+    function attemptMatch(cardElem, targetSlotElem) {
+        const cardId = cardElem.getAttribute('data-card-id');
+        const card = cardsData.find(c => c.id === cardId);
+        if (!card || card.matched) return false;
+
+        const slotDirection = targetSlotElem.getAttribute('data-direction');
+        if (!slotDirection) return false;
+
+        // 检查卡片方向是否匹配槽位方向
+        if (card.direction !== slotDirection) return false;
+
+        // 检查该槽位是否已经被配对
+        if (slotMatched[slotDirection]) return false;
+
+        // 配对成功
+        card.matched = true;
+        slotMatched[slotDirection] = true;
+        currentMatchCount++;
+
+        // 更新UI
+        updateSlotsUI();
+        renderCards();
+        updateScoreUI();
+
+        const dirName = card.name;
+        gameMessage.innerHTML = `✅ 配对成功！ “${dirName}” 放到了正确的位置 ✅`;
+        gameMessage.style.background = "#E0F2CE";
+        setTimeout(() => {
+            if (currentMatchCount !== totalSlots) {
+                gameMessage.innerHTML = "🐣 继续拖拽其他方向卡片到指南针上！";
+                gameMessage.style.background = "#FFF1E2";
+            } else {
+                gameMessage.innerHTML = "🎉🎉 太棒啦！所有方向都配对正确！你已经是方向小英雄啦 🎉🎉<br> ✨ 点击「重新挑战」可以再玩一次 ✨";
+                gameMessage.style.background = "#DAEFC4";
+            }
+        }, 1200);
+        return true;
+    }
+
+    // ---------- 自定义拖拽实现 (支持鼠标+触摸) ----------
+    function startDrag(e, cardElem) {
+        if (dragActive) return;
+        const cardId = cardElem.getAttribute('data-card-id');
+        const card = cardsData.find(c => c.id === cardId);
+        if (!card || card.matched) return;
+        e.preventDefault();
+        let clientX, clientY;
+        if (e.type === 'mousedown') {
+            clientX = e.clientX;
+            clientY = e.clientY;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        } else {
+            const touch = e.touches[0];
+            clientX = touch.clientX;
+            clientY = touch.clientY;
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+            document.addEventListener('touchcancel', onTouchCancel);
+        }
+        dragActive = true;
+        sourceCardElem = cardElem;
+        sourceCardId = cardId;
+        sourceCardElem.classList.add('dragging-source');
+
+        // 创建克隆体
+        cloneElem = document.createElement('div');
+        cloneElem.className = 'drag-clone';
+        // 复制内容
+        const emojiClone = document.createElement('span');
+        emojiClone.className = 'card-emoji';
+        emojiClone.innerText = cardElem.querySelector('.card-emoji')?.innerText || '';
+        const textClone = document.createElement('span');
+        textClone.innerText = cardElem.querySelector('span:last-child')?.innerText || '';
+        cloneElem.appendChild(emojiClone);
+        cloneElem.appendChild(textClone);
+        cloneElem.style.left = (clientX - 40) + 'px';
+        cloneElem.style.top = (clientY - 40) + 'px';
+        cloneElem.style.width = sourceCardElem.offsetWidth + 'px';
+        document.body.appendChild(cloneElem);
+        startX = clientX;
+        startY = clientY;
+
+        // 高亮所有未配对的槽位
+        document.querySelectorAll('.direction-slot').forEach(slot => {
+            if (!slot.classList.contains('matched')) {
+                slot.style.transform = 'scale(1.02)';
+                slot.style.transition = '0.1s';
+                slot.style.boxShadow = '0 0 0 3px #8FC65A';
+            }
+        });
+    }
+
+    function onMouseMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        moveClone(e.clientX, e.clientY);
+    }
+    function onTouchMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveClone(touch.clientX, touch.clientY);
+    }
+    function moveClone(clientX, clientY) {
+        if (cloneElem) {
+            cloneElem.style.left = (clientX - cloneElem.offsetWidth / 2) + 'px';
+            cloneElem.style.top = (clientY - cloneElem.offsetHeight / 2) + 'px';
+        }
+    }
+    function finishDrag(clientX, clientY) {
+        if (!dragActive) return;
+        const elemUnder = document.elementsFromPoint(clientX, clientY);
+        let targetSlot = null;
+        for (let el of elemUnder) {
+            if (el.classList && el.classList.contains('direction-slot')) {
+                targetSlot = el;
+                break;
+            }
+        }
+        let success = false;
+        if (targetSlot && sourceCardElem) {
+            const slotMatchedAlready = targetSlot.classList.contains('matched');
+            if (!slotMatchedAlready) {
+                success = attemptMatch(sourceCardElem, targetSlot);
+                if (!success) {
+                    gameMessage.innerHTML = "😲 配对错误！ 这个方向放错了位置，再试试看～";
+                    gameMessage.style.background = "#FFE0D0";
+                    setTimeout(() => {
+                        if (currentMatchCount !== totalSlots) {
+                            gameMessage.innerHTML = "🐣 继续拖拽方向卡片到正确的位置！";
+                            gameMessage.style.background = "#FFF1E2";
+                        }
+                    }, 1200);
+                }
+            } else {
+                gameMessage.innerHTML = "⛔ 这个方向已经配对过了！不能重复配对";
+                gameMessage.style.background = "#FFE0D0";
+                setTimeout(() => {
+                    if (currentMatchCount !== totalSlots) gameMessage.style.background = "#FFF1E2";
+                }, 1000);
+            }
+        } else if (sourceCardElem) {
+            gameMessage.innerHTML = "💡 要把卡片拖拽到指南针上的方位框里（北/南/西/东）松手哦！";
+            setTimeout(() => {
+                if (currentMatchCount !== totalSlots && gameMessage.innerHTML.includes("指南针")) {
+                    gameMessage.innerHTML = "🐣 继续拖拽方向卡片到正确的位置！";
+                    gameMessage.style.background = "#FFF1E2";
+                }
+            }, 1000);
+        }
+        endDragCleanup();
+        if (!success && sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        if (currentMatchCount === totalSlots) {
+            updateSlotsUI();
+            renderCards();
+        }
+    }
+    function endDragCleanup() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.remove();
+        if (sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+        document.removeEventListener('touchcancel', onTouchCancel);
+        dragActive = false;
+        sourceCardElem = null;
+        cloneElem = null;
+        // 恢复所有槽位样式
+        document.querySelectorAll('.direction-slot').forEach(slot => {
+            slot.style.transform = '';
+            slot.style.boxShadow = '';
+        });
+    }
+    function onMouseUp(e) { if (dragActive) finishDrag(e.clientX, e.clientY); }
+    function onTouchEnd(e) {
+        if (!dragActive) return;
+        let clientX, clientY;
+        if (e.changedTouches && e.changedTouches.length) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        } else { clientX = startX; clientY = startY; }
+        finishDrag(clientX, clientY);
+    }
+    function onTouchCancel(e) { endDragCleanup(); }
+
+    function bindDragEvents() {
+        cardsContainer.addEventListener('mousedown', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        });
+        cardsContainer.addEventListener('touchstart', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        }, { passive: false });
+    }
+
+    // 重置游戏
+    function resetGame() {
+        if (dragActive) endDragCleanup();
+        // 重置匹配状态
+        slotMatched = {
+            north: false,
+            south: false,
+            west: false,
+            east: false
+        };
+        currentMatchCount = 0;
+        initCards();       // 重置卡片并打乱顺序
+        updateSlotsUI();
+        renderCards();
+        updateScoreUI();
+        gameMessage.innerHTML = "✨ 游戏已重置！ 重新把方向卡片拖到指南针的正确位置 ✨";
+        gameMessage.style.background = "#FFF1E2";
+        gameMessage.classList.remove('win-glow');
+    }
+
+    // 初始化
+    function init() {
+        initCards();           // 包含打乱顺序
+        updateSlotsUI();
+        renderCards();
+        bindDragEvents();
+        updateScoreUI();
+        resetBtn.addEventListener('click', resetGame);
+    }
+
+    init();
+</script>
+</body>
+</html>

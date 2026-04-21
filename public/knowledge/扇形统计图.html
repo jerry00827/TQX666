@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🥧 扇形统计图 | 小小数据分析师</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免拖拽时选中文字/图片，提升触屏体验 */
+        }
+
+        body {
+            background: #F0F7EC;
+            font-family: 'Comic Neue', 'Segoe UI Emoji', 'Chalkboard SE', 'Poppins', 'Comic Sans MS', cursive, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 主课程卡片 */
+        .pie-lab {
+            max-width: 1350px;
+            width: 100%;
+            background: #FFFFFFF2;
+            backdrop-filter: blur(2px);
+            border-radius: 68px 52px 68px 52px;
+            box-shadow: 0 25px 40px rgba(70, 60, 40, 0.12);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* 左右布局 */
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* 左侧知识点区域 */
+        .knowledge-side {
+            flex: 1.2;
+            min-width: 260px;
+            background: #FEFCF5;
+            padding: 32px 24px;
+            border-right: 4px dashed #D4E2C6;
+        }
+
+        .knowledge-side h2 {
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #79A85A, #B2D48B);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 8px solid #8DC26F;
+            padding-left: 18px;
+        }
+
+        .info-card {
+            background: #F4F9EF;
+            border-radius: 40px 24px 40px 24px;
+            padding: 22px;
+            margin: 20px 0;
+            box-shadow: 0 8px 0 #DFEAD4;
+        }
+
+        .info-card p {
+            font-size: 1rem;
+            margin: 14px 0;
+            color: #3F5A2B;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .math-badge {
+            background: #E5F0DB;
+            padding: 5px 14px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #558C2F;
+            display: inline-block;
+            margin: 4px 4px 0 0;
+        }
+
+        .tip-area {
+            background: #FEF5E6;
+            border-radius: 32px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .tip-area li {
+            margin-left: 24px;
+            margin-bottom: 8px;
+            color: #A5662C;
+        }
+
+        /* 右侧游戏区 */
+        .game-side {
+            flex: 2;
+            min-width: 300px;
+            background: #FFFCF7;
+            padding: 28px 24px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #E1F0D2;
+            padding-bottom: 12px;
+        }
+
+        .game-header h3 {
+            font-size: 1.8rem;
+            color: #6F9E3F;
+        }
+
+        .stats {
+            display: flex;
+            gap: 12px;
+            background: #F1F7EA;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #54862C;
+            align-items: center;
+        }
+
+        .reset-btn {
+            background: #F2E3CE;
+            border: none;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-family: inherit;
+            color: #9B6A3A;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: 8px;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.96);
+            background: #EAD5B0;
+        }
+
+        /* 扇形统计图容器 */
+        .pie-container {
+            background: #FEF9F0;
+            border-radius: 56px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.04);
+        }
+
+        .pie-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #B87A44;
+            margin-bottom: 16px;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background: #FFFFFF;
+            border-radius: 32px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* 配对目标区域（四个运动项目槽位） */
+        .targets-area {
+            background: #FEF5EA;
+            border-radius: 56px;
+            padding: 20px 16px;
+            margin-bottom: 24px;
+        }
+
+        .targets-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #B87A44;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .targets-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .target-slot {
+            flex: 1;
+            min-width: 150px;
+            background: #FFF8F0;
+            border-radius: 48px;
+            padding: 16px 12px;
+            text-align: center;
+            border: 2px solid #F7DDB5;
+            transition: all 0.2s;
+            box-shadow: 0 6px 0 #EED9BD;
+        }
+
+        .target-slot.matched {
+            background: #E4F3D6;
+            border-color: #8FC65A;
+            box-shadow: 0 4px 0 #B6D99B;
+        }
+
+        .target-icon {
+            font-size: 2rem;
+            margin-bottom: 6px;
+        }
+
+        .target-name {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #C17A3E;
+            margin-bottom: 8px;
+        }
+
+        .target-placeholder {
+            background: #FFF7EB;
+            border-radius: 40px;
+            padding: 8px;
+            font-size: 0.9rem;
+            color: #BF8F60;
+        }
+
+        .target-slot.matched .target-placeholder {
+            background: #D9F0C3;
+            color: #427E1A;
+            font-weight: bold;
+        }
+
+        /* 可拖拽卡片区 */
+        .cards-area {
+            background: #FEF9F0;
+            border-radius: 56px;
+            padding: 20px 16px;
+        }
+
+        .cards-title {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #AF6F3C;
+            margin-bottom: 16px;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: center;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #FFFFFF, #FFF1E2);
+            border-radius: 60px;
+            padding: 12px 22px;
+            min-width: 100px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #A5612A;
+            box-shadow: 0 12px 18px -6px rgba(100, 70, 30, 0.15);
+            cursor: grab;
+            transition: 0.05s linear;
+            border: 2px solid #FDD6A5;
+            touch-action: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        .drag-card.dragging-source {
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+
+        .drag-card.matched-card {
+            display: none;
+        }
+
+        .card-emoji {
+            font-size: 1.2rem;
+        }
+
+        /* 克隆拖拽体 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0,0,0,0.25));
+            transform: scale(1.02) rotate(1deg);
+            pointer-events: none;
+            background: #FFFCF0;
+            border-radius: 60px;
+            padding: 12px 22px;
+            min-width: 100px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #A5612A;
+            border: 2px solid #FCC37A;
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+        }
+
+        .message-panel {
+            background: #FFF1E2;
+            border-radius: 60px;
+            padding: 12px;
+            margin-top: 24px;
+            text-align: center;
+            font-weight: bold;
+            color: #C17A3E;
+            transition: 0.1s;
+        }
+
+        .win-glow {
+            animation: cheerPop 0.6s ease;
+            background: #DAEFC4 !important;
+        }
+
+        @keyframes cheerPop {
+            0% { transform: scale(1); background: #FFEAC6; }
+            50% { transform: scale(1.01); background: #FFE0AE; box-shadow: 0 0 0 5px rgba(150, 200, 100, 0.4);}
+            100% { transform: scale(1); }
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 14px;
+            background: #FBF8EF;
+            color: #BB8A60;
+        }
+
+        @media (max-width: 780px) {
+            .knowledge-side {
+                border-right: none;
+                border-bottom: 4px dashed #D4E2C6;
+            }
+            .target-slot {
+                min-width: 130px;
+            }
+            .drag-card {
+                padding: 8px 16px;
+                font-size: 1rem;
+                min-width: 85px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="pie-lab">
+    <div class="flex-row">
+        <!-- 左侧知识点：扇形统计图 -->
+        <div class="knowledge-side">
+            <h2>🥧 扇形统计图 · 整体与部分</h2>
+            <div class="info-card">
+                <p>📌 <strong>什么是扇形统计图？</strong><br>
+                用<span class="math-badge">扇形</span>表示各部分占总体的百分比，整个圆表示<span class="math-badge">整体（100%）</span>。</p>
+                <p>🎯 <strong>怎样读图？</strong><br>
+                ▪ 每个扇形代表一类事物。<br>
+                ▪ 扇形越大，所占百分比越大。<br>
+                ▪ 所有百分比加起来正好是100%。</p>
+                <p>✨ 小技巧：比较扇形大小，就能知道哪部分最多，哪部分最少。</p>
+                <p>🧸 右边是某班同学最喜欢的运动项目统计图。请把正确的百分比卡片拖到对应的运动项目区域，完成统计图！</p>
+            </div>
+            <div class="tip-area">
+                <span>🧾 数据小知识：</span>
+                <ul>
+                    <li>⚽ 足球：35%</li>
+                    <li>🏀 篮球：25%</li>
+                    <li>🏓 乒乓球：20%</li>
+                    <li>🤸 跳绳：20%</li>
+                    <li>💯 总和 = 100%</li>
+                </ul>
+                <p style="margin-top: 12px; background:#F8EFE2; border-radius: 28px; padding: 8px;">🎮 玩法：把百分比卡片拖到对应运动项目的盒子里，配对成功后扇形会显示正确的百分比！</p>
+            </div>
+        </div>
+
+        <!-- 右侧游戏区 -->
+        <div class="game-side">
+            <div class="game-header">
+                <h3>🥧 扇形配对工坊 · 拖拽百分比</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="stats">🏆 配对 <span id="matchCount">0</span> / <span id="totalTargets">4</span></span>
+                    <button class="reset-btn" id="resetGameBtn">🔄 重新挑战</button>
+                </div>
+            </div>
+
+            <!-- 扇形统计图 Canvas -->
+            <div class="pie-container">
+                <div class="pie-title">📊 最喜欢的运动项目调查</div>
+                <canvas id="pieCanvas" width="400" height="400" style="width:100%; max-width:400px; height:auto; aspect-ratio:1/1"></canvas>
+            </div>
+
+            <!-- 四个运动项目配对槽位 -->
+            <div class="targets-area">
+                <div class="targets-title">🎯 把百分比卡片拖到对应的运动项目盒子里</div>
+                <div class="targets-grid" id="targetsGrid">
+                    <!-- 足球 -->
+                    <div class="target-slot" data-sport="football">
+                        <div class="target-icon">⚽</div>
+                        <div class="target-name">足球</div>
+                        <div class="target-placeholder" id="footballPlaceholder">⬅️ 拖拽百分比</div>
+                    </div>
+                    <!-- 篮球 -->
+                    <div class="target-slot" data-sport="basketball">
+                        <div class="target-icon">🏀</div>
+                        <div class="target-name">篮球</div>
+                        <div class="target-placeholder" id="basketballPlaceholder">⬅️ 拖拽百分比</div>
+                    </div>
+                    <!-- 乒乓球 -->
+                    <div class="target-slot" data-sport="pingpong">
+                        <div class="target-icon">🏓</div>
+                        <div class="target-name">乒乓球</div>
+                        <div class="target-placeholder" id="pingpongPlaceholder">⬅️ 拖拽百分比</div>
+                    </div>
+                    <!-- 跳绳 -->
+                    <div class="target-slot" data-sport="jump">
+                        <div class="target-icon">🤸</div>
+                        <div class="target-name">跳绳</div>
+                        <div class="target-placeholder" id="jumpPlaceholder">⬅️ 拖拽百分比</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 可拖拽百分比卡片 -->
+            <div class="cards-area">
+                <div class="cards-title">🎴 可拖拽百分比卡片（拖到正确的运动项目上）</div>
+                <div class="cards-container" id="cardsContainer"></div>
+            </div>
+            <div id="gameMessage" class="message-panel">
+                🌟 观察扇形的大小，把每个百分比卡片拖到对应的运动项目盒子里，全部配对成功扇形会显示数据！
+            </div>
+        </div>
+    </div>
+    <footer>💡 小提示：扇形越大，百分比越大。35%的扇形最大，20%的扇形最小。拖拽卡片到对应盒子就能完成配对！</footer>
+</div>
+
+<script>
+    // ---------- 运动数据 ----------
+    const sports = [
+        { id: "football", name: "足球", emoji: "⚽", percent: 35, color: "#FFB347" },
+        { id: "basketball", name: "篮球", emoji: "🏀", percent: 25, color: "#FF8C42" },
+        { id: "pingpong", name: "乒乓球", emoji: "🏓", percent: 20, color: "#F4A261" },
+        { id: "jump", name: "跳绳", emoji: "🤸", percent: 20, color: "#E9C46A" }
+    ];
+    const totalPercent = 100;
+
+    // 卡片数据（百分比卡片，初始顺序随机）
+    let cards = [];
+    // 配对状态
+    let matchedStatus = {
+        football: false,
+        basketball: false,
+        pingpong: false,
+        jump: false
+    };
+    let currentMatchCount = 0;
+    const totalTargets = sports.length;
+
+    // 拖拽全局变量
+    let dragActive = false;
+    let sourceCardElem = null;
+    let sourceCardId = null;
+    let cloneElem = null;
+    let startX = 0, startY = 0;
+
+    // DOM 元素
+    const canvas = document.getElementById('pieCanvas');
+    const ctx = canvas.getContext('2d');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const targetsGrid = document.getElementById('targetsGrid');
+    const matchCountSpan = document.getElementById('matchCount');
+    const totalTargetsSpan = document.getElementById('totalTargets');
+    const resetBtn = document.getElementById('resetGameBtn');
+    const gameMessage = document.getElementById('gameMessage');
+
+    totalTargetsSpan.innerText = totalTargets;
+
+    // 初始化卡片数组（随机打乱顺序）
+    function initCards() {
+        let rawCards = sports.map(sport => ({
+            id: `card_${sport.id}`,
+            sportId: sport.id,
+            percent: sport.percent,
+            label: `${sport.percent}%`,
+            matched: false
+        }));
+        // Fisher-Yates 随机打乱
+        for (let i = rawCards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [rawCards[i], rawCards[j]] = [rawCards[j], rawCards[i]];
+        }
+        cards = rawCards;
+    }
+
+    // 绘制扇形统计图（根据匹配状态，已配对的扇形显示百分比标签）
+    function drawPieChart() {
+        if (!ctx) return;
+        const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        
+        const centerX = w / 2;
+        const centerY = h / 2;
+        const radius = Math.min(w, h) * 0.35;
+        
+        // 计算起始角度（从12点钟方向开始，但通常从右侧开始，为好看从顶部开始）
+        let startAngle = -Math.PI / 2; // 从顶部开始
+        
+        // 先收集所有未匹配的扇形数据（但我们需要绘制所有扇形，只是已配对的显示标签）
+        // 绘制所有扇形，无论是否匹配
+        for (let i = 0; i < sports.length; i++) {
+            const sport = sports[i];
+            const angle = (sport.percent / 100) * 2 * Math.PI;
+            const endAngle = startAngle + angle;
+            
+            ctx.beginPath();
+            ctx.fillStyle = sport.color;
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+            ctx.fill();
+            ctx.strokeStyle = "#FFFFFF";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 绘制百分比文字（如果已配对，显示在扇形中央或外侧）
+            const midAngle = startAngle + angle / 2;
+            const textRadius = radius * 0.7;
+            const x = centerX + Math.cos(midAngle) * textRadius;
+            const y = centerY + Math.sin(midAngle) * textRadius;
+            
+            if (matchedStatus[sport.id]) {
+                ctx.fillStyle = "#2C3E2E";
+                ctx.font = `bold ${Math.max(14, radius * 0.12)}px "Comic Neue", monospace`;
+                ctx.shadowBlur = 0;
+                ctx.fillText(`${sport.percent}%`, x - 15, y + 5);
+            } else {
+                ctx.fillStyle = "#AEAEAE";
+                ctx.font = `${Math.max(12, radius * 0.1)}px "Comic Neue", monospace`;
+                ctx.fillText("?", x - 8, y + 5);
+            }
+            
+            startAngle = endAngle;
+        }
+        
+        // 绘制中心圆点装饰
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 12, 0, 2 * Math.PI);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fill();
+        ctx.strokeStyle = "#DBA576";
+        ctx.stroke();
+        
+        // 绘制图例（右侧或下方）
+        const legendX = w - 100;
+        let legendY = 50;
+        ctx.font = "12px 'Segoe UI Emoji'";
+        for (let i = 0; i < sports.length; i++) {
+            const sport = sports[i];
+            ctx.fillStyle = sport.color;
+            ctx.fillRect(legendX, legendY + i * 22, 15, 15);
+            ctx.fillStyle = "#5C452A";
+            ctx.fillText(`${sport.emoji} ${sport.name}`, legendX + 20, legendY + i * 22 + 12);
+        }
+    }
+
+    // 更新目标槽位的UI（显示已配对的百分比）
+    function updateTargetsUI() {
+        sports.forEach(sport => {
+            const slot = document.querySelector(`.target-slot[data-sport="${sport.id}"]`);
+            if (slot) {
+                const placeholder = slot.querySelector('.target-placeholder');
+                if (matchedStatus[sport.id]) {
+                    slot.classList.add('matched');
+                    placeholder.innerHTML = `✅ ${sport.percent}%`;
+                } else {
+                    slot.classList.remove('matched');
+                    placeholder.innerHTML = `⬅️ 拖拽百分比`;
+                }
+            }
+        });
+    }
+
+    // 渲染可拖拽卡片（只显示未配对的）
+    function renderCards() {
+        cardsContainer.innerHTML = '';
+        cards.forEach(card => {
+            if (!card.matched) {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'drag-card';
+                cardDiv.setAttribute('data-card-id', card.id);
+                cardDiv.setAttribute('data-sport-id', card.sportId);
+                cardDiv.setAttribute('data-percent', card.percent);
+                const emojiSpan = document.createElement('span');
+                emojiSpan.className = 'card-emoji';
+                emojiSpan.innerText = "📊";
+                const textSpan = document.createElement('span');
+                textSpan.innerText = card.label;
+                cardDiv.appendChild(emojiSpan);
+                cardDiv.appendChild(textSpan);
+                cardsContainer.appendChild(cardDiv);
+            }
+        });
+    }
+
+    // 更新得分和胜利信息
+    function updateScoreUI() {
+        matchCountSpan.innerText = currentMatchCount;
+        if (currentMatchCount === totalTargets) {
+            gameMessage.innerHTML = "🎉🎉 完美配对！所有百分比都找到了对应的运动项目！扇形统计图完成啦 🎉🎉<br> ✨ 点击「重新挑战」可以再玩一次 ✨";
+            gameMessage.style.background = "#DAEFC4";
+            gameMessage.classList.add('win-glow');
+            setTimeout(() => gameMessage.classList.remove('win-glow'), 800);
+        } else {
+            if (!gameMessage.innerHTML.includes("错误") && !gameMessage.innerHTML.includes("配对成功")) {
+                gameMessage.innerHTML = "🐣 把百分比卡片拖到对应运动项目的盒子里，完成扇形统计图！";
+                gameMessage.style.background = "#FFF1E2";
+            }
+        }
+    }
+
+    // 配对逻辑
+    function attemptMatch(cardElem, targetSlot) {
+        const cardId = cardElem.getAttribute('data-card-id');
+        const card = cards.find(c => c.id === cardId);
+        if (!card || card.matched) return false;
+        
+        const sportId = targetSlot.getAttribute('data-sport');
+        if (!sportId) return false;
+        
+        // 检查卡片对应的运动项目是否匹配，以及百分比是否正确
+        if (card.sportId !== sportId) return false;
+        // 检查该运动项目是否已经配对
+        if (matchedStatus[sportId]) return false;
+        
+        // 配对成功
+        card.matched = true;
+        matchedStatus[sportId] = true;
+        currentMatchCount++;
+        
+        // 更新UI
+        updateTargetsUI();
+        renderCards();
+        drawPieChart();
+        updateScoreUI();
+        
+        const sport = sports.find(s => s.id === sportId);
+        gameMessage.innerHTML = `✅ 配对成功！ ${sport.emoji} ${sport.name} 的百分比是 ${card.percent}% ✅`;
+        gameMessage.style.background = "#E0F2CE";
+        setTimeout(() => {
+            if (currentMatchCount !== totalTargets) {
+                gameMessage.innerHTML = "🐣 继续拖拽其他百分比卡片到对应的运动项目盒子里！";
+                gameMessage.style.background = "#FFF1E2";
+            } else {
+                gameMessage.innerHTML = "🎉🎉 完美配对！所有百分比都找到了对应的运动项目！扇形统计图完成啦 🎉🎉<br> ✨ 点击「重新挑战」可以再玩一次 ✨";
+                gameMessage.style.background = "#DAEFC4";
+            }
+        }, 1200);
+        return true;
+    }
+
+    // ---------- 自定义拖拽实现 (支持鼠标+触摸) ----------
+    function startDrag(e, cardElem) {
+        if (dragActive) return;
+        const cardId = cardElem.getAttribute('data-card-id');
+        const card = cards.find(c => c.id === cardId);
+        if (!card || card.matched) return;
+        e.preventDefault();
+        let clientX, clientY;
+        if (e.type === 'mousedown') {
+            clientX = e.clientX;
+            clientY = e.clientY;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        } else {
+            const touch = e.touches[0];
+            clientX = touch.clientX;
+            clientY = touch.clientY;
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+            document.addEventListener('touchcancel', onTouchCancel);
+        }
+        dragActive = true;
+        sourceCardElem = cardElem;
+        sourceCardId = cardId;
+        sourceCardElem.classList.add('dragging-source');
+        
+        // 创建克隆体
+        cloneElem = document.createElement('div');
+        cloneElem.className = 'drag-clone';
+        // 复制内容
+        const emojiClone = document.createElement('span');
+        emojiClone.className = 'card-emoji';
+        emojiClone.innerText = "📊";
+        const textClone = document.createElement('span');
+        textClone.innerText = card.label;
+        cloneElem.appendChild(emojiClone);
+        cloneElem.appendChild(textClone);
+        cloneElem.style.left = (clientX - 40) + 'px';
+        cloneElem.style.top = (clientY - 40) + 'px';
+        cloneElem.style.width = sourceCardElem.offsetWidth + 'px';
+        document.body.appendChild(cloneElem);
+        startX = clientX;
+        startY = clientY;
+        
+        // 高亮所有未配对的槽位
+        document.querySelectorAll('.target-slot').forEach(slot => {
+            if (!slot.classList.contains('matched')) {
+                slot.style.transform = 'scale(1.02)';
+                slot.style.transition = '0.1s';
+                slot.style.boxShadow = '0 0 0 3px #8FC65A';
+            }
+        });
+    }
+    
+    function onMouseMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        moveClone(e.clientX, e.clientY);
+    }
+    function onTouchMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveClone(touch.clientX, touch.clientY);
+    }
+    function moveClone(clientX, clientY) {
+        if (cloneElem) {
+            cloneElem.style.left = (clientX - cloneElem.offsetWidth / 2) + 'px';
+            cloneElem.style.top = (clientY - cloneElem.offsetHeight / 2) + 'px';
+        }
+    }
+    function finishDrag(clientX, clientY) {
+        if (!dragActive) return;
+        const elemUnder = document.elementsFromPoint(clientX, clientY);
+        let targetSlot = null;
+        for (let el of elemUnder) {
+            if (el.classList && el.classList.contains('target-slot')) {
+                targetSlot = el;
+                break;
+            }
+        }
+        let success = false;
+        if (targetSlot && sourceCardElem) {
+            const alreadyMatched = targetSlot.classList.contains('matched');
+            if (!alreadyMatched) {
+                success = attemptMatch(sourceCardElem, targetSlot);
+                if (!success) {
+                    gameMessage.innerHTML = "😲 配对错误！ 这个百分比不属于这个运动项目，再观察一下扇形大小～";
+                    gameMessage.style.background = "#FFE0D0";
+                    setTimeout(() => {
+                        if (currentMatchCount !== totalTargets) {
+                            gameMessage.innerHTML = "🐣 继续拖拽百分比卡片到对应的运动项目盒子里！";
+                            gameMessage.style.background = "#FFF1E2";
+                        }
+                    }, 1200);
+                }
+            } else {
+                gameMessage.innerHTML = "⛔ 这个运动项目已经配对过了！不能重复配对";
+                gameMessage.style.background = "#FFE0D0";
+                setTimeout(() => {
+                    if (currentMatchCount !== totalTargets) gameMessage.style.background = "#FFF1E2";
+                }, 1000);
+            }
+        } else if (sourceCardElem) {
+            gameMessage.innerHTML = "💡 要把卡片拖拽到运动项目盒子上（足球/篮球/乒乓球/跳绳）松手哦！";
+            setTimeout(() => {
+                if (currentMatchCount !== totalTargets && gameMessage.innerHTML.includes("盒子")) {
+                    gameMessage.innerHTML = "🐣 继续拖拽百分比卡片到对应的运动项目盒子里！";
+                    gameMessage.style.background = "#FFF1E2";
+                }
+            }, 1000);
+        }
+        endDragCleanup();
+        if (!success && sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        if (currentMatchCount === totalTargets) {
+            drawPieChart();
+            renderCards();
+        }
+    }
+    function endDragCleanup() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.remove();
+        if (sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+        document.removeEventListener('touchcancel', onTouchCancel);
+        dragActive = false;
+        sourceCardElem = null;
+        cloneElem = null;
+        // 恢复所有槽位样式
+        document.querySelectorAll('.target-slot').forEach(slot => {
+            slot.style.transform = '';
+            slot.style.boxShadow = '';
+        });
+    }
+    function onMouseUp(e) { if (dragActive) finishDrag(e.clientX, e.clientY); }
+    function onTouchEnd(e) {
+        if (!dragActive) return;
+        let clientX, clientY;
+        if (e.changedTouches && e.changedTouches.length) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        } else { clientX = startX; clientY = startY; }
+        finishDrag(clientX, clientY);
+    }
+    function onTouchCancel(e) { endDragCleanup(); }
+    
+    function bindDragEvents() {
+        cardsContainer.addEventListener('mousedown', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        });
+        cardsContainer.addEventListener('touchstart', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        }, { passive: false });
+    }
+    
+    // 重置游戏
+    function resetGame() {
+        if (dragActive) endDragCleanup();
+        // 重置匹配状态
+        matchedStatus = {
+            football: false,
+            basketball: false,
+            pingpong: false,
+            jump: false
+        };
+        currentMatchCount = 0;
+        initCards();       // 重置卡片并打乱顺序
+        updateTargetsUI();
+        renderCards();
+        drawPieChart();
+        updateScoreUI();
+        gameMessage.innerHTML = "✨ 游戏已重置！ 重新把百分比卡片拖到对应的运动项目盒子里 ✨";
+        gameMessage.style.background = "#FFF1E2";
+        gameMessage.classList.remove('win-glow');
+    }
+    
+    // 初始化（响应窗口大小变化）
+    function init() {
+        // 设置canvas尺寸为固定宽高比
+        const size = Math.min(canvas.parentElement.clientWidth, 400);
+        canvas.width = size;
+        canvas.height = size;
+        initCards();
+        updateTargetsUI();
+        renderCards();
+        drawPieChart();
+        bindDragEvents();
+        updateScoreUI();
+        resetBtn.addEventListener('click', resetGame);
+        window.addEventListener('resize', () => {
+            const newSize = Math.min(canvas.parentElement.clientWidth, 400);
+            canvas.width = newSize;
+            canvas.height = newSize;
+            drawPieChart();
+        });
+    }
+    
+    init();
+</script>
+</body>
+</html>

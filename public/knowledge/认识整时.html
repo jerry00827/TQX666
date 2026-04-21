@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>⏰ 认识整时 | 小小时间管理员</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免拖拽时选中文字/图片，提升触屏体验 */
+        }
+
+        body {
+            background: #F0F7EC;
+            font-family: 'Comic Neue', 'Segoe UI Emoji', 'Chalkboard SE', 'Poppins', 'Comic Sans MS', cursive, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 主课程卡片 */
+        .time-lab {
+            max-width: 1300px;
+            width: 100%;
+            background: #FFFFFFF2;
+            backdrop-filter: blur(2px);
+            border-radius: 68px 52px 68px 52px;
+            box-shadow: 0 25px 40px rgba(70, 60, 40, 0.12);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* 左右布局 */
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* 左侧知识点区域 */
+        .knowledge-side {
+            flex: 1.2;
+            min-width: 260px;
+            background: #FEFCF5;
+            padding: 32px 24px;
+            border-right: 4px dashed #D4E2C6;
+        }
+
+        .knowledge-side h2 {
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #79A85A, #B2D48B);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 8px solid #8DC26F;
+            padding-left: 18px;
+        }
+
+        .info-card {
+            background: #F4F9EF;
+            border-radius: 40px 24px 40px 24px;
+            padding: 22px;
+            margin: 20px 0;
+            box-shadow: 0 8px 0 #DFEAD4;
+        }
+
+        .info-card p {
+            font-size: 1rem;
+            margin: 14px 0;
+            color: #3F5A2B;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .math-badge {
+            background: #E5F0DB;
+            padding: 5px 14px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #558C2F;
+            display: inline-block;
+            margin: 4px 4px 0 0;
+        }
+
+        .tip-area {
+            background: #FEF5E6;
+            border-radius: 32px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .tip-area li {
+            margin-left: 24px;
+            margin-bottom: 8px;
+            color: #A5662C;
+        }
+
+        /* 右侧游戏区 */
+        .game-side {
+            flex: 2;
+            min-width: 300px;
+            background: #FFFCF7;
+            padding: 28px 24px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #E1F0D2;
+            padding-bottom: 12px;
+        }
+
+        .game-header h3 {
+            font-size: 1.8rem;
+            color: #6F9E3F;
+        }
+
+        .stats {
+            display: flex;
+            gap: 12px;
+            background: #F1F7EA;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #54862C;
+            align-items: center;
+        }
+
+        .reset-btn {
+            background: #F2E3CE;
+            border: none;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-family: inherit;
+            color: #9B6A3A;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: 8px;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.96);
+            background: #EAD5B0;
+        }
+
+        /* 钟表网格区域 */
+        .clocks-area {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .clock-card {
+            background: #FFF9F0;
+            border-radius: 48px;
+            padding: 20px 12px;
+            text-align: center;
+            transition: all 0.2s;
+            border: 3px solid #F7DDB5;
+            box-shadow: 0 6px 0 #EED9BD;
+        }
+
+        .clock-card.matched {
+            background: #E4F3D6;
+            border-color: #8FC65A;
+            box-shadow: 0 4px 0 #B6D99B;
+        }
+
+        canvas.clock-canvas {
+            display: block;
+            margin: 0 auto 12px;
+            width: 120px;
+            height: 120px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .clock-label {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #C17A3E;
+            margin-top: 8px;
+        }
+
+        .clock-card.matched .clock-label {
+            color: #427E1A;
+        }
+
+        /* 可拖拽卡片区 */
+        .cards-area {
+            background: #FEF5EA;
+            border-radius: 56px;
+            padding: 20px 16px;
+        }
+
+        .cards-title {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #AF6F3C;
+            margin-bottom: 16px;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: center;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #FFFFFF, #FFF1E2);
+            border-radius: 60px;
+            padding: 14px 24px;
+            min-width: 100px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #A5612A;
+            box-shadow: 0 12px 18px -6px rgba(100, 70, 30, 0.15);
+            cursor: grab;
+            transition: 0.05s linear;
+            border: 2px solid #FDD6A5;
+            touch-action: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        .drag-card.dragging-source {
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+
+        .drag-card.matched-card {
+            display: none;
+        }
+
+        .card-emoji {
+            font-size: 1.3rem;
+        }
+
+        /* 克隆拖拽体 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0,0,0,0.25));
+            transform: scale(1.02) rotate(1deg);
+            pointer-events: none;
+            background: #FFFCF0;
+            border-radius: 60px;
+            padding: 14px 24px;
+            min-width: 100px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #A5612A;
+            border: 2px solid #FCC37A;
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+        }
+
+        .message-panel {
+            background: #FFF1E2;
+            border-radius: 60px;
+            padding: 12px;
+            margin-top: 24px;
+            text-align: center;
+            font-weight: bold;
+            color: #C17A3E;
+            transition: 0.1s;
+        }
+
+        .win-glow {
+            animation: cheerPop 0.6s ease;
+            background: #DAEFC4 !important;
+        }
+
+        @keyframes cheerPop {
+            0% { transform: scale(1); background: #FFEAC6; }
+            50% { transform: scale(1.01); background: #FFE0AE; box-shadow: 0 0 0 5px rgba(150, 200, 100, 0.4);}
+            100% { transform: scale(1); }
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 14px;
+            background: #FBF8EF;
+            color: #BB8A60;
+        }
+
+        @media (max-width: 780px) {
+            .knowledge-side {
+                border-right: none;
+                border-bottom: 4px dashed #D4E2C6;
+            }
+            .clocks-area {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+            canvas.clock-canvas {
+                width: 100px;
+                height: 100px;
+            }
+            .drag-card {
+                padding: 10px 18px;
+                font-size: 1.1rem;
+                min-width: 85px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="time-lab">
+    <div class="flex-row">
+        <!-- 左侧知识点：认识整时 -->
+        <div class="knowledge-side">
+            <h2>⏰ 认识整时 · 时间小管家</h2>
+            <div class="info-card">
+                <p>📌 <strong>钟面上有什么？</strong><br>
+                有<span class="math-badge">12个数字</span>，<span class="math-badge">时针</span>（短针）和<span class="math-badge">分针</span>（长针）。</p>
+                <p>🎯 <strong>整时怎么看？</strong><br>
+                分针指向<span class="math-badge">12</span>，时针指向几，就是<span class="math-badge">几时</span>。<br>
+                例如：时针指向3，分针指向12 → <strong>3时</strong>。</p>
+                <p>✨ 小口诀：<br>
+                分针长长指12，时针指几是几时。</p>
+                <p>🧸 右边的钟表分别显示不同的整时，请把时间卡片拖到对应的钟表下方，帮助它们找到正确的时间！</p>
+            </div>
+            <div class="tip-area">
+                <span>⏰ 整时练习：</span>
+                <ul>
+                    <li>🕐 时针指向7 → 7时</li>
+                    <li>🕒 时针指向12 → 12时</li>
+                    <li>🕘 时针指向9 → 9时</li>
+                </ul>
+                <p style="margin-top: 12px; background:#F8EFE2; border-radius: 28px; padding: 8px;">🎮 玩法：把下面的时间卡片拖到对应的钟表上，配对正确钟表会变绿，卡片消失！</p>
+            </div>
+        </div>
+
+        <!-- 右侧游戏区 -->
+        <div class="game-side">
+            <div class="game-header">
+                <h3>🕰️ 时间配对工坊 · 拖拽挑战</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="stats">🏆 配对 <span id="matchCount">0</span> / <span id="totalClocks">4</span></span>
+                    <button class="reset-btn" id="resetGameBtn">🔄 重新挑战</button>
+                </div>
+            </div>
+
+            <!-- 钟表网格（4个整时钟表） -->
+            <div class="clocks-area" id="clocksArea"></div>
+
+            <!-- 可拖拽时间卡片 -->
+            <div class="cards-area">
+                <div class="cards-title">🎴 可拖拽时间卡片（拖到对应的钟表上）</div>
+                <div class="cards-container" id="cardsContainer"></div>
+            </div>
+            <div id="gameMessage" class="message-panel">
+                🌟 观察每个钟表，把正确的时间卡片拖到对应的钟表卡片上！
+            </div>
+        </div>
+    </div>
+    <footer>💡 小提示：分针指向12，时针指向几就是几时。拖拽卡片到钟表区域松手即可配对！</footer>
+</div>
+
+<script>
+    // ---------- 钟表数据 ----------
+    const clocksData = [
+        { id: "clock_3", hour: 3, displayHour: "3时", matched: false },
+        { id: "clock_6", hour: 6, displayHour: "6时", matched: false },
+        { id: "clock_9", hour: 9, displayHour: "9时", matched: false },
+        { id: "clock_12", hour: 12, displayHour: "12时", matched: false }
+    ];
+    const totalClocks = clocksData.length;
+
+    // 卡片数据（时间卡片，初始顺序随机）
+    let cards = [];
+    let matchedCount = 0;
+
+    // 拖拽全局变量
+    let dragActive = false;
+    let sourceCardElem = null;
+    let sourceCardId = null;
+    let sourceCardHour = null;
+    let cloneElem = null;
+    let startX = 0, startY = 0;
+
+    // DOM 元素
+    const clocksArea = document.getElementById('clocksArea');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const matchCountSpan = document.getElementById('matchCount');
+    const totalClocksSpan = document.getElementById('totalClocks');
+    const resetBtn = document.getElementById('resetGameBtn');
+    const gameMessage = document.getElementById('gameMessage');
+
+    totalClocksSpan.innerText = totalClocks;
+
+    // 绘制钟表canvas（给定小时数，整时）
+    function drawClock(canvas, hour) {
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width, h = canvas.height;
+        const centerX = w / 2, centerY = h / 2;
+        const radius = Math.min(w, h) * 0.4;
+        
+        ctx.clearRect(0, 0, w, h);
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fill();
+        ctx.strokeStyle = "#DBA576";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // 绘制刻度（简略，只画12个大刻度）
+        for (let i = 1; i <= 12; i++) {
+            const angle = (i * 30 - 90) * Math.PI / 180;
+            const x1 = centerX + (radius - 8) * Math.cos(angle);
+            const y1 = centerY + (radius - 8) * Math.sin(angle);
+            const x2 = centerX + radius * Math.cos(angle);
+            const y2 = centerY + radius * Math.sin(angle);
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = "#A76F3E";
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        }
+        
+        // 绘制时针（指向 hour）
+        const hourAngle = ((hour % 12) * 30 - 90) * Math.PI / 180;
+        const hourLen = radius * 0.5;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(centerX + hourLen * Math.cos(hourAngle), centerY + hourLen * Math.sin(hourAngle));
+        ctx.strokeStyle = "#5C3D1E";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        
+        // 绘制分针（整时指向12）
+        const minuteAngle = (0 - 90) * Math.PI / 180;
+        const minuteLen = radius * 0.7;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(centerX + minuteLen * Math.cos(minuteAngle), centerY + minuteLen * Math.sin(minuteAngle));
+        ctx.strokeStyle = "#8B5A2B";
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        
+        // 中心圆点
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 4, 0, 2 * Math.PI);
+        ctx.fillStyle = "#C17A3E";
+        ctx.fill();
+    }
+
+    // 初始化卡片数组（随机打乱顺序）
+    function initCards() {
+        let rawCards = clocksData.map(clock => ({
+            id: `card_${clock.id}`,
+            hour: clock.hour,
+            label: clock.displayHour,
+            matched: false
+        }));
+        // Fisher-Yates 随机打乱
+        for (let i = rawCards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [rawCards[i], rawCards[j]] = [rawCards[j], rawCards[i]];
+        }
+        cards = rawCards;
+    }
+
+    // 渲染钟表区域
+    function renderClocks() {
+        clocksArea.innerHTML = '';
+        clocksData.forEach(clock => {
+            const clockCard = document.createElement('div');
+            clockCard.className = 'clock-card';
+            if (clock.matched) clockCard.classList.add('matched');
+            clockCard.setAttribute('data-clock-id', clock.id);
+            clockCard.setAttribute('data-hour', clock.hour);
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = 120;
+            canvas.height = 120;
+            canvas.className = 'clock-canvas';
+            // 设置实际尺寸（防止retina模糊）
+            canvas.style.width = '120px';
+            canvas.style.height = '120px';
+            drawClock(canvas, clock.hour);
+            
+            const labelSpan = document.createElement('div');
+            labelSpan.className = 'clock-label';
+            if (clock.matched) {
+                labelSpan.innerHTML = `✅ ${clock.displayHour}`;
+            } else {
+                labelSpan.innerHTML = `❓  ? 时`;
+            }
+            
+            clockCard.appendChild(canvas);
+            clockCard.appendChild(labelSpan);
+            clocksArea.appendChild(clockCard);
+        });
+    }
+
+    // 渲染可拖拽卡片（只显示未配对的）
+    function renderCards() {
+        cardsContainer.innerHTML = '';
+        cards.forEach(card => {
+            if (!card.matched) {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'drag-card';
+                cardDiv.setAttribute('data-card-id', card.id);
+                cardDiv.setAttribute('data-hour', card.hour);
+                const emojiSpan = document.createElement('span');
+                emojiSpan.className = 'card-emoji';
+                emojiSpan.innerText = "⏰";
+                const textSpan = document.createElement('span');
+                textSpan.innerText = card.label;
+                cardDiv.appendChild(emojiSpan);
+                cardDiv.appendChild(textSpan);
+                cardsContainer.appendChild(cardDiv);
+            }
+        });
+    }
+
+    // 更新得分和胜利信息
+    function updateScoreUI() {
+        matchCountSpan.innerText = matchedCount;
+        if (matchedCount === totalClocks) {
+            gameMessage.innerHTML = "🎉🎉 完美！所有钟表都找到了正确的时间！你已经是时间小英雄啦 🎉🎉<br> ✨ 点击「重新挑战」可以再玩一次 ✨";
+            gameMessage.style.background = "#DAEFC4";
+            gameMessage.classList.add('win-glow');
+            setTimeout(() => gameMessage.classList.remove('win-glow'), 800);
+        } else {
+            if (!gameMessage.innerHTML.includes("错误") && !gameMessage.innerHTML.includes("配对成功")) {
+                gameMessage.innerHTML = "🐣 观察每个钟表，把正确的时间卡片拖到对应的钟表上！";
+                gameMessage.style.background = "#FFF1E2";
+            }
+        }
+    }
+
+    // 配对逻辑
+    function attemptMatch(cardElem, targetClockCard) {
+        const cardId = cardElem.getAttribute('data-card-id');
+        const card = cards.find(c => c.id === cardId);
+        if (!card || card.matched) return false;
+        
+        const clockId = targetClockCard.getAttribute('data-clock-id');
+        const clock = clocksData.find(c => c.id === clockId);
+        if (!clock || clock.matched) return false;
+        
+        // 检查卡片的小时是否匹配钟表的小时
+        if (card.hour !== clock.hour) return false;
+        
+        // 配对成功
+        card.matched = true;
+        clock.matched = true;
+        matchedCount++;
+        
+        // 重新渲染界面
+        renderClocks();
+        renderCards();
+        updateScoreUI();
+        
+        gameMessage.innerHTML = `✅ 配对成功！ ${clock.displayHour} 的钟表找到了正确的时间 ✅`;
+        gameMessage.style.background = "#E0F2CE";
+        setTimeout(() => {
+            if (matchedCount !== totalClocks) {
+                gameMessage.innerHTML = "🐣 继续拖拽其他时间卡片到正确的钟表上！";
+                gameMessage.style.background = "#FFF1E2";
+            } else {
+                gameMessage.innerHTML = "🎉🎉 完美！所有钟表都找到了正确的时间！你已经是时间小英雄啦 🎉🎉<br> ✨ 点击「重新挑战」可以再玩一次 ✨";
+                gameMessage.style.background = "#DAEFC4";
+            }
+        }, 1200);
+        return true;
+    }
+
+    // ---------- 自定义拖拽实现 (支持鼠标+触摸) ----------
+    function startDrag(e, cardElem) {
+        if (dragActive) return;
+        const cardId = cardElem.getAttribute('data-card-id');
+        const card = cards.find(c => c.id === cardId);
+        if (!card || card.matched) return;
+        e.preventDefault();
+        let clientX, clientY;
+        if (e.type === 'mousedown') {
+            clientX = e.clientX;
+            clientY = e.clientY;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        } else {
+            const touch = e.touches[0];
+            clientX = touch.clientX;
+            clientY = touch.clientY;
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+            document.addEventListener('touchcancel', onTouchCancel);
+        }
+        dragActive = true;
+        sourceCardElem = cardElem;
+        sourceCardId = cardId;
+        sourceCardHour = card.hour;
+        sourceCardElem.classList.add('dragging-source');
+        
+        // 创建克隆体
+        cloneElem = document.createElement('div');
+        cloneElem.className = 'drag-clone';
+        // 复制内容
+        const emojiClone = document.createElement('span');
+        emojiClone.className = 'card-emoji';
+        emojiClone.innerText = "⏰";
+        const textClone = document.createElement('span');
+        textClone.innerText = card.label;
+        cloneElem.appendChild(emojiClone);
+        cloneElem.appendChild(textClone);
+        cloneElem.style.left = (clientX - 40) + 'px';
+        cloneElem.style.top = (clientY - 40) + 'px';
+        cloneElem.style.width = sourceCardElem.offsetWidth + 'px';
+        document.body.appendChild(cloneElem);
+        startX = clientX;
+        startY = clientY;
+        
+        // 高亮所有未配对的钟表卡片
+        document.querySelectorAll('.clock-card').forEach(clockCard => {
+            if (!clockCard.classList.contains('matched')) {
+                clockCard.style.transform = 'scale(1.02)';
+                clockCard.style.transition = '0.1s';
+                clockCard.style.boxShadow = '0 0 0 3px #8FC65A';
+            }
+        });
+    }
+    
+    function onMouseMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        moveClone(e.clientX, e.clientY);
+    }
+    function onTouchMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveClone(touch.clientX, touch.clientY);
+    }
+    function moveClone(clientX, clientY) {
+        if (cloneElem) {
+            cloneElem.style.left = (clientX - cloneElem.offsetWidth / 2) + 'px';
+            cloneElem.style.top = (clientY - cloneElem.offsetHeight / 2) + 'px';
+        }
+    }
+    function finishDrag(clientX, clientY) {
+        if (!dragActive) return;
+        const elemUnder = document.elementsFromPoint(clientX, clientY);
+        let targetClockCard = null;
+        for (let el of elemUnder) {
+            if (el.classList && el.classList.contains('clock-card')) {
+                targetClockCard = el;
+                break;
+            }
+        }
+        let success = false;
+        if (targetClockCard && sourceCardElem) {
+            const alreadyMatched = targetClockCard.classList.contains('matched');
+            if (!alreadyMatched) {
+                success = attemptMatch(sourceCardElem, targetClockCard);
+                if (!success) {
+                    gameMessage.innerHTML = "😲 配对错误！ 这个时间不对，再观察一下钟表上的时针～";
+                    gameMessage.style.background = "#FFE0D0";
+                    setTimeout(() => {
+                        if (matchedCount !== totalClocks) {
+                            gameMessage.innerHTML = "🐣 继续拖拽时间卡片到正确的钟表上！";
+                            gameMessage.style.background = "#FFF1E2";
+                        }
+                    }, 1200);
+                }
+            } else {
+                gameMessage.innerHTML = "⛔ 这个钟表已经配对过了！不能重复配对";
+                gameMessage.style.background = "#FFE0D0";
+                setTimeout(() => {
+                    if (matchedCount !== totalClocks) gameMessage.style.background = "#FFF1E2";
+                }, 1000);
+            }
+        } else if (sourceCardElem) {
+            gameMessage.innerHTML = "💡 要把卡片拖拽到钟表卡片上（带钟表图案的区域）松手哦！";
+            setTimeout(() => {
+                if (matchedCount !== totalClocks && gameMessage.innerHTML.includes("钟表卡片")) {
+                    gameMessage.innerHTML = "🐣 继续拖拽时间卡片到正确的钟表上！";
+                    gameMessage.style.background = "#FFF1E2";
+                }
+            }, 1000);
+        }
+        endDragCleanup();
+        if (!success && sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        if (matchedCount === totalClocks) {
+            renderClocks();
+            renderCards();
+        }
+    }
+    function endDragCleanup() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.remove();
+        if (sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+        document.removeEventListener('touchcancel', onTouchCancel);
+        dragActive = false;
+        sourceCardElem = null;
+        cloneElem = null;
+        // 恢复所有钟表卡片样式
+        document.querySelectorAll('.clock-card').forEach(clockCard => {
+            clockCard.style.transform = '';
+            clockCard.style.boxShadow = '';
+        });
+    }
+    function onMouseUp(e) { if (dragActive) finishDrag(e.clientX, e.clientY); }
+    function onTouchEnd(e) {
+        if (!dragActive) return;
+        let clientX, clientY;
+        if (e.changedTouches && e.changedTouches.length) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        } else { clientX = startX; clientY = startY; }
+        finishDrag(clientX, clientY);
+    }
+    function onTouchCancel(e) { endDragCleanup(); }
+    
+    function bindDragEvents() {
+        cardsContainer.addEventListener('mousedown', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        });
+        cardsContainer.addEventListener('touchstart', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        }, { passive: false });
+    }
+    
+    // 重置游戏
+    function resetGame() {
+        if (dragActive) endDragCleanup();
+        // 重置匹配状态
+        clocksData.forEach(clock => clock.matched = false);
+        matchedCount = 0;
+        initCards();       // 重置卡片并打乱顺序
+        renderClocks();
+        renderCards();
+        updateScoreUI();
+        gameMessage.innerHTML = "✨ 游戏已重置！ 重新把时间卡片拖到正确的钟表上 ✨";
+        gameMessage.style.background = "#FFF1E2";
+        gameMessage.classList.remove('win-glow');
+    }
+    
+    // 初始化
+    function init() {
+        initCards();
+        renderClocks();
+        renderCards();
+        bindDragEvents();
+        updateScoreUI();
+        resetBtn.addEventListener('click', resetGame);
+        // 适应窗口大小变化时重绘钟表（canvas内容不变但尺寸可能变化，不需要重新绘制因为canvas大小固定）
+    }
+    
+    init();
+</script>
+</body>
+</html>

@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>📐 列方程解决问题 | 小小方程师</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免拖拽时选中文字，提升触屏体验 */
+        }
+
+        body {
+            background: #F0F7EC;
+            font-family: 'Comic Neue', 'Segoe UI Emoji', 'Chalkboard SE', 'Poppins', 'Comic Sans MS', cursive, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 主课程卡片 */
+        .equation-lab {
+            max-width: 1350px;
+            width: 100%;
+            background: #FFFFFFF2;
+            backdrop-filter: blur(2px);
+            border-radius: 68px 52px 68px 52px;
+            box-shadow: 0 25px 40px rgba(70, 60, 40, 0.12);
+            overflow: hidden;
+        }
+
+        /* 左右布局 */
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* 左侧知识点区域 */
+        .knowledge-side {
+            flex: 1.2;
+            min-width: 260px;
+            background: #FEFCF5;
+            padding: 32px 24px;
+            border-right: 4px dashed #D4E2C6;
+        }
+
+        .knowledge-side h2 {
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #79A85A, #B2D48B);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            border-left: 8px solid #8DC26F;
+            padding-left: 18px;
+        }
+
+        .info-card {
+            background: #F4F9EF;
+            border-radius: 40px 24px 40px 24px;
+            padding: 22px;
+            margin: 20px 0;
+            box-shadow: 0 8px 0 #DFEAD4;
+        }
+
+        .info-card p {
+            font-size: 1rem;
+            margin: 14px 0;
+            color: #3F5A2B;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .math-badge {
+            background: #E5F0DB;
+            padding: 5px 14px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #558C2F;
+            display: inline-block;
+            margin: 4px 4px 0 0;
+        }
+
+        .tip-area {
+            background: #FEF5E6;
+            border-radius: 32px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .tip-area li {
+            margin-left: 24px;
+            margin-bottom: 8px;
+            color: #A5662C;
+        }
+
+        /* 右侧游戏区 */
+        .game-side {
+            flex: 2;
+            min-width: 300px;
+            background: #FFFCF7;
+            padding: 28px 24px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #E1F0D2;
+            padding-bottom: 12px;
+        }
+
+        .game-header h3 {
+            font-size: 1.8rem;
+            color: #6F9E3F;
+        }
+
+        .stats {
+            display: flex;
+            gap: 12px;
+            background: #F1F7EA;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #54862C;
+            align-items: center;
+        }
+
+        .reset-btn {
+            background: #F2E3CE;
+            border: none;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-family: inherit;
+            color: #9B6A3A;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: 8px;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.96);
+            background: #EAD5B0;
+        }
+
+        /* 题目区域 */
+        .question-area {
+            background: #FFF9F0;
+            border-radius: 56px;
+            padding: 24px 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.04);
+        }
+
+        .problem-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #B87A44;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .equation-container {
+            background: #FFF4E8;
+            border-radius: 48px;
+            padding: 20px;
+            margin: 16px 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+            font-family: monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .equation-part {
+            background: #FFFFFF;
+            border-radius: 30px;
+            padding: 8px 16px;
+            display: inline-block;
+        }
+
+        .missing-number {
+            background: #FFEEDD;
+            border: 2px dashed #F7DDB5;
+            border-radius: 30px;
+            padding: 8px 20px;
+            min-width: 70px;
+            text-align: center;
+            font-weight: bold;
+            color: #C17A3E;
+        }
+
+        .missing-number.filled {
+            background: #E4F3D6;
+            border: 2px solid #8FC65A;
+            color: #427E1A;
+        }
+
+        .drop-zone {
+            background: #FFF8F0;
+            border-radius: 60px;
+            padding: 20px;
+            margin: 16px auto 0;
+            width: 80%;
+            text-align: center;
+            border: 3px dashed #F7DDB5;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .drop-zone.active-drop {
+            background: #F3FCEB;
+            border-color: #8FC65A;
+        }
+
+        .drop-box {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #C17A3E;
+        }
+
+        .drop-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #8FC65A;
+            margin-top: 8px;
+            font-family: monospace;
+        }
+
+        /* 可拖拽卡片区 */
+        .cards-area {
+            background: #FEF5EA;
+            border-radius: 56px;
+            padding: 20px 16px;
+        }
+
+        .cards-title {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #AF6F3C;
+            margin-bottom: 16px;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: center;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #FFFFFF, #FFF1E2);
+            border-radius: 60px;
+            padding: 14px 24px;
+            min-width: 80px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #A5612A;
+            box-shadow: 0 12px 18px -6px rgba(100, 70, 30, 0.15);
+            cursor: grab;
+            transition: 0.05s linear;
+            border: 2px solid #FDD6A5;
+            touch-action: none;
+            font-family: monospace;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        .drag-card.dragging-source {
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+
+        .drag-card.matched-card {
+            display: none;
+        }
+
+        /* 克隆拖拽体 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0,0,0,0.25));
+            transform: scale(1.02) rotate(1deg);
+            pointer-events: none;
+            background: #FFFCF0;
+            border-radius: 60px;
+            padding: 14px 24px;
+            min-width: 80px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #A5612A;
+            border: 2px solid #FCC37A;
+            backdrop-filter: blur(6px);
+            font-family: monospace;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+        }
+
+        .message-panel {
+            background: #FFF1E2;
+            border-radius: 60px;
+            padding: 12px;
+            margin-top: 24px;
+            text-align: center;
+            font-weight: bold;
+            color: #C17A3E;
+            transition: 0.1s;
+        }
+
+        .win-glow {
+            animation: cheerPop 0.6s ease;
+            background: #DAEFC4 !important;
+        }
+
+        @keyframes cheerPop {
+            0% { transform: scale(1); background: #FFEAC6; }
+            50% { transform: scale(1.01); background: #FFE0AE; box-shadow: 0 0 0 5px rgba(150, 200, 100, 0.4);}
+            100% { transform: scale(1); }
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 14px;
+            background: #FBF8EF;
+            color: #BB8A60;
+        }
+
+        @media (max-width: 780px) {
+            .knowledge-side {
+                border-right: none;
+                border-bottom: 4px dashed #D4E2C6;
+            }
+            .drag-card {
+                padding: 10px 18px;
+                font-size: 1.1rem;
+                min-width: 70px;
+            }
+            .equation-container {
+                font-size: 1.2rem;
+            }
+            .problem-text {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="equation-lab">
+    <div class="flex-row">
+        <!-- 左侧知识点：列方程解决问题 -->
+        <div class="knowledge-side">
+            <h2>📐 列方程 · 解题小魔法</h2>
+            <div class="info-card">
+                <p>📌 <strong>列方程解应用题的步骤</strong><br>
+                1️⃣ 找出未知数，用字母表示（通常用x）。<br>
+                2️⃣ 分析数量关系，列出等量关系式。<br>
+                3️⃣ 根据等量关系列方程。<br>
+                4️⃣ 解方程，求出未知数。<br>
+                5️⃣ 检验并作答。</p>
+                <p>🎯 <strong>小例子</strong><br>
+                一个数加上5等于12，求这个数。<br>
+                解：设这个数为x，<br>
+                x + 5 = 12，<br>
+                x = 12 - 5，<br>
+                x = 7。</p>
+                <p>🧸 右边游戏：把正确的数字拖到方程的空缺处，完成方程并解出答案！</p>
+            </div>
+            <div class="tip-area">
+                <span>🧠 解题小口诀：</span>
+                <ul>
+                    <li>🔢 未知数，设x</li>
+                    <li>📝 等量关系要找准</li>
+                    <li>✖️➕ 列式解方程</li>
+                </ul>
+                <p style="margin-top: 12px; background:#F8EFE2; border-radius: 28px; padding: 8px;">🎮 玩法：把数字卡片拖到方程中“？”的位置，配对正确自动进入下一题！</p>
+            </div>
+        </div>
+
+        <!-- 右侧游戏区：列方程拖拽配对 -->
+        <div class="game-side">
+            <div class="game-header">
+                <h3>🧩 方程填空站 · 拖拽数字</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="stats">🏆 得分 <span id="scoreValue">0</span> / <span id="totalQuestions">4</span></span>
+                    <button class="reset-btn" id="resetGameBtn">🔄 重新挑战</button>
+                </div>
+            </div>
+
+            <!-- 当前题目区域 -->
+            <div class="question-area">
+                <div class="problem-text" id="problemText"></div>
+                <div class="equation-container" id="equationContainer"></div>
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-box">📦 把正确答案拖到这里 →</div>
+                    <div class="drop-value" id="dropValue"></div>
+                </div>
+            </div>
+
+            <!-- 可拖拽卡片区 -->
+            <div class="cards-area">
+                <div class="cards-title">🎴 可拖拽数字卡片（拖到方程中的“？”处）</div>
+                <div class="cards-container" id="cardsContainer"></div>
+            </div>
+            <div id="gameMessage" class="message-panel">
+                🌟 读题，把正确的数字拖到方程的空缺处，使方程成立，然后计算出x的值！
+            </div>
+        </div>
+    </div>
+    <footer>💡 小秘诀：先列方程，再把缺少的数字补上，然后解方程。拖拽正确的数字到问号位置，就能得分！</footer>
+</div>
+
+<script>
+    // ---------- 题目数据（应用题，方程模板，缺失数字位置，正确答案，解）----------
+    const questionBank = [
+        { 
+            text: "一个数加上8等于20，求这个数。",
+            equationParts: ["x", "+", "?", "=", "20"],
+            missingIndex: 2,
+            correctNumber: 8,
+            solution: "x = 12",
+            solutionDisplay: "x = 12"
+        },
+        { 
+            text: "一个数的3倍减去5等于16，求这个数。",
+            equationParts: ["3", "×", "x", "-", "5", "=", "?"],
+            missingIndex: 6,
+            correctNumber: 16,
+            solution: "x = 7",
+            solutionDisplay: "x = 7"
+        },
+        { 
+            text: "一个数除以4等于6，求这个数。",
+            equationParts: ["x", "÷", "4", "=", "?"],
+            missingIndex: 4,
+            correctNumber: 6,
+            solution: "x = 24",
+            solutionDisplay: "x = 24"
+        },
+        { 
+            text: "某数的2倍加上3等于15，求这个数。",
+            equationParts: ["2", "×", "x", "+", "3", "=", "?"],
+            missingIndex: 6,
+            correctNumber: 15,
+            solution: "x = 6",
+            solutionDisplay: "x = 6"
+        }
+    ];
+    const totalQuestions = questionBank.length;
+
+    let currentIndex = 0;
+    let currentScore = 0;
+    let gameCompleted = false;
+    let currentQuestion = questionBank[0];
+    let missingFilled = false;
+
+    // 拖拽全局变量
+    let dragActive = false;
+    let sourceCardElem = null;
+    let sourceCardValue = null;
+    let cloneElem = null;
+    let startX = 0, startY = 0;
+
+    // DOM 元素
+    const problemText = document.getElementById('problemText');
+    const equationContainer = document.getElementById('equationContainer');
+    const dropZone = document.getElementById('dropZone');
+    const dropValueSpan = document.getElementById('dropValue');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const scoreSpan = document.getElementById('scoreValue');
+    const totalSpan = document.getElementById('totalQuestions');
+    const resetBtn = document.getElementById('resetGameBtn');
+    const gameMessage = document.getElementById('gameMessage');
+
+    totalSpan.innerText = totalQuestions;
+
+    // 生成当前题目的选项卡片（正确值 + 两个干扰项）
+    function generateCardValues(correctVal) {
+        let options = new Set();
+        options.add(correctVal);
+        // 产生两个不同干扰值（与正确值不同，且为正整数，范围1~30）
+        while(options.size < 3) {
+            let offset = Math.floor(Math.random() * 5) + 2; // 2~6偏移
+            let candidate = correctVal + (Math.random() > 0.5 ? offset : -offset);
+            if (candidate < 1) candidate = correctVal + offset;
+            if (candidate > 30) candidate = correctVal - offset;
+            candidate = Math.round(candidate);
+            if (candidate !== correctVal && candidate > 0) options.add(candidate);
+        }
+        let arr = Array.from(options);
+        // 打乱顺序
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // 渲染方程（高亮缺失位置）
+    function renderEquation() {
+        const q = currentQuestion;
+        equationContainer.innerHTML = '';
+        q.equationParts.forEach((part, idx) => {
+            if (part === "?") {
+                const missingSpan = document.createElement('span');
+                missingSpan.className = 'missing-number';
+                if (missingFilled) {
+                    missingSpan.classList.add('filled');
+                    missingSpan.innerText = q.correctNumber;
+                } else {
+                    missingSpan.innerText = '?';
+                }
+                missingSpan.setAttribute('data-missing-idx', idx);
+                equationContainer.appendChild(missingSpan);
+            } else {
+                const partSpan = document.createElement('span');
+                partSpan.className = 'equation-part';
+                partSpan.innerText = part;
+                equationContainer.appendChild(partSpan);
+            }
+        });
+    }
+
+    // 渲染当前题目
+    function renderCurrentQuestion() {
+        currentQuestion = questionBank[currentIndex];
+        missingFilled = false;
+        problemText.innerText = currentQuestion.text;
+        renderEquation();
+        
+        // 生成选项卡片
+        const optionValues = generateCardValues(currentQuestion.correctNumber);
+        cardsContainer.innerHTML = '';
+        optionValues.forEach(val => {
+            const card = document.createElement('div');
+            card.className = 'drag-card';
+            card.setAttribute('data-value', val);
+            card.innerText = val;
+            cardsContainer.appendChild(card);
+        });
+        
+        // 清空放置区显示
+        dropValueSpan.innerHTML = '';
+        dropZone.classList.remove('active-drop');
+        if (!gameCompleted && currentScore !== totalQuestions) {
+            gameMessage.innerHTML = `📌 第 ${currentIndex+1} 题：把正确的数字拖到方程中的“？”处！`;
+            gameMessage.style.background = "#FFF1E2";
+        }
+    }
+
+    // 更新得分和胜利信息
+    function updateScoreUI() {
+        scoreSpan.innerText = currentScore;
+        if (currentScore === totalQuestions && !gameCompleted) {
+            gameCompleted = true;
+            gameMessage.innerHTML = "🎉🎉 完美！所有方程都填对了！你已经是列方程小英雄啦 🎉🎉<br> ✨ 点击「重新挑战」可以再玩一次 ✨";
+            gameMessage.style.background = "#DAEFC4";
+            gameMessage.classList.add('win-glow');
+            setTimeout(() => gameMessage.classList.remove('win-glow'), 800);
+        }
+    }
+
+    // 配对成功 -> 填入缺失数字，然后显示解
+    function handleMatchSuccess(cardValue) {
+        if (gameCompleted) return;
+        if (cardValue === currentQuestion.correctNumber) {
+            // 填入缺失数字
+            missingFilled = true;
+            renderEquation();
+            // 显示解
+            dropValueSpan.innerHTML = currentQuestion.solutionDisplay;
+            dropZone.classList.add('active-drop');
+            gameMessage.innerHTML = "✅ 正确！ 方程已补全，" + currentQuestion.solutionDisplay + " ✅";
+            gameMessage.style.background = "#E0F2CE";
+            
+            currentScore++;
+            scoreSpan.innerText = currentScore;
+            
+            if (currentScore === totalQuestions) {
+                gameCompleted = true;
+                updateScoreUI();
+                return;
+            }
+            // 延迟进入下一题
+            setTimeout(() => {
+                currentIndex++;
+                renderCurrentQuestion();
+                updateScoreUI();
+            }, 1500);
+        } else {
+            gameMessage.innerHTML = `😲 错误！ ${cardValue} 不对，再读题列方程～ 缺的数字是多少？`;
+            gameMessage.style.background = "#FFE0D0";
+            setTimeout(() => {
+                if (!gameCompleted && currentScore !== totalQuestions) {
+                    gameMessage.innerHTML = `🐣 第 ${currentIndex+1} 题：再试试看，拖拽正确的数字到问号处！`;
+                    gameMessage.style.background = "#FFF1E2";
+                }
+            }, 1500);
+        }
+    }
+
+    // ---------- 自定义拖拽实现 (支持鼠标+触摸) ----------
+    function startDrag(e, cardElem) {
+        if (dragActive || gameCompleted) return;
+        e.preventDefault();
+        const val = parseInt(cardElem.getAttribute('data-value'));
+        if (isNaN(val)) return;
+        
+        let clientX, clientY;
+        if (e.type === 'mousedown') {
+            clientX = e.clientX;
+            clientY = e.clientY;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        } else {
+            const touch = e.touches[0];
+            clientX = touch.clientX;
+            clientY = touch.clientY;
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+            document.addEventListener('touchcancel', onTouchCancel);
+        }
+        
+        dragActive = true;
+        sourceCardElem = cardElem;
+        sourceCardValue = val;
+        sourceCardElem.classList.add('dragging-source');
+        
+        // 创建克隆体
+        cloneElem = document.createElement('div');
+        cloneElem.className = 'drag-clone';
+        cloneElem.innerText = cardElem.innerText;
+        cloneElem.style.left = (clientX - 30) + 'px';
+        cloneElem.style.top = (clientY - 30) + 'px';
+        cloneElem.style.width = sourceCardElem.offsetWidth + 'px';
+        document.body.appendChild(cloneElem);
+        startX = clientX;
+        startY = clientY;
+        
+        // 高亮问号区域
+        const missingSpan = document.querySelector('.missing-number');
+        if (missingSpan) missingSpan.classList.add('active-drop');
+    }
+    
+    function onMouseMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        moveClone(e.clientX, e.clientY);
+    }
+    function onTouchMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveClone(touch.clientX, touch.clientY);
+    }
+    function moveClone(clientX, clientY) {
+        if (cloneElem) {
+            cloneElem.style.left = (clientX - cloneElem.offsetWidth / 2) + 'px';
+            cloneElem.style.top = (clientY - cloneElem.offsetHeight / 2) + 'px';
+        }
+    }
+    function finishDrag(clientX, clientY) {
+        if (!dragActive) return;
+        // 检查释放点是否在问号区域
+        const elemUnderPointer = document.elementsFromPoint(clientX, clientY);
+        let isOverMissing = false;
+        for (let el of elemUnderPointer) {
+            if (el.classList && el.classList.contains('missing-number')) {
+                isOverMissing = true;
+                break;
+            }
+        }
+        if (isOverMissing && sourceCardElem && !gameCompleted && !missingFilled) {
+            handleMatchSuccess(sourceCardValue);
+        } else if (!gameCompleted) {
+            gameMessage.innerHTML = "💡 要把卡片拖拽到方程中的「？」号上松手哦！";
+            gameMessage.style.background = "#FFE0D0";
+            setTimeout(() => {
+                if (!gameCompleted && currentScore !== totalQuestions) {
+                    gameMessage.innerHTML = `🐣 第 ${currentIndex+1} 题：拖拽正确的数字到问号处！`;
+                    gameMessage.style.background = "#FFF1E2";
+                }
+            }, 1000);
+        }
+        endDragCleanup();
+    }
+    
+    function endDragCleanup() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.remove();
+        if (sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+        document.removeEventListener('touchcancel', onTouchCancel);
+        dragActive = false;
+        sourceCardElem = null;
+        cloneElem = null;
+        const missingSpan = document.querySelector('.missing-number');
+        if (missingSpan) missingSpan.classList.remove('active-drop');
+    }
+    
+    function onMouseUp(e) { if (dragActive) finishDrag(e.clientX, e.clientY); }
+    function onTouchEnd(e) {
+        if (!dragActive) return;
+        let clientX, clientY;
+        if (e.changedTouches && e.changedTouches.length) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        } else { clientX = startX; clientY = startY; }
+        finishDrag(clientX, clientY);
+    }
+    function onTouchCancel(e) { endDragCleanup(); }
+    
+    function bindDragEvents() {
+        cardsContainer.addEventListener('mousedown', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        });
+        cardsContainer.addEventListener('touchstart', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        }, { passive: false });
+    }
+    
+    // 重置整个游戏
+    function resetGame() {
+        if (dragActive) endDragCleanup();
+        currentIndex = 0;
+        currentScore = 0;
+        gameCompleted = false;
+        renderCurrentQuestion();
+        updateScoreUI();
+        gameMessage.innerHTML = "✨ 游戏已重置！ 重新挑战列方程问题 ✨";
+        gameMessage.style.background = "#FFF1E2";
+        gameMessage.classList.remove('win-glow');
+        dropValueSpan.innerHTML = '';
+        dropZone.classList.remove('active-drop');
+    }
+    
+    // 初始化
+    function init() {
+        renderCurrentQuestion();
+        bindDragEvents();
+        updateScoreUI();
+        resetBtn.addEventListener('click', resetGame);
+    }
+    
+    init();
+</script>
+</body>
+</html>

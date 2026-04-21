@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>📈 折线统计图 | 小小气象分析师</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免拖拽时选中文字/图片，提升触屏体验 */
+        }
+
+        body {
+            background: #F0F7EC;
+            font-family: 'Comic Neue', 'Segoe UI Emoji', 'Chalkboard SE', 'Poppins', 'Comic Sans MS', cursive, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 主课程卡片 */
+        .stats-lab {
+            max-width: 1350px;
+            width: 100%;
+            background: #FFFFFFF2;
+            backdrop-filter: blur(2px);
+            border-radius: 68px 52px 68px 52px;
+            box-shadow: 0 25px 40px rgba(70, 60, 40, 0.12);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* 左右布局 */
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* 左侧知识点区域 */
+        .knowledge-side {
+            flex: 1.2;
+            min-width: 260px;
+            background: #FEFCF5;
+            padding: 32px 24px;
+            border-right: 4px dashed #D4E2C6;
+        }
+
+        .knowledge-side h2 {
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #79A85A, #B2D48B);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 8px solid #8DC26F;
+            padding-left: 18px;
+        }
+
+        .info-card {
+            background: #F4F9EF;
+            border-radius: 40px 24px 40px 24px;
+            padding: 22px;
+            margin: 20px 0;
+            box-shadow: 0 8px 0 #DFEAD4;
+        }
+
+        .info-card p {
+            font-size: 1rem;
+            margin: 14px 0;
+            color: #3F5A2B;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .math-badge {
+            background: #E5F0DB;
+            padding: 5px 14px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #558C2F;
+            display: inline-block;
+            margin: 4px 4px 0 0;
+        }
+
+        .tip-area {
+            background: #FEF5E6;
+            border-radius: 32px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .tip-area li {
+            margin-left: 24px;
+            margin-bottom: 8px;
+            color: #A5662C;
+        }
+
+        /* 右侧游戏区 */
+        .game-side {
+            flex: 2;
+            min-width: 300px;
+            background: #FFFCF7;
+            padding: 28px 24px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #E1F0D2;
+            padding-bottom: 12px;
+        }
+
+        .game-header h3 {
+            font-size: 1.8rem;
+            color: #6F9E3F;
+        }
+
+        .stats-panel {
+            display: flex;
+            gap: 12px;
+            background: #F1F7EA;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #54862C;
+            align-items: center;
+        }
+
+        .reset-btn {
+            background: #F2E3CE;
+            border: none;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-family: inherit;
+            color: #9B6A3A;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: 8px;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.96);
+            background: #EAD5B0;
+        }
+
+        /* 折线统计图容器 */
+        .chart-container {
+            background: #FEF9F0;
+            border-radius: 56px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.04);
+        }
+
+        .chart-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #B87A44;
+            margin-bottom: 16px;
+        }
+
+        .line-chart {
+            position: relative;
+            background: #FFF8F0;
+            border-radius: 48px;
+            padding: 20px 20px 20px 40px;
+            min-height: 320px;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: #FFFFFF;
+            border-radius: 32px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        /* 可拖拽卡片区 */
+        .cards-area {
+            background: #FEF5EA;
+            border-radius: 56px;
+            padding: 20px 16px;
+        }
+
+        .cards-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #B87A44;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: center;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #FFFFFF, #FFF1E2);
+            border-radius: 60px;
+            padding: 12px 22px;
+            min-width: 90px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #A5612A;
+            box-shadow: 0 12px 18px -6px rgba(100, 70, 30, 0.15);
+            cursor: grab;
+            transition: 0.05s linear;
+            border: 2px solid #FDD6A5;
+            touch-action: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        .drag-card.dragging-source {
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+
+        .drag-card.matched-card {
+            display: none;
+        }
+
+        .card-emoji {
+            font-size: 1.2rem;
+        }
+
+        /* 克隆拖拽体 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0,0,0,0.25));
+            transform: scale(1.02) rotate(1deg);
+            pointer-events: none;
+            background: #FFFCF0;
+            border-radius: 60px;
+            padding: 12px 22px;
+            min-width: 90px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #A5612A;
+            border: 2px solid #FCC37A;
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+        }
+
+        .message-panel {
+            background: #FFF1E2;
+            border-radius: 60px;
+            padding: 12px;
+            margin-top: 24px;
+            text-align: center;
+            font-weight: bold;
+            color: #C17A3E;
+            transition: 0.1s;
+        }
+
+        .win-glow {
+            animation: cheerPop 0.6s ease;
+            background: #DAEFC4 !important;
+        }
+
+        @keyframes cheerPop {
+            0% { transform: scale(1); background: #FFEAC6; }
+            50% { transform: scale(1.01); background: #FFE0AE; box-shadow: 0 0 0 5px rgba(150, 200, 100, 0.4);}
+            100% { transform: scale(1); }
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 14px;
+            background: #FBF8EF;
+            color: #BB8A60;
+        }
+
+        @media (max-width: 780px) {
+            .knowledge-side {
+                border-right: none;
+                border-bottom: 4px dashed #D4E2C6;
+            }
+            .drag-card {
+                padding: 8px 16px;
+                font-size: 1rem;
+                min-width: 75px;
+            }
+            .line-chart {
+                padding: 10px 10px 10px 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="stats-lab">
+    <div class="flex-row">
+        <!-- 左侧知识点：折线统计图 -->
+        <div class="knowledge-side">
+            <h2>📈 折线统计图 · 变化趋势小侦探</h2>
+            <div class="info-card">
+                <p>📌 <strong>什么是折线统计图？</strong><br>
+                用<span class="math-badge">点</span>表示数量，用<span class="math-badge">线段</span>连接，反映数据的变化趋势。</p>
+                <p>🎯 <strong>折线统计图的组成</strong><br>
+                ▪ 横轴：项目（时间、类别）<br>
+                ▪ 纵轴：数量，有刻度<br>
+                ▪ 点：表示每个项目的具体数值<br>
+                ▪ 线：连接点，看出上升、下降或平稳</p>
+                <p>✨ 小技巧：折线陡峭→变化大，平缓→变化小。</p>
+                <p>🧸 右边是一周的气温变化图，有些温度数据丢失了。请把正确的温度卡片拖到对应的日期点上，完成折线统计图！</p>
+            </div>
+            <div class="tip-area">
+                <span>🧾 读图小练习：</span>
+                <ul>
+                    <li>🌡️ 周一温度：18°C</li>
+                    <li>🌡️ 周二温度：20°C</li>
+                    <li>🌡️ 周三温度：22°C</li>
+                    <li>🌡️ 周四温度：25°C</li>
+                    <li>🌡️ 周五温度：23°C</li>
+                </ul>
+                <p style="margin-top: 12px; background:#F8EFE2; border-radius: 28px; padding: 8px;">🎮 玩法：把温度卡片拖到对应日期的圆点上，配对成功后圆点会显示温度，折线自动连接！</p>
+            </div>
+        </div>
+
+        <!-- 右侧游戏区 -->
+        <div class="game-side">
+            <div class="game-header">
+                <h3>🌡️ 一周气温统计 · 拖拽连线</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="stats-panel">🏆 配对 <span id="matchCount">0</span> / <span id="totalPoints">5</span></span>
+                    <button class="reset-btn" id="resetGameBtn">🔄 重新挑战</button>
+                </div>
+            </div>
+
+            <!-- 折线统计图区域 -->
+            <div class="chart-container">
+                <div class="chart-title">📊 某市一周最高气温变化图</div>
+                <div class="line-chart">
+                    <canvas id="lineCanvas" width="800" height="350" style="width:100%; height:auto; max-width:800px; aspect-ratio:800/350"></canvas>
+                </div>
+            </div>
+
+            <!-- 可拖拽温度卡片 -->
+            <div class="cards-area">
+                <div class="cards-title">🎴 可拖拽温度卡片（拖到对应的日期圆点上）</div>
+                <div class="cards-container" id="cardsContainer"></div>
+            </div>
+            <div id="gameMessage" class="message-panel">
+                🌟 把每个温度卡片拖到对应的日期圆点上，配对成功圆点会亮起，折线会自动连接！
+            </div>
+        </div>
+    </div>
+    <footer>💡 小提示：纵轴表示温度（°C），横轴表示星期。把卡片拖到对应圆点上，完成一周气温变化图！</footer>
+</div>
+
+<script>
+    // ---------- 数据配置 ----------
+    // 星期数据（横轴）
+    const days = ["周一", "周二", "周三", "周四", "周五"];
+    // 正确温度值（°C）
+    const temperatures = [18, 20, 22, 25, 23];
+    // 每个点的坐标（由canvas动态计算）
+    let points = []; // 存储 { x, y, day, temp, matched }
+
+    // 卡片数据（初始顺序随机）
+    let cards = [];
+    let matchedCount = 0;
+    const totalPoints = days.length;
+
+    // 拖拽全局变量
+    let dragActive = false;
+    let sourceCardElem = null;
+    let sourceCardId = null;
+    let sourceTempValue = null;
+    let cloneElem = null;
+    let startX = 0, startY = 0;
+
+    // DOM 元素
+    const canvas = document.getElementById('lineCanvas');
+    const ctx = canvas.getContext('2d');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const matchCountSpan = document.getElementById('matchCount');
+    const totalPointsSpan = document.getElementById('totalPoints');
+    const resetBtn = document.getElementById('resetGameBtn');
+    const gameMessage = document.getElementById('gameMessage');
+
+    totalPointsSpan.innerText = totalPoints;
+
+    // 初始化卡片数组（随机打乱顺序）
+    function initCards() {
+        let rawCards = days.map((day, idx) => ({
+            id: `card_${idx}`,
+            dayIndex: idx,
+            temp: temperatures[idx],
+            label: `${temperatures[idx]}°C`,
+            matched: false
+        }));
+        // Fisher-Yates 随机打乱
+        for (let i = rawCards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [rawCards[i], rawCards[j]] = [rawCards[j], rawCards[i]];
+        }
+        cards = rawCards;
+    }
+
+    // 计算canvas上每个点的坐标（基于当前canvas实际尺寸）
+    function computePoints() {
+        const rect = canvas.getBoundingClientRect();
+        const width = rect.width;
+        const height = rect.height;
+        const paddingLeft = 60;
+        const paddingRight = 40;
+        const paddingTop = 30;
+        const paddingBottom = 40;
+        const graphWidth = width - paddingLeft - paddingRight;
+        const graphHeight = height - paddingTop - paddingBottom;
+        const stepX = graphWidth / (days.length - 1);
+        
+        // 温度范围 15~28，映射到Y坐标
+        const minTemp = 15;
+        const maxTemp = 28;
+        
+        points = [];
+        for (let i = 0; i < days.length; i++) {
+            const x = paddingLeft + i * stepX;
+            // Y坐标：温度越高，Y越小（canvas Y轴向下）
+            const y = paddingTop + graphHeight - ((temperatures[i] - minTemp) / (maxTemp - minTemp)) * graphHeight;
+            points.push({
+                x: x,
+                y: y,
+                day: days[i],
+                temp: temperatures[i],
+                matched: false
+            });
+        }
+    }
+
+    // 绘制折线统计图（根据匹配状态显示已匹配的点）
+    function drawChart() {
+        if (!ctx) return;
+        const width = canvas.width;
+        const height = canvas.height;
+        ctx.clearRect(0, 0, width, height);
+        
+        // 背景
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, width, height);
+        
+        // 绘制网格线和坐标轴
+        ctx.save();
+        ctx.strokeStyle = "#E0D6C8";
+        ctx.lineWidth = 1;
+        // 水平网格线（温度刻度）
+        const minTemp = 15;
+        const maxTemp = 28;
+        const paddingLeft = 60;
+        const paddingRight = 40;
+        const paddingTop = 30;
+        const paddingBottom = 40;
+        const graphHeight = height - paddingTop - paddingBottom;
+        for (let temp = 15; temp <= 28; temp++) {
+            const y = paddingTop + graphHeight - ((temp - minTemp) / (maxTemp - minTemp)) * graphHeight;
+            ctx.beginPath();
+            ctx.moveTo(paddingLeft, y);
+            ctx.lineTo(width - paddingRight, y);
+            ctx.stroke();
+            ctx.fillStyle = "#B89A70";
+            ctx.font = "12px monospace";
+            ctx.fillText(temp + "°C", paddingLeft - 25, y + 4);
+        }
+        // 垂直网格线（星期）
+        const stepX = (width - paddingLeft - paddingRight) / (days.length - 1);
+        for (let i = 0; i < days.length; i++) {
+            const x = paddingLeft + i * stepX;
+            ctx.beginPath();
+            ctx.moveTo(x, paddingTop);
+            ctx.lineTo(x, height - paddingBottom);
+            ctx.stroke();
+            ctx.fillStyle = "#B89A70";
+            ctx.font = "bold 14px 'Segoe UI Emoji'";
+            ctx.fillText(days[i], x - 15, height - paddingBottom + 20);
+        }
+        
+        // 绘制轴线
+        ctx.beginPath();
+        ctx.moveTo(paddingLeft, paddingTop);
+        ctx.lineTo(paddingLeft, height - paddingBottom);
+        ctx.lineTo(width - paddingRight, height - paddingBottom);
+        ctx.strokeStyle = "#A76F3E";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // 绘制折线（只连接已匹配的点）
+        // 先收集已匹配点的坐标
+        let matchedPoints = points.filter(p => p.matched);
+        if (matchedPoints.length >= 2) {
+            ctx.beginPath();
+            ctx.moveTo(matchedPoints[0].x, matchedPoints[0].y);
+            for (let i = 1; i < matchedPoints.length; i++) {
+                ctx.lineTo(matchedPoints[i].x, matchedPoints[i].y);
+            }
+            ctx.strokeStyle = "#8FC65A";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+        
+        // 绘制所有点（未匹配的为空心圆，已匹配的为实心圆并显示温度）
+        for (let i = 0; i < points.length; i++) {
+            const p = points[i];
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 12, 0, 2 * Math.PI);
+            if (p.matched) {
+                ctx.fillStyle = "#8FC65A";
+                ctx.fill();
+                ctx.fillStyle = "#FFFFFF";
+                ctx.font = "bold 12px monospace";
+                ctx.fillText(p.temp + "°C", p.x - 13, p.y - 10);
+                // 内圈
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 6, 0, 2 * Math.PI);
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fill();
+            } else {
+                ctx.fillStyle = "#FFF2E4";
+                ctx.fill();
+                ctx.strokeStyle = "#F7DDB5";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                // 显示问号
+                ctx.fillStyle = "#C17A3E";
+                ctx.font = "bold 12px monospace";
+                ctx.fillText("?", p.x - 4, p.y + 5);
+            }
+        }
+        
+        // 标注标题
+        ctx.fillStyle = "#A76F3E";
+        ctx.font = "bold 14px 'Segoe UI Emoji'";
+        ctx.fillText("温度(°C)", 12, 50);
+        ctx.restore();
+    }
+
+    // 根据鼠标/触摸坐标查找最近的点（用于配对）
+    function findPointNear(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const canvasX = (clientX - rect.left) * scaleX;
+        const canvasY = (clientY - rect.top) * scaleY;
+        let minDist = 25;
+        let foundIndex = -1;
+        for (let i = 0; i < points.length; i++) {
+            const p = points[i];
+            if (p.matched) continue; // 已配对的不再接受
+            const dx = p.x - canvasX;
+            const dy = p.y - canvasY;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < minDist) {
+                minDist = dist;
+                foundIndex = i;
+            }
+        }
+        return foundIndex !== -1 ? points[foundIndex] : null;
+    }
+
+    // 渲染可拖拽卡片（只显示未配对的）
+    function renderCards() {
+        cardsContainer.innerHTML = '';
+        cards.forEach(card => {
+            if (!card.matched) {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'drag-card';
+                cardDiv.setAttribute('data-card-id', card.id);
+                cardDiv.setAttribute('data-temp', card.temp);
+                cardDiv.setAttribute('data-day-index', card.dayIndex);
+                const emojiSpan = document.createElement('span');
+                emojiSpan.className = 'card-emoji';
+                emojiSpan.innerText = "🌡️";
+                const textSpan = document.createElement('span');
+                textSpan.innerText = card.label;
+                cardDiv.appendChild(emojiSpan);
+                cardDiv.appendChild(textSpan);
+                cardsContainer.appendChild(cardDiv);
+            }
+        });
+    }
+
+    // 更新得分和胜利信息
+    function updateScoreUI() {
+        matchCountSpan.innerText = matchedCount;
+        if (matchedCount === totalPoints) {
+            gameMessage.innerHTML = "🎉🎉 完美！所有温度都配对正确！折线统计图完成啦 🎉🎉<br> ✨ 点击「重新挑战」可以再玩一次 ✨";
+            gameMessage.style.background = "#DAEFC4";
+            gameMessage.classList.add('win-glow');
+            setTimeout(() => gameMessage.classList.remove('win-glow'), 800);
+        } else {
+            if (!gameMessage.innerHTML.includes("错误") && !gameMessage.innerHTML.includes("配对成功")) {
+                gameMessage.innerHTML = "🐣 把温度卡片拖到对应日期的圆点上，完成一周气温折线图！";
+                gameMessage.style.background = "#FFF1E2";
+            }
+        }
+    }
+
+    // 配对逻辑
+    function attemptMatch(cardElem, point) {
+        const cardId = cardElem.getAttribute('data-card-id');
+        const card = cards.find(c => c.id === cardId);
+        if (!card || card.matched) return false;
+        
+        const dayIndex = days.findIndex(d => d === point.day);
+        if (dayIndex === -1) return false;
+        // 检查温度是否匹配
+        if (card.temp !== point.temp) return false;
+        // 检查该点是否已经配对
+        if (point.matched) return false;
+        
+        // 配对成功
+        card.matched = true;
+        point.matched = true;
+        matchedCount++;
+        
+        // 重新绘制图表和卡片
+        drawChart();
+        renderCards();
+        updateScoreUI();
+        
+        gameMessage.innerHTML = `✅ 配对成功！ ${point.day} 的温度是 ${point.temp}°C，折线已连接 ✅`;
+        gameMessage.style.background = "#E0F2CE";
+        setTimeout(() => {
+            if (matchedCount !== totalPoints) {
+                gameMessage.innerHTML = "🐣 继续拖拽其他温度卡片到正确的日期圆点上！";
+                gameMessage.style.background = "#FFF1E2";
+            } else {
+                gameMessage.innerHTML = "🎉🎉 完美！所有温度都配对正确！折线统计图完成啦 🎉🎉<br> ✨ 点击「重新挑战」可以再玩一次 ✨";
+                gameMessage.style.background = "#DAEFC4";
+            }
+        }, 1200);
+        return true;
+    }
+
+    // ---------- 自定义拖拽实现 (支持鼠标+触摸) ----------
+    function startDrag(e, cardElem) {
+        if (dragActive) return;
+        const cardId = cardElem.getAttribute('data-card-id');
+        const card = cards.find(c => c.id === cardId);
+        if (!card || card.matched) return;
+        e.preventDefault();
+        let clientX, clientY;
+        if (e.type === 'mousedown') {
+            clientX = e.clientX;
+            clientY = e.clientY;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        } else {
+            const touch = e.touches[0];
+            clientX = touch.clientX;
+            clientY = touch.clientY;
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+            document.addEventListener('touchcancel', onTouchCancel);
+        }
+        dragActive = true;
+        sourceCardElem = cardElem;
+        sourceCardId = cardId;
+        sourceTempValue = card.temp;
+        sourceCardElem.classList.add('dragging-source');
+        
+        // 创建克隆体
+        cloneElem = document.createElement('div');
+        cloneElem.className = 'drag-clone';
+        // 复制内容
+        const emojiClone = document.createElement('span');
+        emojiClone.className = 'card-emoji';
+        emojiClone.innerText = "🌡️";
+        const textClone = document.createElement('span');
+        textClone.innerText = card.label;
+        cloneElem.appendChild(emojiClone);
+        cloneElem.appendChild(textClone);
+        cloneElem.style.left = (clientX - 40) + 'px';
+        cloneElem.style.top = (clientY - 40) + 'px';
+        cloneElem.style.width = sourceCardElem.offsetWidth + 'px';
+        document.body.appendChild(cloneElem);
+        startX = clientX;
+        startY = clientY;
+        
+        // 高亮未配对的圆点
+        const rect = canvas.getBoundingClientRect();
+        for (let i = 0; i < points.length; i++) {
+            if (!points[i].matched) {
+                // 可以在canvas上临时绘制高亮，但简单添加样式比较困难，使用canvas重绘时高亮
+            }
+        }
+    }
+    
+    function onMouseMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        moveClone(e.clientX, e.clientY);
+    }
+    function onTouchMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveClone(touch.clientX, touch.clientY);
+    }
+    function moveClone(clientX, clientY) {
+        if (cloneElem) {
+            cloneElem.style.left = (clientX - cloneElem.offsetWidth / 2) + 'px';
+            cloneElem.style.top = (clientY - cloneElem.offsetHeight / 2) + 'px';
+        }
+    }
+    function finishDrag(clientX, clientY) {
+        if (!dragActive) return;
+        // 查找canvas上的点
+        const point = findPointNear(clientX, clientY);
+        let success = false;
+        if (point && sourceCardElem) {
+            if (!point.matched) {
+                success = attemptMatch(sourceCardElem, point);
+                if (!success) {
+                    gameMessage.innerHTML = "😲 配对错误！ 这个温度不属于这个日期，再检查一下～";
+                    gameMessage.style.background = "#FFE0D0";
+                    setTimeout(() => {
+                        if (matchedCount !== totalPoints) {
+                            gameMessage.innerHTML = "🐣 继续拖拽温度卡片到正确的日期圆点上！";
+                            gameMessage.style.background = "#FFF1E2";
+                        }
+                    }, 1200);
+                }
+            } else {
+                gameMessage.innerHTML = "⛔ 这个日期已经配对过了！不能重复配对";
+                gameMessage.style.background = "#FFE0D0";
+                setTimeout(() => {
+                    if (matchedCount !== totalPoints) gameMessage.style.background = "#FFF1E2";
+                }, 1000);
+            }
+        } else if (sourceCardElem) {
+            gameMessage.innerHTML = "💡 要把卡片拖拽到折线图上的圆点（日期位置）松手哦！";
+            setTimeout(() => {
+                if (matchedCount !== totalPoints && gameMessage.innerHTML.includes("圆点")) {
+                    gameMessage.innerHTML = "🐣 继续拖拽温度卡片到正确的日期圆点上！";
+                    gameMessage.style.background = "#FFF1E2";
+                }
+            }, 1000);
+        }
+        endDragCleanup();
+        if (!success && sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        if (matchedCount === totalPoints) {
+            drawChart();
+            renderCards();
+        }
+    }
+    function endDragCleanup() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.remove();
+        if (sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+        document.removeEventListener('touchcancel', onTouchCancel);
+        dragActive = false;
+        sourceCardElem = null;
+        cloneElem = null;
+    }
+    function onMouseUp(e) { if (dragActive) finishDrag(e.clientX, e.clientY); }
+    function onTouchEnd(e) {
+        if (!dragActive) return;
+        let clientX, clientY;
+        if (e.changedTouches && e.changedTouches.length) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        } else { clientX = startX; clientY = startY; }
+        finishDrag(clientX, clientY);
+    }
+    function onTouchCancel(e) { endDragCleanup(); }
+    
+    function bindDragEvents() {
+        cardsContainer.addEventListener('mousedown', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        });
+        cardsContainer.addEventListener('touchstart', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        }, { passive: false });
+    }
+    
+    // 重置游戏
+    function resetGame() {
+        if (dragActive) endDragCleanup();
+        // 重置匹配状态
+        points.forEach(p => p.matched = false);
+        matchedCount = 0;
+        initCards();       // 重置卡片并打乱顺序
+        computePoints();
+        drawChart();
+        renderCards();
+        updateScoreUI();
+        gameMessage.innerHTML = "✨ 游戏已重置！ 重新把温度卡片拖到正确的日期圆点上 ✨";
+        gameMessage.style.background = "#FFF1E2";
+        gameMessage.classList.remove('win-glow');
+    }
+    
+    // 初始化（响应窗口大小变化）
+    function init() {
+        initCards();
+        computePoints();
+        drawChart();
+        bindDragEvents();
+        updateScoreUI();
+        resetBtn.addEventListener('click', resetGame);
+        window.addEventListener('resize', () => {
+            computePoints();
+            drawChart();
+        });
+        // 确保canvas尺寸正确
+        const resizeObserver = new ResizeObserver(() => {
+            computePoints();
+            drawChart();
+        });
+        resizeObserver.observe(canvas.parentElement);
+    }
+    
+    init();
+</script>
+</body>
+</html>

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>认识正方形和长方形 | 图形小侦探 | 拖拽游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #fef5ea;
+            font-family: 'Comic Neue', 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI Emoji', system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .course-card {
+            max-width: 1400px;
+            width: 100%;
+            background: #fffffb;
+            border-radius: 70px 60px 70px 60px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.08), 0 8px 18px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .two-columns {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* 左侧知识点区 */
+        .knowledge-panel {
+            flex: 1.2;
+            min-width: 260px;
+            background: #fffef8;
+            padding: 28px 24px;
+            border-right: 4px solid #ffbc6e;
+        }
+
+        .knowledge-panel h1 {
+            font-size: 2rem;
+            color: #e67e22;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 14px solid #ffaa55;
+            padding-left: 18px;
+            margin-bottom: 8px;
+        }
+
+        .sub {
+            color: #c95a0f;
+            margin-bottom: 24px;
+            padding-left: 32px;
+            font-size: 1rem;
+        }
+
+        .intro-card {
+            background: #fff0e0;
+            border-radius: 48px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .shape-compare {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .shape-card {
+            background: white;
+            border-radius: 32px;
+            padding: 12px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            flex: 1;
+        }
+
+        .shape-svg {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .feature-list {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #7b3f00;
+        }
+
+        .rule-list {
+            background: #fff3e6;
+            border-radius: 36px;
+            padding: 16px 20px;
+            margin: 20px 0;
+        }
+
+        .rule-list p {
+            margin: 10px 0;
+            font-size: 1rem;
+            color: #7b3f00;
+        }
+
+        .example-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        .example-item {
+            background: white;
+            border-radius: 32px;
+            padding: 6px 16px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #c4410c;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .game-tip {
+            background: #ffe1b9;
+            border-radius: 30px;
+            padding: 14px 16px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #aa5a1c;
+        }
+
+        /* 右侧游戏区 */
+        .game-panel {
+            flex: 2;
+            min-width: 300px;
+            background: #fffbf5;
+            padding: 24px 22px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            background: #ffefdc;
+            border-radius: 50px;
+            padding: 10px 22px;
+            margin-bottom: 24px;
+            gap: 12px;
+        }
+
+        .score-board, .remain-board {
+            background: #f39c12;
+            border-radius: 40px;
+            padding: 6px 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: inset 0 -2px 0 #c56a00;
+        }
+
+        .remain-board {
+            background: #2ecc71;
+            box-shadow: inset 0 -2px 0 #1f8f4a;
+        }
+
+        .new-game-btn {
+            background: #3498db;
+            border: none;
+            font-size: 1rem;
+            padding: 8px 24px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 5px 0 #1f618d;
+            transition: 0.05s linear;
+        }
+
+        .new-game-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1f618d;
+        }
+
+        /* 拖拽卡片区 */
+        .drag-zone {
+            background: #fef3e8;
+            border-radius: 48px;
+            padding: 20px 16px;
+            margin-bottom: 28px;
+            border: 3px dashed #ffbc6e;
+            min-height: 260px;
+        }
+
+        .drag-zone p {
+            text-align: center;
+            font-weight: bold;
+            color: #b85c1a;
+            margin-bottom: 18px;
+            font-size: 1.1rem;
+        }
+
+        .cards-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #fff5e8, #ffe6d0);
+            width: 170px;
+            padding: 14px 8px;
+            text-align: center;
+            border-radius: 48px;
+            box-shadow: 0 8px 0 #e0a45a;
+            cursor: grab;
+            touch-action: none;
+            transition: 0.05s;
+            border: 2px solid #ffcd94;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #c4410c;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        .baskets-area {
+            background: #ffefdd;
+            border-radius: 48px;
+            padding: 18px 14px;
+        }
+
+        .baskets-area h3 {
+            text-align: center;
+            margin-bottom: 18px;
+            color: #c2410c;
+            font-size: 1.2rem;
+        }
+
+        .baskets-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .basket {
+            background: #ffedd5;
+            width: 160px;
+            padding: 14px 8px;
+            text-align: center;
+            border-radius: 60px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #e67e22;
+            box-shadow: 0 6px 0 #d9b48b;
+            transition: 0.1s;
+            border: 2px solid #f7bc6c;
+            cursor: pointer;
+        }
+
+        .basket span {
+            display: block;
+            font-size: 0.7rem;
+            color: #a65d2a;
+        }
+
+        .message-area {
+            margin-top: 20px;
+            background: #f7e1b0;
+            border-radius: 36px;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            color: #b85c1a;
+            font-size: 0.95rem;
+        }
+
+        /* 拖拽克隆样式 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.25));
+            opacity: 0.9;
+            pointer-events: none;
+            transform: scale(1.05) rotate(2deg);
+            width: 170px;
+            background: linear-gradient(145deg, #fff5e8, #ffe6d0);
+            border-radius: 48px;
+            padding: 14px 8px;
+            border: 3px solid #ffb347;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+            color: #c4410c;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 动画 */
+        .correct-pop {
+            animation: bounceHappy 0.35s ease;
+        }
+
+        @keyframes bounceHappy {
+            0% { transform: scale(1); background: #d9f0cd; }
+            70% { transform: scale(1.08); background: #b2e0a0; }
+            100% { transform: scale(1); background: #ffedd5; }
+        }
+
+        .wrong-shake {
+            animation: shakeBad 0.3s ease 0s 2;
+            background-color: #ffe0e0;
+        }
+
+        @keyframes shakeBad {
+            0%,100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* 响应式 */
+        @media (max-width: 850px) {
+            .knowledge-panel {
+                border-right: none;
+                border-bottom: 4px solid #ffbc6e;
+            }
+            .drag-card, .drag-clone {
+                width: 150px;
+                font-size: 0.9rem;
+            }
+            .basket {
+                width: 140px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .drag-card, .drag-clone {
+                width: 130px;
+                font-size: 0.85rem;
+            }
+            .basket {
+                width: 120px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="course-card">
+    <div class="two-columns">
+        <!-- 左侧：认识正方形和长方形知识点 -->
+        <div class="knowledge-panel">
+            <h1>🔲 认识正方形和长方形</h1>
+            <div class="sub">—— 四边形的两个好兄弟</div>
+            <div class="intro-card">
+                <div class="shape-compare">
+                    <div class="shape-card">
+                        <svg width="100" height="100" viewBox="0 0 100 100" class="shape-svg">
+                            <rect x="15" y="15" width="70" height="70" fill="#ffe6cf" stroke="#c4410c" stroke-width="3" />
+                        </svg>
+                        <div class="feature-list">
+                            <strong>正方形</strong><br>
+                            四条边都相等<br>
+                            四个角都是直角
+                        </div>
+                    </div>
+                    <div class="shape-card">
+                        <svg width="100" height="100" viewBox="0 0 100 100" class="shape-svg">
+                            <rect x="10" y="20" width="80" height="60" fill="#ffe6cf" stroke="#c4410c" stroke-width="3" />
+                        </svg>
+                        <div class="feature-list">
+                            <strong>长方形</strong><br>
+                            对边相等<br>
+                            四个角都是直角
+                        </div>
+                    </div>
+                </div>
+                <p>✨ 它们都是四边形，都有四条边、四个角。</p>
+                <p>📖 <strong>相同点</strong>：四个角都是直角。<br>
+                <strong>不同点</strong>：正方形的四条边都相等，长方形只有对边相等。</p>
+            </div>
+            <div class="rule-list">
+                <p>🎈 小口诀：</p>
+                <p>✔️ 长方形，对边等，四个角，都直角。<br>
+                ✔️ 正方形，更特殊，四边等，直角住。<br>
+                ✔️ 生活中，到处有，窗户书本和魔方。</p>
+                <div class="example-group">
+                    <div class="example-item">魔方 → 正方形</div>
+                    <div class="example-item">数学课本 → 长方形</div>
+                    <div class="example-item">手帕 → 正方形</div>
+                </div>
+            </div>
+            <div class="game-tip">
+                🎮 游戏玩法：<br>
+                右边每个卡片上有一个图形或特征描述。<br>
+                判断它属于正方形还是长方形，把卡片拖到正确的篮子里。<br>
+                全部配对成功就胜利啦！✨ 成为图形小侦探！
+            </div>
+        </div>
+
+        <!-- 右侧：拖拽配对游戏区 -->
+        <div class="game-panel">
+            <div class="game-header">
+                <div class="score-board">⭐ 配对: <span id="scoreValue">0</span></div>
+                <div class="remain-board">🎯 剩余: <span id="remainValue">0</span></div>
+                <button class="new-game-btn" id="resetGameBtn">🔄 新的一关</button>
+            </div>
+
+            <div class="drag-zone">
+                <p>🐣 按住卡片，拖到正确的篮子里！</p>
+                <div id="cardsContainer" class="cards-grid">
+                    <!-- 动态生成卡片 -->
+                </div>
+            </div>
+
+            <div class="baskets-area">
+                <h3>📦 形状篮子 (拖到这里配对)</h3>
+                <div class="baskets-grid">
+                    <div class="basket" data-type="square">🔲 正方形<span>四条边相等，四个直角</span></div>
+                    <div class="basket" data-type="rectangle">📏 长方形<span>对边相等，四个直角</span></div>
+                </div>
+            </div>
+
+            <div id="gameMessage" class="message-area">
+                🧸 把图形或特征卡片拖到正确的篮子里！
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- 游戏核心：正方形和长方形分类配对（图形/特征 -> 正方形/长方形）----------
+    // 预定义卡片数据：每个卡片包含描述、类型（square/rectangle）、图标或图形
+    const CARD_BANK = [
+        { text: "🟫 四边相等，四个直角", type: "square", icon: "🔲" },
+        { text: "🟧 对边相等，四个直角", type: "rectangle", icon: "📏" },
+        { text: "🧊 魔方的一个面", type: "square", icon: "🧊" },
+        { text: "📘 数学课本的封面", type: "rectangle", icon: "📘" },
+        { text: "🪞 小镜子（正方形）", type: "square", icon: "🪞" },
+        { text: "🖼️ 相框（长方形）", type: "rectangle", icon: "🖼️" },
+        { text: "🍪 正方形的饼干", type: "square", icon: "🍪" },
+        { text: "📱 手机屏幕", type: "rectangle", icon: "📱" },
+        { text: "图形：四条边都相等", type: "square", icon: "🔲" },
+        { text: "图形：对边相等", type: "rectangle", icon: "📐" },
+        { text: "🎲 骰子的一个面", type: "square", icon: "🎲" },
+        { text: "🏠 窗户（长方形）", type: "rectangle", icon: "🏠" }
+    ];
+
+    // 随机选取5~6个不重复卡片
+    function getRandomCards(maxCount = 5) {
+        const shuffled = [...CARD_BANK];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled.slice(0, maxCount);
+    }
+
+    let currentCards = [];      // 未配对卡片 { text, type, icon }
+    let currentScore = 0;
+    let totalCount = 0;
+
+    // DOM 元素
+    const cardsContainer = document.getElementById('cardsContainer');
+    const baskets = document.querySelectorAll('.basket');
+    const scoreSpan = document.getElementById('scoreValue');
+    const remainSpan = document.getElementById('remainValue');
+    const messageDiv = document.getElementById('gameMessage');
+    const resetBtn = document.getElementById('resetGameBtn');
+
+    // 洗牌函数
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // 重置游戏
+    function resetAndNewGame() {
+        const rawCards = getRandomCards(5);
+        currentCards = rawCards.map((item, idx) => ({
+            text: item.text,
+            type: item.type,
+            icon: item.icon,
+            id: idx
+        }));
+        currentCards = shuffleArray(currentCards);
+        currentScore = 0;
+        totalCount = currentCards.length;
+        renderGame();
+        messageDiv.innerHTML = '🎈 新的一关！ 把卡片拖到正确的形状篮子！ 🎈';
+        messageDiv.style.background = '#f7e1b0';
+        if (isDragging) stopDrag();
+    }
+
+    // 渲染卡片
+    function renderGame() {
+        cardsContainer.innerHTML = '';
+        currentCards.forEach(card => {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'drag-card';
+            cardDiv.setAttribute('data-type', card.type);
+            cardDiv.setAttribute('data-text', card.text);
+            cardDiv.innerHTML = `
+                <span style="font-size:1.8rem;">${card.icon}</span>
+                <span>${card.text}</span>
+            `;
+            cardsContainer.appendChild(cardDiv);
+        });
+
+        const remainCount = currentCards.length;
+        remainSpan.innerText = remainCount;
+        scoreSpan.innerText = currentScore;
+
+        if (remainCount === 0 && totalCount > 0) {
+            messageDiv.innerHTML = '🎉🎉 完美！ 你完全认识了正方形和长方形！ 点“新的一关”继续挑战 🎉🎉';
+            messageDiv.style.background = '#c8f0d1';
+        } else {
+            if (messageDiv.innerHTML.includes('完美')) {
+                messageDiv.innerHTML = '🐣 继续拖拽配对，成为图形小侦探！';
+                messageDiv.style.background = '#f7e1b0';
+            }
+        }
+        bindDragEvents();
+    }
+
+    // ---------- 自定义拖拽系统 (鼠标+触摸) ----------
+    let isDragging = false;
+    let draggedCardElem = null;
+    let cloneElem = null;
+    let draggedType = null;
+
+    function removeClone() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.parentNode.removeChild(cloneElem);
+        cloneElem = null;
+    }
+
+    function stopDrag() {
+        if (!isDragging) return;
+        isDragging = false;
+        removeClone();
+        document.removeEventListener('mousemove', onGlobalMove);
+        document.removeEventListener('mouseup', onGlobalUp);
+        document.removeEventListener('touchmove', onGlobalTouchMove);
+        document.removeEventListener('touchend', onGlobalTouchEnd);
+        document.body.style.userSelect = '';
+        draggedCardElem = null;
+        draggedType = null;
+    }
+
+    function onGlobalMove(e) {
+        if (!cloneElem) return;
+        e.preventDefault();
+        const x = e.clientX;
+        const y = e.clientY;
+        cloneElem.style.left = (x - cloneElem.offsetWidth / 2) + 'px';
+        cloneElem.style.top = (y - cloneElem.offsetHeight / 2) + 'px';
+    }
+
+    function onGlobalTouchMove(e) {
+        if (!cloneElem) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const x = touch.clientX;
+        const y = touch.clientY;
+        cloneElem.style.left = (x - cloneElem.offsetWidth / 2) + 'px';
+        cloneElem.style.top = (y - cloneElem.offsetHeight / 2) + 'px';
+    }
+
+    function finishDrag(endX, endY) {
+        if (!draggedCardElem || !isDragging) {
+            stopDrag();
+            return;
+        }
+
+        const elemUnderPointer = document.elementsFromPoint(endX, endY);
+        let targetBasket = null;
+        for (let el of elemUnderPointer) {
+            if (el.classList && el.classList.contains('basket')) {
+                targetBasket = el;
+                break;
+            }
+        }
+
+        let isCorrect = false;
+        if (targetBasket) {
+            const basketType = targetBasket.getAttribute('data-type');
+            if (basketType === draggedType) {
+                isCorrect = true;
+                // 从 currentCards 中移除该卡片
+                const cardIndex = currentCards.findIndex(c => c.type === draggedType && c.text === draggedCardElem.getAttribute('data-text'));
+                if (cardIndex !== -1) {
+                    currentCards.splice(cardIndex, 1);
+                    currentScore++;
+                    // 篮子不消失（固定篮子）
+                    targetBasket.classList.add('correct-pop');
+                    setTimeout(() => targetBasket.classList.remove('correct-pop'), 350);
+                    messageDiv.innerHTML = `✅ 正确！ "${draggedCardElem.innerText.trim()}" 是 ${basketType === 'square' ? '正方形' : '长方形'}  ✅ +1分`;
+                    messageDiv.style.background = '#c8e6b5';
+                    setTimeout(() => {
+                        if (currentCards.length !== 0) messageDiv.style.background = '#f7e1b0';
+                        else messageDiv.innerHTML = '🏆 全对！ 图形小侦探就是你！ 🏆';
+                    }, 900);
+                    renderGame();
+                } else {
+                    messageDiv.innerHTML = '🤔 卡片不见了，请点新游戏~';
+                }
+            } else {
+                messageDiv.innerHTML = `❌ 不对哦！ "${draggedCardElem.innerText.trim()}" 不是 ${basketType === 'square' ? '正方形' : '长方形'}，再想想特征~ ❌`;
+                messageDiv.style.background = '#ffe0e0';
+                setTimeout(() => {
+                    if (currentCards.length !== 0 && messageDiv.innerHTML.includes('不对哦')) messageDiv.style.background = '#f7e1b0';
+                }, 1000);
+                draggedCardElem.classList.add('wrong-shake');
+                setTimeout(() => draggedCardElem.classList.remove('wrong-shake'), 500);
+            }
+        } else {
+            messageDiv.innerHTML = '🧸 要把卡片拖到篮子上方再松开哟！ 试试看~';
+            messageDiv.style.background = '#ffefcf';
+            setTimeout(() => {
+                if (currentCards.length !== 0 && messageDiv.innerHTML.includes('拖到篮子')) messageDiv.style.background = '#f7e1b0';
+            }, 800);
+        }
+        stopDrag();
+    }
+
+    function onGlobalUp(e) {
+        if (!isDragging) return;
+        finishDrag(e.clientX, e.clientY);
+    }
+
+    function onGlobalTouchEnd(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        const touch = e.changedTouches[0];
+        finishDrag(touch.clientX, touch.clientY);
+    }
+
+    function startDrag(cardElement, startX, startY) {
+        if (isDragging) stopDrag();
+        draggedCardElem = cardElement;
+        const typeAttr = cardElement.getAttribute('data-type');
+        if (typeAttr) {
+            draggedType = typeAttr;
+        } else {
+            const text = cardElement.getAttribute('data-text');
+            const found = currentCards.find(c => c.text === text);
+            if (found) draggedType = found.type;
+        }
+        if (!draggedType) return;
+
+        const rect = cardElement.getBoundingClientRect();
+        cloneElem = cardElement.cloneNode(true);
+        cloneElem.classList.add('drag-clone');
+        cloneElem.style.position = 'fixed';
+        cloneElem.style.left = rect.left + 'px';
+        cloneElem.style.top = rect.top + 'px';
+        cloneElem.style.width = rect.width + 'px';
+        cloneElem.style.margin = '0';
+        cloneElem.style.pointerEvents = 'none';
+        document.body.appendChild(cloneElem);
+
+        isDragging = true;
+        document.addEventListener('mousemove', onGlobalMove);
+        document.addEventListener('mouseup', onGlobalUp);
+        document.addEventListener('touchmove', onGlobalTouchMove, { passive: false });
+        document.addEventListener('touchend', onGlobalTouchEnd);
+        document.body.style.userSelect = 'none';
+    }
+
+    function bindDragEvents() {
+        const cards = document.querySelectorAll('.drag-card');
+        cards.forEach(card => {
+            card.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                startDrag(card, e.clientX, e.clientY);
+            });
+            card.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                startDrag(card, touch.clientX, touch.clientY);
+            });
+            card.addEventListener('dragstart', (e) => e.preventDefault());
+        });
+    }
+
+    // 初始化
+    resetAndNewGame();
+    resetBtn.addEventListener('click', () => {
+        if (isDragging) stopDrag();
+        resetAndNewGame();
+    });
+</script>
+</body>
+</html>

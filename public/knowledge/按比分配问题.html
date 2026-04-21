@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>📊 按比分配 | 小小分配师</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免拖拽时选中文字，提升触屏体验 */
+        }
+
+        body {
+            background: #F0F7EC;
+            font-family: 'Comic Neue', 'Segoe UI Emoji', 'Chalkboard SE', 'Poppins', 'Comic Sans MS', cursive, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 主课程卡片 */
+        .ratio-lab {
+            max-width: 1350px;
+            width: 100%;
+            background: #FFFFFFF2;
+            backdrop-filter: blur(2px);
+            border-radius: 68px 52px 68px 52px;
+            box-shadow: 0 25px 40px rgba(70, 60, 40, 0.12);
+            overflow: hidden;
+        }
+
+        /* 左右布局 */
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* 左侧知识点区域 */
+        .knowledge-side {
+            flex: 1.2;
+            min-width: 260px;
+            background: #FEFCF5;
+            padding: 32px 24px;
+            border-right: 4px dashed #D4E2C6;
+        }
+
+        .knowledge-side h2 {
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #79A85A, #B2D48B);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            border-left: 8px solid #8DC26F;
+            padding-left: 18px;
+        }
+
+        .info-card {
+            background: #F4F9EF;
+            border-radius: 40px 24px 40px 24px;
+            padding: 22px;
+            margin: 20px 0;
+            box-shadow: 0 8px 0 #DFEAD4;
+        }
+
+        .info-card p {
+            font-size: 1rem;
+            margin: 14px 0;
+            color: #3F5A2B;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .math-badge {
+            background: #E5F0DB;
+            padding: 5px 14px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #558C2F;
+            display: inline-block;
+            margin: 4px 4px 0 0;
+        }
+
+        .tip-area {
+            background: #FEF5E6;
+            border-radius: 32px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .tip-area li {
+            margin-left: 24px;
+            margin-bottom: 8px;
+            color: #A5662C;
+        }
+
+        /* 右侧游戏区 */
+        .game-side {
+            flex: 2;
+            min-width: 300px;
+            background: #FFFCF7;
+            padding: 28px 24px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #E1F0D2;
+            padding-bottom: 12px;
+        }
+
+        .game-header h3 {
+            font-size: 1.8rem;
+            color: #6F9E3F;
+        }
+
+        .stats {
+            display: flex;
+            gap: 12px;
+            background: #F1F7EA;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #54862C;
+            align-items: center;
+        }
+
+        .reset-btn {
+            background: #F2E3CE;
+            border: none;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-family: inherit;
+            color: #9B6A3A;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: 8px;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.96);
+            background: #EAD5B0;
+        }
+
+        /* 题目区域 */
+        .question-area {
+            background: #FFF9F0;
+            border-radius: 56px;
+            padding: 24px 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.04);
+        }
+
+        .problem-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #B87A44;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .ratio-display {
+            background: #FFF4E8;
+            border-radius: 48px;
+            padding: 12px;
+            margin: 12px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #A76F3E;
+        }
+
+        .allocation-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        .target-card {
+            flex: 1;
+            min-width: 150px;
+            background: #FFF8F0;
+            border-radius: 48px;
+            padding: 18px 12px;
+            text-align: center;
+            border: 2px solid #F7DDB5;
+            transition: all 0.2s;
+            box-shadow: 0 6px 0 #EED9BD;
+        }
+
+        .target-card.matched {
+            background: #E4F3D6;
+            border-color: #8FC65A;
+            box-shadow: 0 4px 0 #B6D99B;
+        }
+
+        .target-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #C17A3E;
+            margin-bottom: 12px;
+        }
+
+        .target-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #8FC65A;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .drop-zone {
+            background: #FFF7EB;
+            border-radius: 40px;
+            padding: 10px;
+            margin-top: 12px;
+            font-size: 0.9rem;
+            color: #BF8F60;
+            border: 2px dashed #F7DDB5;
+            transition: all 0.2s;
+        }
+
+        .drop-zone.active-drop {
+            background: #F3FCEB;
+            border-color: #8FC65A;
+        }
+
+        /* 可拖拽卡片区 */
+        .cards-area {
+            background: #FEF5EA;
+            border-radius: 56px;
+            padding: 20px 16px;
+        }
+
+        .cards-title {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #AF6F3C;
+            margin-bottom: 16px;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: center;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #FFFFFF, #FFF1E2);
+            border-radius: 60px;
+            padding: 14px 24px;
+            min-width: 90px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #A5612A;
+            box-shadow: 0 12px 18px -6px rgba(100, 70, 30, 0.15);
+            cursor: grab;
+            transition: 0.05s linear;
+            border: 2px solid #FDD6A5;
+            touch-action: none;
+            font-family: monospace;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        .drag-card.dragging-source {
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+
+        .drag-card.matched-card {
+            display: none;
+        }
+
+        /* 克隆拖拽体 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0,0,0,0.25));
+            transform: scale(1.02) rotate(1deg);
+            pointer-events: none;
+            background: #FFFCF0;
+            border-radius: 60px;
+            padding: 14px 24px;
+            min-width: 90px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #A5612A;
+            border: 2px solid #FCC37A;
+            backdrop-filter: blur(6px);
+            font-family: monospace;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+        }
+
+        .message-panel {
+            background: #FFF1E2;
+            border-radius: 60px;
+            padding: 12px;
+            margin-top: 24px;
+            text-align: center;
+            font-weight: bold;
+            color: #C17A3E;
+            transition: 0.1s;
+        }
+
+        .win-glow {
+            animation: cheerPop 0.6s ease;
+            background: #DAEFC4 !important;
+        }
+
+        @keyframes cheerPop {
+            0% { transform: scale(1); background: #FFEAC6; }
+            50% { transform: scale(1.01); background: #FFE0AE; box-shadow: 0 0 0 5px rgba(150, 200, 100, 0.4);}
+            100% { transform: scale(1); }
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 14px;
+            background: #FBF8EF;
+            color: #BB8A60;
+        }
+
+        @media (max-width: 780px) {
+            .knowledge-side {
+                border-right: none;
+                border-bottom: 4px dashed #D4E2C6;
+            }
+            .target-card {
+                min-width: 130px;
+            }
+            .drag-card {
+                padding: 10px 18px;
+                font-size: 1.1rem;
+                min-width: 75px;
+            }
+            .problem-text {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="ratio-lab">
+    <div class="flex-row">
+        <!-- 左侧知识点：按比分配 -->
+        <div class="knowledge-side">
+            <h2>📊 按比分配 · 公平分一分</h2>
+            <div class="info-card">
+                <p>📌 <strong>什么是按比分配？</strong><br>
+                把一个总数按照一定的<span class="math-badge">比</span>分成几部分，叫做按比分配。</p>
+                <p>🎯 <strong>解题步骤</strong><br>
+                1️⃣ 求出总份数（比的前项+后项）。<br>
+                2️⃣ 每份数 = 总数 ÷ 总份数。<br>
+                3️⃣ 各部分数量 = 每份数 × 对应的份数。</p>
+                <p>✨ 例子：<br>
+                把30个糖果按3:2分给小明和小红。<br>
+                总份数=3+2=5，每份=30÷5=6个。<br>
+                小明=6×3=18个，小红=6×2=12个。</p>
+                <p>🧸 右边游戏：帮小动物们分配食物，把正确的数量拖到对应的盒子里！</p>
+            </div>
+            <div class="tip-area">
+                <span>🧠 小口诀：</span>
+                <ul>
+                    <li>🔢 总份数先相加</li>
+                    <li>➗ 每份数等于总数÷总份数</li>
+                    <li>✖️ 每份数×份数=各部分量</li>
+                </ul>
+                <p style="margin-top: 12px; background:#F8EFE2; border-radius: 28px; padding: 8px;">🎮 玩法：把数字卡片拖到对应物品的虚线框里，配对正确自动进入下一题！</p>
+            </div>
+        </div>
+
+        <!-- 右侧游戏区：按比分配拖拽配对 -->
+        <div class="game-side">
+            <div class="game-header">
+                <h3>🍎 分配小管家 · 拖拽配对</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="stats">🏆 得分 <span id="scoreValue">0</span> / <span id="totalQuestions">4</span></span>
+                    <button class="reset-btn" id="resetGameBtn">🔄 重新挑战</button>
+                </div>
+            </div>
+
+            <!-- 当前题目区域 -->
+            <div class="question-area">
+                <div class="problem-text" id="problemText"></div>
+                <div class="ratio-display" id="ratioDisplay"></div>
+                <div class="allocation-area" id="allocationArea"></div>
+            </div>
+
+            <!-- 可拖拽卡片区 -->
+            <div class="cards-area">
+                <div class="cards-title">🎴 可拖拽数字卡片（拖到对应的分配框中）</div>
+                <div class="cards-container" id="cardsContainer"></div>
+            </div>
+            <div id="gameMessage" class="message-panel">
+                🌟 读题，计算按比分配后各部分的数量，把正确的数字卡片拖到对应的虚线框里！
+            </div>
+        </div>
+    </div>
+    <footer>💡 小秘诀：先求总份数，再算每份数，最后乘各自的份数。拖拽正确的数字到对应的框里，就能得分！</footer>
+</div>
+
+<script>
+    // ---------- 题目数据（总数，比例，两个部分的名称和份数，正确答案）----------
+    const questionBank = [
+        {
+            total: 30,
+            ratioA: 3,
+            ratioB: 2,
+            nameA: "小明",
+            nameB: "小红",
+            emojiA: "👦",
+            emojiB: "👧",
+            correctA: 18,
+            correctB: 12,
+            description: "把30颗糖果按3:2分给小明和小红"
+        },
+        {
+            total: 56,
+            ratioA: 5,
+            ratioB: 3,
+            nameA: "足球组",
+            nameB: "篮球组",
+            emojiA: "⚽",
+            emojiB: "🏀",
+            correctA: 35,
+            correctB: 21,
+            description: "学校买来56个球，按5:3分给足球组和篮球组"
+        },
+        {
+            total: 72,
+            ratioA: 4,
+            ratioB: 5,
+            nameA: "三年级",
+            nameB: "四年级",
+            emojiA: "📚",
+            emojiB: "📖",
+            correctA: 32,
+            correctB: 40,
+            description: "把72本图书按4:5分给三年级和四年级"
+        },
+        {
+            total: 100,
+            ratioA: 2,
+            ratioB: 3,
+            nameA: "苹果",
+            nameB: "橘子",
+            emojiA: "🍎",
+            emojiB: "🍊",
+            correctA: 40,
+            correctB: 60,
+            description: "水果店运来100个水果，按2:3分给苹果和橘子"
+        }
+    ];
+    const totalQuestions = questionBank.length;
+
+    let currentIndex = 0;
+    let currentScore = 0;
+    let gameCompleted = false;
+    let currentQuestion = questionBank[0];
+    let aMatched = false;
+    let bMatched = false;
+
+    // 拖拽全局变量
+    let dragActive = false;
+    let sourceCardElem = null;
+    let sourceCardValue = null;
+    let sourceCardTarget = null; // 记录卡片对应的是A还是B（卡片本身不区分，配对时根据目标区域判断）
+    let cloneElem = null;
+    let startX = 0, startY = 0;
+
+    // DOM 元素
+    const problemText = document.getElementById('problemText');
+    const ratioDisplay = document.getElementById('ratioDisplay');
+    const allocationArea = document.getElementById('allocationArea');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const scoreSpan = document.getElementById('scoreValue');
+    const totalSpan = document.getElementById('totalQuestions');
+    const resetBtn = document.getElementById('resetGameBtn');
+    const gameMessage = document.getElementById('gameMessage');
+
+    totalSpan.innerText = totalQuestions;
+
+    // 生成当前题目的选项卡片（正确值A、正确值B + 两个干扰项）
+    function generateCardValues(question) {
+        let options = new Set();
+        options.add(question.correctA);
+        options.add(question.correctB);
+        // 产生两个干扰值（与正确值不同，且为正整数，范围1~总数）
+        let possibleInterference = [question.correctA + 5, question.correctA - 5, question.correctB + 5, question.correctB - 5];
+        let added = 0;
+        for (let val of possibleInterference) {
+            if (val > 0 && val !== question.correctA && val !== question.correctB && !options.has(val) && added < 2) {
+                options.add(val);
+                added++;
+            }
+        }
+        // 如果干扰项不足，补充随机数
+        while(options.size < 4) {
+            let candidate = Math.floor(Math.random() * (question.total)) + 1;
+            if (candidate !== question.correctA && candidate !== question.correctB && !options.has(candidate)) {
+                options.add(candidate);
+            }
+        }
+        let arr = Array.from(options);
+        // 打乱顺序
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // 渲染题目和分配区域
+    function renderCurrentQuestion() {
+        currentQuestion = questionBank[currentIndex];
+        aMatched = false;
+        bMatched = false;
+        problemText.innerText = currentQuestion.description;
+        ratioDisplay.innerText = `📐 比例：${currentQuestion.ratioA} : ${currentQuestion.ratioB}`;
+        
+        // 渲染分配区域
+        allocationArea.innerHTML = '';
+        // 第一个分配框
+        const targetA = document.createElement('div');
+        targetA.className = 'target-card';
+        targetA.setAttribute('data-target', 'A');
+        targetA.innerHTML = `
+            <div class="target-name">${currentQuestion.emojiA} ${currentQuestion.nameA}</div>
+            <div class="target-value" id="valueA">❓</div>
+            <div class="drop-zone" id="dropZoneA">⬅️ 拖拽数字至此</div>
+        `;
+        // 第二个分配框
+        const targetB = document.createElement('div');
+        targetB.className = 'target-card';
+        targetB.setAttribute('data-target', 'B');
+        targetB.innerHTML = `
+            <div class="target-name">${currentQuestion.emojiB} ${currentQuestion.nameB}</div>
+            <div class="target-value" id="valueB">❓</div>
+            <div class="drop-zone" id="dropZoneB">⬅️ 拖拽数字至此</div>
+        `;
+        allocationArea.appendChild(targetA);
+        allocationArea.appendChild(targetB);
+        
+        // 生成选项卡片
+        const optionValues = generateCardValues(currentQuestion);
+        cardsContainer.innerHTML = '';
+        optionValues.forEach(val => {
+            const card = document.createElement('div');
+            card.className = 'drag-card';
+            card.setAttribute('data-value', val);
+            card.innerText = val;
+            cardsContainer.appendChild(card);
+        });
+        
+        if (!gameCompleted && currentScore !== totalQuestions) {
+            gameMessage.innerHTML = `📌 第 ${currentIndex+1} 题：把正确的数量拖到对应的框里！`;
+            gameMessage.style.background = "#FFF1E2";
+        }
+    }
+
+    // 更新得分和胜利信息
+    function updateScoreUI() {
+        scoreSpan.innerText = currentScore;
+        if (currentScore === totalQuestions && !gameCompleted) {
+            gameCompleted = true;
+            gameMessage.innerHTML = "🎉🎉 完美！所有按比分配都算对了！你已经是分配小英雄啦 🎉🎉<br> ✨ 点击「重新挑战」可以再玩一次 ✨";
+            gameMessage.style.background = "#DAEFC4";
+            gameMessage.classList.add('win-glow');
+            setTimeout(() => gameMessage.classList.remove('win-glow'), 800);
+        }
+    }
+
+    // 配对成功 -> 更新对应框的值，检查是否两个都完成
+    function handleMatchSuccess(cardValue, targetType) {
+        if (gameCompleted) return;
+        const isCorrectA = (targetType === 'A' && cardValue === currentQuestion.correctA);
+        const isCorrectB = (targetType === 'B' && cardValue === currentQuestion.correctB);
+        if (isCorrectA && !aMatched) {
+            aMatched = true;
+            const valueSpan = document.getElementById('valueA');
+            if (valueSpan) valueSpan.innerText = cardValue;
+            const dropZoneA = document.getElementById('dropZoneA');
+            if (dropZoneA) {
+                dropZoneA.innerText = `✅ ${cardValue}`;
+                dropZoneA.style.background = "#D9F0C3";
+                dropZoneA.style.border = "2px solid #8FC65A";
+            }
+            gameMessage.innerHTML = `✅ ${currentQuestion.nameA} 分配正确！ +1分 ✅`;
+            gameMessage.style.background = "#E0F2CE";
+            currentScore++;
+            scoreSpan.innerText = currentScore;
+            // 检查是否两个都完成了
+            if (aMatched && bMatched) {
+                // 两个都配对成功，进入下一题
+                setTimeout(() => {
+                    if (currentScore === totalQuestions) {
+                        gameCompleted = true;
+                        updateScoreUI();
+                        return;
+                    }
+                    currentIndex++;
+                    renderCurrentQuestion();
+                    updateScoreUI();
+                }, 1200);
+            } else {
+                // 只完成一个，更新消息后延迟恢复
+                setTimeout(() => {
+                    if (!gameCompleted && !(aMatched && bMatched) && currentScore !== totalQuestions) {
+                        gameMessage.innerHTML = `🐣 继续分配另一个物品！`;
+                        gameMessage.style.background = "#FFF1E2";
+                    }
+                }, 1500);
+            }
+        } else if (isCorrectB && !bMatched) {
+            bMatched = true;
+            const valueSpan = document.getElementById('valueB');
+            if (valueSpan) valueSpan.innerText = cardValue;
+            const dropZoneB = document.getElementById('dropZoneB');
+            if (dropZoneB) {
+                dropZoneB.innerText = `✅ ${cardValue}`;
+                dropZoneB.style.background = "#D9F0C3";
+                dropZoneB.style.border = "2px solid #8FC65A";
+            }
+            gameMessage.innerHTML = `✅ ${currentQuestion.nameB} 分配正确！ +1分 ✅`;
+            gameMessage.style.background = "#E0F2CE";
+            currentScore++;
+            scoreSpan.innerText = currentScore;
+            if (aMatched && bMatched) {
+                setTimeout(() => {
+                    if (currentScore === totalQuestions) {
+                        gameCompleted = true;
+                        updateScoreUI();
+                        return;
+                    }
+                    currentIndex++;
+                    renderCurrentQuestion();
+                    updateScoreUI();
+                }, 1200);
+            } else {
+                setTimeout(() => {
+                    if (!gameCompleted && !(aMatched && bMatched) && currentScore !== totalQuestions) {
+                        gameMessage.innerHTML = `🐣 继续分配另一个物品！`;
+                        gameMessage.style.background = "#FFF1E2";
+                    }
+                }, 1500);
+            }
+        } else {
+            gameMessage.innerHTML = `😲 错误！ ${cardValue} 不对，再算一遍～ 先求总份数，再算每份数，最后乘份数。`;
+            gameMessage.style.background = "#FFE0D0";
+            setTimeout(() => {
+                if (!gameCompleted && !(aMatched && bMatched) && currentScore !== totalQuestions) {
+                    gameMessage.innerHTML = `🐣 第 ${currentIndex+1} 题：拖拽正确的数字到对应的框里！`;
+                    gameMessage.style.background = "#FFF1E2";
+                }
+            }, 1500);
+        }
+    }
+
+    // ---------- 自定义拖拽实现 (支持鼠标+触摸) ----------
+    function startDrag(e, cardElem) {
+        if (dragActive || gameCompleted) return;
+        e.preventDefault();
+        const val = parseInt(cardElem.getAttribute('data-value'));
+        if (isNaN(val)) return;
+        
+        let clientX, clientY;
+        if (e.type === 'mousedown') {
+            clientX = e.clientX;
+            clientY = e.clientY;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        } else {
+            const touch = e.touches[0];
+            clientX = touch.clientX;
+            clientY = touch.clientY;
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+            document.addEventListener('touchcancel', onTouchCancel);
+        }
+        
+        dragActive = true;
+        sourceCardElem = cardElem;
+        sourceCardValue = val;
+        sourceCardElem.classList.add('dragging-source');
+        
+        // 创建克隆体
+        cloneElem = document.createElement('div');
+        cloneElem.className = 'drag-clone';
+        cloneElem.innerText = cardElem.innerText;
+        cloneElem.style.left = (clientX - 30) + 'px';
+        cloneElem.style.top = (clientY - 30) + 'px';
+        cloneElem.style.width = sourceCardElem.offsetWidth + 'px';
+        document.body.appendChild(cloneElem);
+        startX = clientX;
+        startY = clientY;
+        
+        // 高亮所有未配对的放置区
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            if (!zone.closest('.target-card').classList.contains('matched')) {
+                zone.classList.add('active-drop');
+            }
+        });
+    }
+    
+    function onMouseMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        moveClone(e.clientX, e.clientY);
+    }
+    function onTouchMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveClone(touch.clientX, touch.clientY);
+    }
+    function moveClone(clientX, clientY) {
+        if (cloneElem) {
+            cloneElem.style.left = (clientX - cloneElem.offsetWidth / 2) + 'px';
+            cloneElem.style.top = (clientY - cloneElem.offsetHeight / 2) + 'px';
+        }
+    }
+    function finishDrag(clientX, clientY) {
+        if (!dragActive) return;
+        const elemUnder = document.elementsFromPoint(clientX, clientY);
+        let targetDropZone = null;
+        let targetType = null;
+        for (let el of elemUnder) {
+            if (el.classList && el.classList.contains('drop-zone')) {
+                targetDropZone = el;
+                const parentCard = el.closest('.target-card');
+                if (parentCard) {
+                    targetType = parentCard.getAttribute('data-target');
+                }
+                break;
+            }
+        }
+        let success = false;
+        if (targetDropZone && sourceCardElem && !gameCompleted) {
+            // 检查该目标是否已经配对
+            const isMatched = (targetType === 'A' && aMatched) || (targetType === 'B' && bMatched);
+            if (!isMatched) {
+                handleMatchSuccess(sourceCardValue, targetType);
+                success = true;
+            } else {
+                gameMessage.innerHTML = "⛔ 这个物品已经分配过了！不能重复分配";
+                gameMessage.style.background = "#FFE0D0";
+                setTimeout(() => {
+                    if (!gameCompleted && currentScore !== totalQuestions) gameMessage.style.background = "#FFF1E2";
+                }, 1000);
+            }
+        } else if (sourceCardElem && !gameCompleted) {
+            gameMessage.innerHTML = "💡 要把卡片拖拽到物品下方的「虚线框」里松手哦！";
+            gameMessage.style.background = "#FFE0D0";
+            setTimeout(() => {
+                if (!gameCompleted && currentScore !== totalQuestions) {
+                    gameMessage.innerHTML = `🐣 第 ${currentIndex+1} 题：拖拽正确的数字到对应的框里！`;
+                    gameMessage.style.background = "#FFF1E2";
+                }
+            }, 1000);
+        }
+        endDragCleanup();
+        if (!success && sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        if (currentScore === totalQuestions) {
+            // 游戏结束，无需额外操作
+        }
+    }
+    
+    function endDragCleanup() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.remove();
+        if (sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+        document.removeEventListener('touchcancel', onTouchCancel);
+        dragActive = false;
+        sourceCardElem = null;
+        cloneElem = null;
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            zone.classList.remove('active-drop');
+        });
+    }
+    
+    function onMouseUp(e) { if (dragActive) finishDrag(e.clientX, e.clientY); }
+    function onTouchEnd(e) {
+        if (!dragActive) return;
+        let clientX, clientY;
+        if (e.changedTouches && e.changedTouches.length) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        } else { clientX = startX; clientY = startY; }
+        finishDrag(clientX, clientY);
+    }
+    function onTouchCancel(e) { endDragCleanup(); }
+    
+    function bindDragEvents() {
+        cardsContainer.addEventListener('mousedown', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        });
+        cardsContainer.addEventListener('touchstart', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        }, { passive: false });
+    }
+    
+    // 重置整个游戏
+    function resetGame() {
+        if (dragActive) endDragCleanup();
+        currentIndex = 0;
+        currentScore = 0;
+        gameCompleted = false;
+        renderCurrentQuestion();
+        updateScoreUI();
+        gameMessage.innerHTML = "✨ 游戏已重置！ 重新挑战按比分配 ✨";
+        gameMessage.style.background = "#FFF1E2";
+        gameMessage.classList.remove('win-glow');
+    }
+    
+    // 初始化
+    function init() {
+        renderCurrentQuestion();
+        bindDragEvents();
+        updateScoreUI();
+        resetBtn.addEventListener('click', resetGame);
+    }
+    
+    init();
+</script>
+</body>
+</html>

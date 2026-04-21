@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>📊 百分数问题 | 小小百分师</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: #F0F7EC;
+            font-family: 'Comic Neue', 'Segoe UI Emoji', 'Chalkboard SE', 'Poppins', 'Comic Sans MS', cursive, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .percent-lab {
+            max-width: 1350px;
+            width: 100%;
+            background: #FFFFFFF2;
+            backdrop-filter: blur(2px);
+            border-radius: 68px 52px 68px 52px;
+            box-shadow: 0 25px 40px rgba(70, 60, 40, 0.12);
+            overflow: hidden;
+        }
+
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .knowledge-side {
+            flex: 1.2;
+            min-width: 260px;
+            background: #FEFCF5;
+            padding: 32px 24px;
+            border-right: 4px dashed #D4E2C6;
+        }
+
+        .knowledge-side h2 {
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #79A85A, #B2D48B);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            border-left: 8px solid #8DC26F;
+            padding-left: 18px;
+        }
+
+        .info-card {
+            background: #F4F9EF;
+            border-radius: 40px 24px 40px 24px;
+            padding: 22px;
+            margin: 20px 0;
+            box-shadow: 0 8px 0 #DFEAD4;
+        }
+
+        .info-card p {
+            font-size: 1rem;
+            margin: 14px 0;
+            color: #3F5A2B;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .math-badge {
+            background: #E5F0DB;
+            padding: 5px 14px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #558C2F;
+            display: inline-block;
+            margin: 4px 4px 0 0;
+        }
+
+        .tip-area {
+            background: #FEF5E6;
+            border-radius: 32px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .tip-area li {
+            margin-left: 24px;
+            margin-bottom: 8px;
+            color: #A5662C;
+        }
+
+        .game-side {
+            flex: 2;
+            min-width: 300px;
+            background: #FFFCF7;
+            padding: 28px 24px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #E1F0D2;
+            padding-bottom: 12px;
+        }
+
+        .game-header h3 {
+            font-size: 1.8rem;
+            color: #6F9E3F;
+        }
+
+        .stats {
+            display: flex;
+            gap: 12px;
+            background: #F1F7EA;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #54862C;
+            align-items: center;
+        }
+
+        .reset-btn {
+            background: #F2E3CE;
+            border: none;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-family: inherit;
+            color: #9B6A3A;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: 8px;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.96);
+            background: #EAD5B0;
+        }
+
+        /* 题目区域 */
+        .questions-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .question-card {
+            background: #FFF9F0;
+            border-radius: 48px;
+            padding: 16px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            border: 2px solid #F7DDB5;
+            transition: all 0.2s;
+            box-shadow: 0 6px 0 #EED9BD;
+        }
+
+        .question-card.matched {
+            background: #E4F3D6;
+            border-color: #8FC65A;
+            box-shadow: 0 4px 0 #B6D99B;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #A76F3E;
+            min-width: 150px;
+        }
+
+        .drop-zone {
+            background: #FFF8F0;
+            border-radius: 60px;
+            padding: 10px 20px;
+            min-width: 100px;
+            text-align: center;
+            border: 2px dashed #F7DDB5;
+            transition: all 0.2s;
+            font-weight: bold;
+            color: #C17A3E;
+        }
+
+        .drop-zone.active-drop {
+            background: #F3FCEB;
+            border-color: #8FC65A;
+        }
+
+        .drop-zone.matched {
+            background: #D9F0C3;
+            border: 2px solid #8FC65A;
+            color: #427E1A;
+        }
+
+        /* 可拖拽卡片区 */
+        .cards-area {
+            background: #FEF5EA;
+            border-radius: 56px;
+            padding: 20px 16px;
+        }
+
+        .cards-title {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #AF6F3C;
+            margin-bottom: 16px;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: center;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #FFFFFF, #FFF1E2);
+            border-radius: 60px;
+            padding: 12px 24px;
+            min-width: 90px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #A5612A;
+            box-shadow: 0 12px 18px -6px rgba(100, 70, 30, 0.15);
+            cursor: grab;
+            transition: 0.05s linear;
+            border: 2px solid #FDD6A5;
+            touch-action: none;
+            font-family: monospace;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        .drag-card.dragging-source {
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+
+        .drag-card.matched-card {
+            display: none;
+        }
+
+        /* 克隆拖拽体 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0,0,0,0.25));
+            transform: scale(1.02) rotate(1deg);
+            pointer-events: none;
+            background: #FFFCF0;
+            border-radius: 60px;
+            padding: 12px 24px;
+            min-width: 90px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #A5612A;
+            border: 2px solid #FCC37A;
+            backdrop-filter: blur(6px);
+            font-family: monospace;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+        }
+
+        .message-panel {
+            background: #FFF1E2;
+            border-radius: 60px;
+            padding: 12px;
+            margin-top: 24px;
+            text-align: center;
+            font-weight: bold;
+            color: #C17A3E;
+            transition: 0.1s;
+        }
+
+        .win-glow {
+            animation: cheerPop 0.6s ease;
+            background: #DAEFC4 !important;
+        }
+
+        @keyframes cheerPop {
+            0% { transform: scale(1); background: #FFEAC6; }
+            50% { transform: scale(1.01); background: #FFE0AE; box-shadow: 0 0 0 5px rgba(150, 200, 100, 0.4);}
+            100% { transform: scale(1); }
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 14px;
+            background: #FBF8EF;
+            color: #BB8A60;
+        }
+
+        @media (max-width: 780px) {
+            .knowledge-side {
+                border-right: none;
+                border-bottom: 4px dashed #D4E2C6;
+            }
+            .question-card {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .drop-zone {
+                margin-top: 8px;
+            }
+            .drag-card {
+                padding: 8px 18px;
+                font-size: 1.1rem;
+                min-width: 75px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="percent-lab">
+    <div class="flex-row">
+        <!-- 左侧知识点：百分数问题 -->
+        <div class="knowledge-side">
+            <h2>📊 百分数 · 生活小帮手</h2>
+            <div class="info-card">
+                <p>📌 <strong>百分数的意义</strong><br>
+                表示一个数是另一个数的<span class="math-badge">百分之几</span>，也叫百分率或百分比。</p>
+                <p>🎯 <strong>求一个数的百分之几</strong><br>
+                用乘法：<span class="math-badge">单位“1” × 百分率 = 部分量</span></p>
+                <p>✨ 例子：<br>
+                50的20%是多少？<br>
+                50 × 20% = 50 × 0.2 = <strong>10</strong></p>
+                <p>🧸 右边游戏：计算每个百分数问题，把正确的答案卡片拖到对应的方框里！</p>
+            </div>
+            <div class="tip-area">
+                <span>🧠 计算小技巧：</span>
+                <ul>
+                    <li>🔢 把百分数化成小数（除以100）</li>
+                    <li>✖️ 再用乘法计算</li>
+                </ul>
+                <p style="margin-top: 12px; background:#F8EFE2; border-radius: 28px; padding: 8px;">🎮 玩法：把正确答案卡片拖到对应的虚线框里，配对正确自动得分！</p>
+            </div>
+        </div>
+
+        <!-- 右侧游戏区 -->
+        <div class="game-side">
+            <div class="game-header">
+                <h3>🧮 百分数计算工坊 · 拖拽配对</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="stats">🏆 得分 <span id="scoreValue">0</span> / <span id="totalQuestions">4</span></span>
+                    <button class="reset-btn" id="resetGameBtn">🔄 重新挑战</button>
+                </div>
+            </div>
+
+            <!-- 题目列表（动态生成） -->
+            <div class="questions-area" id="questionsArea"></div>
+
+            <!-- 可拖拽答案卡片 -->
+            <div class="cards-area">
+                <div class="cards-title">🎴 可拖拽答案卡片（拖到对应的题目下方）</div>
+                <div class="cards-container" id="cardsContainer"></div>
+            </div>
+            <div id="gameMessage" class="message-panel">
+                🌟 计算每个百分数问题，把正确的数字卡片拖到对应的方框中！
+            </div>
+        </div>
+    </div>
+    <footer>💡 小秘诀：求一个数的百分之几，用这个数乘以百分数（化成小数）。拖拽正确的数字到答案区，就能得分！</footer>
+</div>
+
+<script>
+    // ---------- 题目数据 ----------
+    // 每个题目包含：描述，正确答案，答案标签
+    const questionsData = [
+        { 
+            id: "q1", 
+            text: "50 的 20% 是多少？", 
+            correct: 10,
+            answerLabel: "10",
+            hint: "50 × 20% = 50 × 0.2 = 10"
+        },
+        { 
+            id: "q2", 
+            text: "80 的 25% 是多少？", 
+            correct: 20,
+            answerLabel: "20",
+            hint: "80 × 25% = 80 × 0.25 = 20"
+        },
+        { 
+            id: "q3", 
+            text: "120 的 15% 是多少？", 
+            correct: 18,
+            answerLabel: "18",
+            hint: "120 × 15% = 120 × 0.15 = 18"
+        },
+        { 
+            id: "q4", 
+            text: "200 的 30% 是多少？", 
+            correct: 60,
+            answerLabel: "60",
+            hint: "200 × 30% = 200 × 0.3 = 60"
+        }
+    ];
+    const totalQuestions = questionsData.length;
+
+    // 卡片数据（答案卡片 + 干扰项，初始顺序随机）
+    let cards = [];
+    // 配对状态
+    let matchedStatus = [];
+    let currentMatchCount = 0;
+
+    // 拖拽全局变量
+    let dragActive = false;
+    let sourceCardElem = null;
+    let sourceCardId = null;
+    let cloneElem = null;
+    let startX = 0, startY = 0;
+
+    // DOM 元素
+    const questionsArea = document.getElementById('questionsArea');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const scoreSpan = document.getElementById('scoreValue');
+    const totalQuestionsSpan = document.getElementById('totalQuestions');
+    const resetBtn = document.getElementById('resetGameBtn');
+    const gameMessage = document.getElementById('gameMessage');
+
+    totalQuestionsSpan.innerText = totalQuestions;
+
+    // 初始化卡片数组（包括正确卡片和干扰卡片，随机打乱）
+    function initCards() {
+        // 正确卡片
+        let rawCards = questionsData.map(q => ({
+            id: `card_${q.id}`,
+            questionId: q.id,
+            value: q.correct,
+            label: q.answerLabel,
+            matched: false
+        }));
+        // 添加干扰项（数字与所有正确答案不同）
+        const distractors = [5, 8, 12, 15, 25, 30, 40, 50];
+        const correctValues = questionsData.map(q => q.correct);
+        const availableDistractors = distractors.filter(d => !correctValues.includes(d));
+        // 取2个干扰项
+        const selectedDistractors = availableDistractors.slice(0, 2);
+        selectedDistractors.forEach((val, idx) => {
+            rawCards.push({
+                id: `card_distractor_${idx}`,
+                questionId: null,
+                value: val,
+                label: val.toString(),
+                matched: false
+            });
+        });
+        // 随机打乱
+        for (let i = rawCards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [rawCards[i], rawCards[j]] = [rawCards[j], rawCards[i]];
+        }
+        cards = rawCards;
+        matchedStatus = questionsData.map(() => false);
+        currentMatchCount = 0;
+    }
+
+    // 渲染题目区域
+    function renderQuestions() {
+        questionsArea.innerHTML = '';
+        questionsData.forEach((q, idx) => {
+            const questionCard = document.createElement('div');
+            questionCard.className = 'question-card';
+            if (matchedStatus[idx]) questionCard.classList.add('matched');
+            questionCard.setAttribute('data-question-id', q.id);
+            questionCard.setAttribute('data-correct', q.correct);
+            
+            const questionText = document.createElement('div');
+            questionText.className = 'question-text';
+            questionText.innerText = q.text;
+            
+            const dropZone = document.createElement('div');
+            dropZone.className = 'drop-zone';
+            if (matchedStatus[idx]) {
+                dropZone.classList.add('matched');
+                dropZone.innerText = `✅ ${q.answerLabel}`;
+            } else {
+                dropZone.innerText = '⬅️ 拖拽答案至此 ➡️';
+            }
+            dropZone.setAttribute('data-drop-zone-idx', idx);
+            
+            questionCard.appendChild(questionText);
+            questionCard.appendChild(dropZone);
+            questionsArea.appendChild(questionCard);
+        });
+    }
+
+    // 渲染可拖拽卡片（只显示未配对的）
+    function renderCards() {
+        cardsContainer.innerHTML = '';
+        cards.forEach(card => {
+            if (!card.matched) {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'drag-card';
+                cardDiv.setAttribute('data-card-id', card.id);
+                cardDiv.setAttribute('data-question-id', card.questionId !== null ? card.questionId : '');
+                cardDiv.setAttribute('data-value', card.value);
+                cardDiv.innerText = card.label;
+                cardsContainer.appendChild(cardDiv);
+            }
+        });
+    }
+
+    // 更新得分和胜利信息
+    function updateScoreUI() {
+        scoreSpan.innerText = currentMatchCount;
+        if (currentMatchCount === totalQuestions) {
+            gameMessage.innerHTML = "🎉🎉 完美！所有百分数问题都答对了！你已经是百分数小英雄啦 🎉🎉<br> ✨ 点击「重新挑战」可以再玩一次 ✨";
+            gameMessage.style.background = "#DAEFC4";
+            gameMessage.classList.add('win-glow');
+            setTimeout(() => gameMessage.classList.remove('win-glow'), 800);
+        } else {
+            if (!gameMessage.innerHTML.includes("错误") && !gameMessage.innerHTML.includes("配对成功")) {
+                gameMessage.innerHTML = "🐣 计算每个百分数问题，拖拽正确的答案卡片到虚线框里！";
+                gameMessage.style.background = "#FFF1E2";
+            }
+        }
+    }
+
+    // 配对逻辑
+    function attemptMatch(cardElem, targetDropZone) {
+        const cardId = cardElem.getAttribute('data-card-id');
+        const card = cards.find(c => c.id === cardId);
+        if (!card || card.matched) return false;
+        
+        const dropZoneIdx = parseInt(targetDropZone.getAttribute('data-drop-zone-idx'));
+        if (isNaN(dropZoneIdx)) return false;
+        const question = questionsData[dropZoneIdx];
+        if (!question) return false;
+        
+        // 检查卡片是否匹配这个题目
+        if (card.questionId !== question.id) return false;
+        // 检查该题目是否已经配对
+        if (matchedStatus[dropZoneIdx]) return false;
+        
+        // 配对成功
+        card.matched = true;
+        matchedStatus[dropZoneIdx] = true;
+        currentMatchCount++;
+        
+        // 重新渲染
+        renderQuestions();
+        renderCards();
+        updateScoreUI();
+        
+        gameMessage.innerHTML = `✅ 配对成功！ ${question.text} 答案是 ${card.label} ✅`;
+        gameMessage.style.background = "#E0F2CE";
+        setTimeout(() => {
+            if (currentMatchCount !== totalQuestions) {
+                gameMessage.innerHTML = "🐣 继续拖拽其他答案卡片到正确的题目下方！";
+                gameMessage.style.background = "#FFF1E2";
+            } else {
+                gameMessage.innerHTML = "🎉🎉 完美！所有百分数问题都答对了！你已经是百分数小英雄啦 🎉🎉<br> ✨ 点击「重新挑战」可以再玩一次 ✨";
+                gameMessage.style.background = "#DAEFC4";
+            }
+        }, 1200);
+        return true;
+    }
+
+    // ---------- 自定义拖拽实现 (支持鼠标+触摸) ----------
+    function startDrag(e, cardElem) {
+        if (dragActive) return;
+        const cardId = cardElem.getAttribute('data-card-id');
+        const card = cards.find(c => c.id === cardId);
+        if (!card || card.matched) return;
+        e.preventDefault();
+        let clientX, clientY;
+        if (e.type === 'mousedown') {
+            clientX = e.clientX;
+            clientY = e.clientY;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        } else {
+            const touch = e.touches[0];
+            clientX = touch.clientX;
+            clientY = touch.clientY;
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+            document.addEventListener('touchcancel', onTouchCancel);
+        }
+        dragActive = true;
+        sourceCardElem = cardElem;
+        sourceCardId = cardId;
+        sourceCardElem.classList.add('dragging-source');
+        
+        // 创建克隆体
+        cloneElem = document.createElement('div');
+        cloneElem.className = 'drag-clone';
+        cloneElem.innerText = cardElem.innerText;
+        cloneElem.style.left = (clientX - 30) + 'px';
+        cloneElem.style.top = (clientY - 30) + 'px';
+        cloneElem.style.width = sourceCardElem.offsetWidth + 'px';
+        document.body.appendChild(cloneElem);
+        startX = clientX;
+        startY = clientY;
+        
+        // 高亮所有未配对的放置区
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            const parentCard = zone.closest('.question-card');
+            if (parentCard && !parentCard.classList.contains('matched')) {
+                zone.classList.add('active-drop');
+            }
+        });
+    }
+    
+    function onMouseMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        moveClone(e.clientX, e.clientY);
+    }
+    function onTouchMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveClone(touch.clientX, touch.clientY);
+    }
+    function moveClone(clientX, clientY) {
+        if (cloneElem) {
+            cloneElem.style.left = (clientX - cloneElem.offsetWidth / 2) + 'px';
+            cloneElem.style.top = (clientY - cloneElem.offsetHeight / 2) + 'px';
+        }
+    }
+    function finishDrag(clientX, clientY) {
+        if (!dragActive) return;
+        const elemUnder = document.elementsFromPoint(clientX, clientY);
+        let targetDropZone = null;
+        for (let el of elemUnder) {
+            if (el.classList && el.classList.contains('drop-zone')) {
+                targetDropZone = el;
+                break;
+            }
+        }
+        let success = false;
+        if (targetDropZone && sourceCardElem) {
+            const parentQuestion = targetDropZone.closest('.question-card');
+            const alreadyMatched = parentQuestion && parentQuestion.classList.contains('matched');
+            if (!alreadyMatched) {
+                success = attemptMatch(sourceCardElem, targetDropZone);
+                if (!success) {
+                    gameMessage.innerHTML = "😲 配对错误！ 这个答案不对，再算一遍～ 用这个数乘以百分数。";
+                    gameMessage.style.background = "#FFE0D0";
+                    setTimeout(() => {
+                        if (currentMatchCount !== totalQuestions) {
+                            gameMessage.innerHTML = "🐣 继续拖拽答案卡片到正确的题目下方！";
+                            gameMessage.style.background = "#FFF1E2";
+                        }
+                    }, 1200);
+                }
+            } else {
+                gameMessage.innerHTML = "⛔ 这个题目已经配对过了！不能重复配对";
+                gameMessage.style.background = "#FFE0D0";
+                setTimeout(() => {
+                    if (currentMatchCount !== totalQuestions) gameMessage.style.background = "#FFF1E2";
+                }, 1000);
+            }
+        } else if (sourceCardElem) {
+            gameMessage.innerHTML = "💡 要把卡片拖拽到题目下方的「虚线框」里松手哦！";
+            setTimeout(() => {
+                if (currentMatchCount !== totalQuestions && gameMessage.innerHTML.includes("虚线框")) {
+                    gameMessage.innerHTML = "🐣 继续拖拽答案卡片到正确的题目下方！";
+                    gameMessage.style.background = "#FFF1E2";
+                }
+            }, 1000);
+        }
+        endDragCleanup();
+        if (!success && sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        if (currentMatchCount === totalQuestions) {
+            renderQuestions();
+            renderCards();
+        }
+    }
+    function endDragCleanup() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.remove();
+        if (sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+        document.removeEventListener('touchcancel', onTouchCancel);
+        dragActive = false;
+        sourceCardElem = null;
+        cloneElem = null;
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            zone.classList.remove('active-drop');
+        });
+    }
+    function onMouseUp(e) { if (dragActive) finishDrag(e.clientX, e.clientY); }
+    function onTouchEnd(e) {
+        if (!dragActive) return;
+        let clientX, clientY;
+        if (e.changedTouches && e.changedTouches.length) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        } else { clientX = startX; clientY = startY; }
+        finishDrag(clientX, clientY);
+    }
+    function onTouchCancel(e) { endDragCleanup(); }
+    
+    function bindDragEvents() {
+        cardsContainer.addEventListener('mousedown', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        });
+        cardsContainer.addEventListener('touchstart', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        }, { passive: false });
+    }
+    
+    // 重置游戏
+    function resetGame() {
+        if (dragActive) endDragCleanup();
+        initCards();
+        renderQuestions();
+        renderCards();
+        updateScoreUI();
+        gameMessage.innerHTML = "✨ 游戏已重置！ 重新挑战百分数问题 ✨";
+        gameMessage.style.background = "#FFF1E2";
+        gameMessage.classList.remove('win-glow');
+    }
+    
+    // 初始化
+    function init() {
+        initCards();
+        renderQuestions();
+        renderCards();
+        bindDragEvents();
+        updateScoreUI();
+        resetBtn.addEventListener('click', resetGame);
+    }
+    
+    init();
+</script>
+</body>
+</html>

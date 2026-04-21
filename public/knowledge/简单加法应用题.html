@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🛒 加法应用题 | 小小购物员</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: #F0F7EC;
+            font-family: 'Comic Neue', 'Segoe UI Emoji', 'Chalkboard SE', 'Poppins', 'Comic Sans MS', cursive, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .math-lab {
+            max-width: 1350px;
+            width: 100%;
+            background: #FFFFFFF2;
+            backdrop-filter: blur(2px);
+            border-radius: 68px 52px 68px 52px;
+            box-shadow: 0 25px 40px rgba(70, 60, 40, 0.12);
+            overflow: hidden;
+        }
+
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .knowledge-side {
+            flex: 1.2;
+            min-width: 260px;
+            background: #FEFCF5;
+            padding: 32px 24px;
+            border-right: 4px dashed #D4E2C6;
+        }
+
+        .knowledge-side h2 {
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #79A85A, #B2D48B);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            border-left: 8px solid #8DC26F;
+            padding-left: 18px;
+        }
+
+        .info-card {
+            background: #F4F9EF;
+            border-radius: 40px 24px 40px 24px;
+            padding: 22px;
+            margin: 20px 0;
+            box-shadow: 0 8px 0 #DFEAD4;
+        }
+
+        .info-card p {
+            font-size: 1rem;
+            margin: 14px 0;
+            color: #3F5A2B;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .math-badge {
+            background: #E5F0DB;
+            padding: 5px 14px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #558C2F;
+            display: inline-block;
+            margin: 4px 4px 0 0;
+        }
+
+        .tip-area {
+            background: #FEF5E6;
+            border-radius: 32px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .tip-area li {
+            margin-left: 24px;
+            margin-bottom: 8px;
+            color: #A5662C;
+        }
+
+        .game-side {
+            flex: 2;
+            min-width: 300px;
+            background: #FFFCF7;
+            padding: 28px 24px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #E1F0D2;
+            padding-bottom: 12px;
+        }
+
+        .game-header h3 {
+            font-size: 1.8rem;
+            color: #6F9E3F;
+        }
+
+        .stats {
+            display: flex;
+            gap: 12px;
+            background: #F1F7EA;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #54862C;
+            align-items: center;
+        }
+
+        .reset-btn, .checkout-btn {
+            background: #F2E3CE;
+            border: none;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-family: inherit;
+            color: #9B6A3A;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: 8px;
+        }
+
+        .reset-btn:active, .checkout-btn:active {
+            transform: scale(0.96);
+            background: #EAD5B0;
+        }
+
+        /* 商品货架区域 */
+        .shelves {
+            background: #FFF9F0;
+            border-radius: 56px;
+            padding: 24px 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.04);
+        }
+
+        .shelves-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #B87A44;
+            margin-bottom: 20px;
+        }
+
+        .products-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .product-card {
+            background: #FFF4E8;
+            border-radius: 48px;
+            padding: 16px;
+            width: 130px;
+            text-align: center;
+            transition: all 0.2s;
+            border: 2px solid #F7DDB5;
+            box-shadow: 0 6px 0 #EED9BD;
+        }
+
+        .product-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        .product-name {
+            font-weight: bold;
+            color: #A76F3E;
+            font-size: 0.9rem;
+        }
+
+        .product-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #C17A3E;
+            margin: 6px 0;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #FFFFFF, #FFF1E2);
+            border-radius: 60px;
+            padding: 12px 0;
+            cursor: grab;
+            transition: 0.05s linear;
+            border: 2px solid #FDD6A5;
+            touch-action: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        .drag-card.dragging-source {
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+
+        /* 购物车区域 */
+        .cart-area {
+            background: #FEF5EA;
+            border-radius: 56px;
+            padding: 20px 16px;
+            margin-bottom: 20px;
+        }
+
+        .cart-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #AF6F3C;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cart-items {
+            min-height: 120px;
+            background: #FFF8F0;
+            border-radius: 48px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 2px dashed #F7DDB5;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #FFFFFF;
+            border-radius: 40px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .cart-item-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cart-item-emoji {
+            font-size: 1.5rem;
+        }
+
+        .cart-item-name {
+            font-weight: bold;
+            color: #A76F3E;
+        }
+
+        .cart-item-price {
+            font-weight: bold;
+            color: #C17A3E;
+        }
+
+        .remove-btn {
+            background: #FFE0D0;
+            border: none;
+            border-radius: 30px;
+            padding: 4px 12px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: #C17A3E;
+            transition: 0.1s;
+        }
+
+        .remove-btn:active {
+            transform: scale(0.95);
+        }
+
+        .cart-total {
+            text-align: right;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #54862C;
+            padding: 8px;
+            border-top: 2px solid #E1F0D2;
+        }
+
+        .drop-zone {
+            background: #FFF8F0;
+            border-radius: 60px;
+            padding: 12px;
+            margin-top: 8px;
+            text-align: center;
+            border: 2px dashed #F7DDB5;
+            transition: all 0.2s;
+        }
+
+        .drop-zone.active-drop {
+            background: #F3FCEB;
+            border-color: #8FC65A;
+        }
+
+        .message-panel {
+            background: #FFF1E2;
+            border-radius: 60px;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            color: #C17A3E;
+            transition: 0.1s;
+        }
+
+        .win-glow {
+            animation: cheerPop 0.6s ease;
+            background: #DAEFC4 !important;
+        }
+
+        @keyframes cheerPop {
+            0% { transform: scale(1); background: #FFEAC6; }
+            50% { transform: scale(1.01); background: #FFE0AE; box-shadow: 0 0 0 5px rgba(150, 200, 100, 0.4);}
+            100% { transform: scale(1); }
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 14px;
+            background: #FBF8EF;
+            color: #BB8A60;
+        }
+
+        @media (max-width: 780px) {
+            .knowledge-side {
+                border-right: none;
+                border-bottom: 4px dashed #D4E2C6;
+            }
+            .product-card {
+                width: 110px;
+            }
+            .product-emoji {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="math-lab">
+    <div class="flex-row">
+        <!-- 左侧知识点：简单加法应用题 -->
+        <div class="knowledge-side">
+            <h2>➕ 加法应用题 · 购物小管家</h2>
+            <div class="info-card">
+                <p>📌 <strong>加法应用题</strong><br>
+                把两个或几个数<span class="math-badge">合并起来</span>，求一共是多少，用加法。</p>
+                <p>🎯 <strong>解题步骤</strong><br>
+                1️⃣ 读懂题意，找到“一共”“总共”等关键词。<br>
+                2️⃣ 找出每个部分的数量。<br>
+                3️⃣ 列加法算式，计算结果。</p>
+                <p>✨ 例子：<br>
+                小明有3个苹果，妈妈又给他2个，一共多少个？<br>
+                3 + 2 = <strong>5个</strong>。</p>
+                <p>🧸 右边超市：把商品拖到购物车里，计算总价！</p>
+            </div>
+            <div class="tip-area">
+                <span>🧠 加法小口诀：</span>
+                <ul>
+                    <li>🔢 看到“一共”“总共”用加法</li>
+                    <li>➕ 部分 + 部分 = 整体</li>
+                    <li>🛒 购物算总价，加法来帮忙</li>
+                </ul>
+                <p style="margin-top: 12px; background:#F8EFE2; border-radius: 28px; padding: 8px;">🎮 玩法：把商品卡片拖到购物车里，看看总价是多少！</p>
+            </div>
+        </div>
+
+        <!-- 右侧游戏区：超市购物加法 -->
+        <div class="game-side">
+            <div class="game-header">
+                <h3>🛒 快乐超市 · 拖拽购物</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="stats">💰 总价 <span id="totalPrice">0</span> 元</span>
+                    <button class="checkout-btn" id="checkoutBtn">🧾 结账</button>
+                    <button class="reset-btn" id="resetGameBtn">🗑️ 清空购物车</button>
+                </div>
+            </div>
+
+            <!-- 商品货架 -->
+            <div class="shelves">
+                <div class="shelves-title">🛍️ 商品货架（拖拽到购物车）</div>
+                <div class="products-container" id="productsContainer"></div>
+            </div>
+
+            <!-- 购物车区域 -->
+            <div class="cart-area">
+                <div class="cart-title">🛒 我的购物车</div>
+                <div class="cart-items" id="cartItems">
+                    <div style="text-align: center; color: #BF8F60; padding: 20px;">购物车还是空的，拖拽商品进来吧~</div>
+                </div>
+                <div class="cart-total" id="cartTotalDisplay">💰 总价: 0 元</div>
+            </div>
+
+            <div id="gameMessage" class="message-panel">
+                🌟 把商品卡片拖拽到购物车里，每次添加商品总价会自动增加！点击「结账」看看你花了多少钱。
+            </div>
+        </div>
+    </div>
+    <footer>💡 小秘诀：把商品拖进购物车，总价会自动加起来。如果想移除商品，点击商品旁边的「移除」按钮。试试买几样东西，算算一共多少钱！</footer>
+</div>
+
+<script>
+    // ---------- 商品数据 ----------
+    const products = [
+        { id: "apple", name: "苹果", emoji: "🍎", price: 5, unit: "元" },
+        { id: "banana", name: "香蕉", emoji: "🍌", price: 3, unit: "元" },
+        { id: "cake", name: "蛋糕", emoji: "🍰", price: 12, unit: "元" },
+        { id: "milk", name: "牛奶", emoji: "🥛", price: 8, unit: "元" },
+        { id: "candy", name: "糖果", emoji: "🍬", price: 2, unit: "元" }
+    ];
+
+    // 购物车数据（存储商品对象）
+    let cart = [];
+
+    // DOM 元素
+    const productsContainer = document.getElementById('productsContainer');
+    const cartItemsDiv = document.getElementById('cartItems');
+    const cartTotalDisplay = document.getElementById('cartTotalDisplay');
+    const totalPriceSpan = document.getElementById('totalPrice');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    const resetBtn = document.getElementById('resetGameBtn');
+    const gameMessage = document.getElementById('gameMessage');
+
+    // 拖拽全局变量
+    let dragActive = false;
+    let sourceCardElem = null;
+    let sourceProductId = null;
+    let cloneElem = null;
+    let startX = 0, startY = 0;
+
+    // 计算购物车总价
+    function calculateTotal() {
+        let total = 0;
+        cart.forEach(item => {
+            total += item.price;
+        });
+        totalPriceSpan.innerText = total;
+        cartTotalDisplay.innerHTML = `💰 总价: ${total} 元`;
+        return total;
+    }
+
+    // 渲染购物车
+    function renderCart() {
+        if (cart.length === 0) {
+            cartItemsDiv.innerHTML = '<div style="text-align: center; color: #BF8F60; padding: 20px;">购物车还是空的，拖拽商品进来吧~</div>';
+            return;
+        }
+        cartItemsDiv.innerHTML = '';
+        cart.forEach((item, idx) => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'cart-item';
+            itemDiv.setAttribute('data-cart-idx', idx);
+            itemDiv.innerHTML = `
+                <div class="cart-item-info">
+                    <div class="cart-item-emoji">${item.emoji}</div>
+                    <div class="cart-item-name">${item.name}</div>
+                    <div class="cart-item-price">${item.price}元</div>
+                </div>
+                <button class="remove-btn" data-idx="${idx}">移除</button>
+            `;
+            cartItemsDiv.appendChild(itemDiv);
+        });
+        // 绑定移除按钮事件
+        document.querySelectorAll('.remove-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = parseInt(btn.getAttribute('data-idx'));
+                if (!isNaN(idx) && idx >= 0 && idx < cart.length) {
+                    const removed = cart.splice(idx, 1)[0];
+                    calculateTotal();
+                    renderCart();
+                    gameMessage.innerHTML = `🗑️ 已从购物车移除 ${removed.name}，总价 ${calculateTotal()} 元。`;
+                    gameMessage.style.background = "#E0F2CE";
+                    setTimeout(() => {
+                        if (gameMessage.innerHTML.includes("已从购物车")) {
+                            gameMessage.innerHTML = "🌟 继续添加商品到购物车吧！";
+                            gameMessage.style.background = "#FFF1E2";
+                        }
+                    }, 1500);
+                }
+            });
+        });
+        calculateTotal();
+    }
+
+    // 添加商品到购物车
+    function addToCart(product) {
+        cart.push({ ...product });
+        renderCart();
+        calculateTotal();
+        gameMessage.innerHTML = `✅ 已将 ${product.name} 加入购物车！当前总价 ${calculateTotal()} 元。`;
+        gameMessage.style.background = "#E0F2CE";
+        setTimeout(() => {
+            if (gameMessage.innerHTML.includes("加入购物车")) {
+                gameMessage.innerHTML = "🌟 继续拖拽其他商品到购物车，或者点击「结账」！";
+                gameMessage.style.background = "#FFF1E2";
+            }
+        }, 1500);
+    }
+
+    // 结账提示
+    function checkout() {
+        const total = calculateTotal();
+        if (cart.length === 0) {
+            gameMessage.innerHTML = "🛒 购物车还是空的，先选一些商品吧！";
+            gameMessage.style.background = "#FFE0D0";
+            setTimeout(() => {
+                gameMessage.innerHTML = "🌟 把商品拖拽到购物车里，试试看！";
+                gameMessage.style.background = "#FFF1E2";
+            }, 1500);
+        } else {
+            let itemList = cart.map(item => `${item.name}(${item.price}元)`).join('、');
+            gameMessage.innerHTML = `🧾 结账啦！您购买了：${itemList}，一共需要支付 ${total} 元。欢迎下次光临！`;
+            gameMessage.style.background = "#DAEFC4";
+            gameMessage.classList.add('win-glow');
+            setTimeout(() => gameMessage.classList.remove('win-glow'), 800);
+        }
+    }
+
+    // 清空购物车
+    function clearCart() {
+        if (cart.length === 0) {
+            gameMessage.innerHTML = "🛒 购物车已经是空的了！";
+            gameMessage.style.background = "#FFE0D0";
+            setTimeout(() => {
+                gameMessage.innerHTML = "🌟 拖拽商品到购物车里吧！";
+                gameMessage.style.background = "#FFF1E2";
+            }, 1000);
+        } else {
+            cart = [];
+            renderCart();
+            calculateTotal();
+            gameMessage.innerHTML = "🗑️ 购物车已清空！重新开始购物吧。";
+            gameMessage.style.background = "#FFF1E2";
+        }
+    }
+
+    // 渲染商品货架（每个商品都是可拖拽卡片）
+    function renderProducts() {
+        productsContainer.innerHTML = '';
+        products.forEach(product => {
+            const productCard = document.createElement('div');
+            productCard.className = 'product-card drag-card';
+            productCard.setAttribute('data-product-id', product.id);
+            productCard.setAttribute('data-product-name', product.name);
+            productCard.setAttribute('data-product-price', product.price);
+            productCard.setAttribute('data-product-emoji', product.emoji);
+            productCard.innerHTML = `
+                <div class="product-emoji">${product.emoji}</div>
+                <div class="product-name">${product.name}</div>
+                <div class="product-price">${product.price}元</div>
+            `;
+            productsContainer.appendChild(productCard);
+        });
+    }
+
+    // ---------- 拖拽实现 (支持鼠标+触摸) ----------
+    function startDrag(e, cardElem) {
+        if (dragActive) return;
+        e.preventDefault();
+        const productId = cardElem.getAttribute('data-product-id');
+        if (!productId) return;
+        
+        let clientX, clientY;
+        if (e.type === 'mousedown') {
+            clientX = e.clientX;
+            clientY = e.clientY;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        } else {
+            const touch = e.touches[0];
+            clientX = touch.clientX;
+            clientY = touch.clientY;
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+            document.addEventListener('touchcancel', onTouchCancel);
+        }
+        
+        dragActive = true;
+        sourceCardElem = cardElem;
+        sourceProductId = productId;
+        sourceCardElem.classList.add('dragging-source');
+        
+        // 创建克隆体
+        cloneElem = document.createElement('div');
+        cloneElem.className = 'drag-clone';
+        cloneElem.style.position = 'fixed';
+        cloneElem.style.zIndex = '9999';
+        cloneElem.style.filter = 'drop-shadow(0 12px 20px rgba(0,0,0,0.25))';
+        cloneElem.style.transform = 'scale(1.02) rotate(1deg)';
+        cloneElem.style.pointerEvents = 'none';
+        cloneElem.style.background = '#FFFCF0';
+        cloneElem.style.borderRadius = '60px';
+        cloneElem.style.padding = '16px';
+        cloneElem.style.width = '120px';
+        cloneElem.style.textAlign = 'center';
+        cloneElem.style.border = '2px solid #FCC37A';
+        cloneElem.style.backdropFilter = 'blur(6px)';
+        cloneElem.style.display = 'flex';
+        cloneElem.style.flexDirection = 'column';
+        cloneElem.style.alignItems = 'center';
+        cloneElem.style.gap = '4px';
+        cloneElem.style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)';
+        
+        const emojiClone = document.createElement('div');
+        emojiClone.style.fontSize = '2rem';
+        emojiClone.innerText = cardElem.querySelector('.product-emoji')?.innerText || '';
+        const nameClone = document.createElement('div');
+        nameClone.innerText = cardElem.querySelector('.product-name')?.innerText || '';
+        const priceClone = document.createElement('div');
+        priceClone.innerText = cardElem.querySelector('.product-price')?.innerText || '';
+        cloneElem.appendChild(emojiClone);
+        cloneElem.appendChild(nameClone);
+        cloneElem.appendChild(priceClone);
+        
+        cloneElem.style.left = (clientX - 50) + 'px';
+        cloneElem.style.top = (clientY - 50) + 'px';
+        document.body.appendChild(cloneElem);
+        startX = clientX;
+        startY = clientY;
+        
+        // 高亮购物车区域
+        const cartArea = document.querySelector('.cart-items');
+        if (cartArea) cartArea.classList.add('active-drop');
+    }
+    
+    function onMouseMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        moveClone(e.clientX, e.clientY);
+    }
+    function onTouchMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveClone(touch.clientX, touch.clientY);
+    }
+    function moveClone(clientX, clientY) {
+        if (cloneElem) {
+            cloneElem.style.left = (clientX - cloneElem.offsetWidth / 2) + 'px';
+            cloneElem.style.top = (clientY - cloneElem.offsetHeight / 2) + 'px';
+        }
+    }
+    function finishDrag(clientX, clientY) {
+        if (!dragActive) return;
+        // 检查释放点是否在购物车区域内
+        const elemUnder = document.elementsFromPoint(clientX, clientY);
+        let isOverCart = false;
+        for (let el of elemUnder) {
+            if (el.classList && (el.classList.contains('cart-items') || el.closest('.cart-items'))) {
+                isOverCart = true;
+                break;
+            }
+        }
+        if (isOverCart && sourceCardElem) {
+            const product = products.find(p => p.id === sourceProductId);
+            if (product) {
+                addToCart(product);
+            }
+        } else if (sourceCardElem) {
+            gameMessage.innerHTML = "💡 要把商品拖拽到「购物车」区域里松手哦！";
+            gameMessage.style.background = "#FFE0D0";
+            setTimeout(() => {
+                if (gameMessage.innerHTML.includes("购物车区域")) {
+                    gameMessage.innerHTML = "🌟 拖拽商品到右边的购物车框里！";
+                    gameMessage.style.background = "#FFF1E2";
+                }
+            }, 1200);
+        }
+        endDragCleanup();
+    }
+    
+    function endDragCleanup() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.remove();
+        if (sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+        document.removeEventListener('touchcancel', onTouchCancel);
+        dragActive = false;
+        sourceCardElem = null;
+        cloneElem = null;
+        const cartArea = document.querySelector('.cart-items');
+        if (cartArea) cartArea.classList.remove('active-drop');
+    }
+    
+    function onMouseUp(e) { if (dragActive) finishDrag(e.clientX, e.clientY); }
+    function onTouchEnd(e) {
+        if (!dragActive) return;
+        let clientX, clientY;
+        if (e.changedTouches && e.changedTouches.length) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        } else { clientX = startX; clientY = startY; }
+        finishDrag(clientX, clientY);
+    }
+    function onTouchCancel(e) { endDragCleanup(); }
+    
+    function bindDragEvents() {
+        productsContainer.addEventListener('mousedown', (e) => {
+            const card = e.target.closest('.product-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        });
+        productsContainer.addEventListener('touchstart', (e) => {
+            const card = e.target.closest('.product-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        }, { passive: false });
+    }
+    
+    // 初始化
+    function init() {
+        renderProducts();
+        renderCart();
+        bindDragEvents();
+        checkoutBtn.addEventListener('click', checkout);
+        resetBtn.addEventListener('click', clearCart);
+    }
+    
+    init();
+</script>
+</body>
+</html>

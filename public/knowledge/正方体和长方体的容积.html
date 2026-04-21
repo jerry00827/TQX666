@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>📦 容积魔法超市 | 正方体·长方体容积挑战</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免拖拽时选中文字，提升触屏体验 */
+        }
+
+        body {
+            background: #EFF5F0;
+            font-family: 'Comic Neue', 'Segoe UI Emoji', 'Chalkboard SE', 'Poppins', 'Comic Sans MS', cursive, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 主课程卡片 */
+        .course-card {
+            max-width: 1350px;
+            width: 100%;
+            background: #FFFFFFF2;
+            backdrop-filter: blur(2px);
+            border-radius: 68px 48px 68px 48px;
+            box-shadow: 0 25px 40px rgba(60, 70, 40, 0.12);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* 左右布局 */
+        .row-split {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* 左侧知识点区 */
+        .knowledge-zone {
+            flex: 1.2;
+            min-width: 260px;
+            background: #FEFCF5;
+            padding: 32px 24px;
+            border-right: 4px dashed #B8D9A6;
+        }
+
+        .knowledge-zone h2 {
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #6C9E4F, #A7C5A1);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 8px solid #8BBE6E;
+            padding-left: 18px;
+        }
+
+        .vol-card {
+            background: #F4F9EF;
+            border-radius: 40px 24px 40px 24px;
+            padding: 22px;
+            margin: 20px 0;
+            box-shadow: 0 8px 0 #DDE8D4;
+        }
+
+        .vol-card p {
+            font-size: 1.05rem;
+            margin: 14px 0;
+            color: #3F5A2B;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .math-chip {
+            background: #E9F3E2;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #5C8F3A;
+        }
+
+        .highlight {
+            background: #FFF1CF;
+            border-radius: 28px;
+            padding: 12px;
+            margin-top: 20px;
+        }
+
+        .highlight li {
+            margin-left: 24px;
+            margin-bottom: 8px;
+            color: #6A4E2E;
+        }
+
+        /* 右侧游戏区 */
+        .game-zone {
+            flex: 2;
+            min-width: 300px;
+            background: #FFFAF2;
+            padding: 28px 24px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #E2F0D6;
+            padding-bottom: 12px;
+        }
+
+        .game-header h3 {
+            font-size: 1.8rem;
+            color: #6F9E3F;
+        }
+
+        .score-panel {
+            background: #EFF7E8;
+            border-radius: 60px;
+            padding: 6px 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #538E2C;
+        }
+
+        .reset-button {
+            background: #F1E2C9;
+            border: none;
+            font-size: 1rem;
+            padding: 6px 20px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-family: inherit;
+            color: #9B6A3A;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .reset-button:active {
+            transform: scale(0.96);
+            background: #EAD5B0;
+        }
+
+        /* 可拖拽卡片区 (问题卡片) */
+        .drag-zone {
+            background: #FEF7E8;
+            border-radius: 48px;
+            padding: 20px 16px;
+            margin-bottom: 32px;
+        }
+
+        .drag-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #A46F38;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cards-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: center;
+            min-height: 180px;
+        }
+
+        .drag-question {
+            background: white;
+            border-radius: 56px;
+            padding: 18px 20px;
+            min-width: 190px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: #6A4A2A;
+            box-shadow: 0 14px 20px -8px rgba(80, 60, 30, 0.12);
+            cursor: grab;
+            transition: 0.05s linear;
+            border: 2px solid #FCD9A8;
+            background: #FFFFFF;
+            touch-action: none;
+            flex: 0 0 auto;
+        }
+
+        .drag-question:active {
+            cursor: grabbing;
+        }
+
+        .drag-question.dragging-source {
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+
+        /* 答案槽区域 (货架) */
+        .target-zone {
+            background: #F4EDE1;
+            border-radius: 48px;
+            padding: 20px 16px;
+        }
+
+        .target-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #A46F38;
+            margin-bottom: 16px;
+        }
+
+        .target-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .answer-slot {
+            background: #FFF6E8;
+            border-radius: 40px;
+            padding: 18px 12px;
+            min-width: 130px;
+            text-align: center;
+            transition: all 0.2s;
+            border: 2px solid #F4D2A4;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #A5672F;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.03);
+            position: relative;
+        }
+
+        .answer-slot.matched {
+            background: #CEE8B6;
+            border: 2px solid #6C9E3F;
+            color: #3D6920;
+        }
+
+        .answer-slot.matched::after {
+            content: " ✓✓";
+            font-weight: bold;
+            font-size: 1.3rem;
+            margin-left: 8px;
+            color: #4A8922;
+        }
+
+        .slot-value {
+            font-family: monospace;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .message-area {
+            background: #FFF3E2;
+            border-radius: 60px;
+            padding: 12px;
+            margin-top: 24px;
+            text-align: center;
+            font-weight: bold;
+            color: #BE7C42;
+            transition: 0.1s;
+        }
+
+        .win-glow {
+            animation: celebration 0.6s ease;
+            background: #D9F0C3 !important;
+        }
+
+        @keyframes celebration {
+            0% { transform: scale(1); background: #FFE6BF; }
+            50% { transform: scale(1.01); background: #FFDFA5; box-shadow: 0 0 0 5px rgba(150, 200, 100, 0.4);}
+            100% { transform: scale(1); }
+        }
+
+        /* 拖拽克隆体 */
+        .drag-clone-vol {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0,0,0,0.2));
+            transform: scale(1.02) rotate(1deg);
+            pointer-events: none;
+            background: #FFFBEF;
+            border-radius: 56px;
+            padding: 18px 20px;
+            min-width: 180px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: #6A4A2A;
+            border: 2px solid #FFC285;
+            backdrop-filter: blur(5px);
+            font-family: inherit;
+            box-shadow: 0 15px 20px rgba(0,0,0,0.2);
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 12px;
+            background: #F7F4EA;
+            color: #B48A5C;
+        }
+
+        @media (max-width: 780px) {
+            .knowledge-zone {
+                border-right: none;
+                border-bottom: 4px dashed #B8D9A6;
+            }
+            .drag-question, .answer-slot {
+                min-width: 140px;
+                font-size: 0.85rem;
+                padding: 12px 12px;
+            }
+            .drag-clone-vol {
+                min-width: 140px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="course-card">
+    <div class="row-split">
+        <!-- 左侧 容积知识点 -->
+        <div class="knowledge-zone">
+            <h2>🧃 容积魔法学院</h2>
+            <div class="vol-card">
+                <p>📦 <strong>什么是容积？</strong><br>容器内部能容纳物体的体积，叫做容积。 <span class="math-chip">从里面量</span></p>
+                <p>🧊 <strong>长方体容积公式：</strong><br><span class="math-chip">V = 长 × 宽 × 高 (从里面量)</span></p>
+                <p>🎲 <strong>正方体容积公式：</strong><br><span class="math-chip">V = 棱长 × 棱长 × 棱长</span></p>
+                <p>💧 <strong>常用单位：</strong><br>升(L)、毫升(mL) —— 1L = 1dm³ &nbsp;&nbsp; 1mL = 1cm³</p>
+            </div>
+            <div class="highlight">
+                <span>✨ 小提醒 ✨</span>
+                <ul>
+                    <li>📏 容积必须用容器 <strong>内部的长度</strong> 计算！</li>
+                    <li>🥛 一个长方体水箱从里面量长5dm、宽3dm、高2dm → 容积 = 5×3×2 = 30 dm³ = 30升</li>
+                    <li>🎯 正方体鱼缸棱长4dm → 容积 = 4×4×4 = 64 dm³ = 64升</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 右侧 互动游戏区：拖拽配对 -->
+        <div class="game-zone">
+            <div class="game-header">
+                <h3>🛒 容积超市 · 拖拽配货</h3>
+                <div style="display: flex; gap: 12px;">
+                    <span class="score-panel" id="gameScore">配对 0 / 4</span>
+                    <button class="reset-button" id="resetGameBtn">🔄 新的一车</button>
+                </div>
+            </div>
+
+            <!-- 可拖拽的问题卡片区 -->
+            <div class="drag-zone">
+                <div class="drag-title">🤲 按住卡片，拖拽到右边的「正确容积货架」上！</div>
+                <div class="cards-list" id="questionsContainer">
+                    <!-- 动态渲染未配对的问题卡片 -->
+                </div>
+            </div>
+
+            <!-- 答案货架区 (接收drop) -->
+            <div class="target-zone">
+                <div class="target-title">🎯 容积货架 (正确的dm³/L)</div>
+                <div class="target-grid" id="answersContainer">
+                    <!-- 动态渲染答案槽 -->
+                </div>
+            </div>
+            <div id="msgArea" class="message-area">
+                🌟 把左侧的「容积问题卡」拖到正确数值的货架上！每配对成功一个，货物就售出啦！
+            </div>
+        </div>
+    </div>
+    <footer>💡 小技巧：从里面测量才是容积哟！拖拽卡片到对应的答案盒子上松手，配对正确会有✅标记~</footer>
+</div>
+
+<script>
+    // ---- 容积课程数据 (长方体&正方体容积挑战) ----
+    // 问题卡片数据
+    const questionsData = [
+        { id: 0, text: "🥛 长方体牛奶盒：从里面量长6cm，宽4cm，高10cm，容积是多少？", correctVolume: "240 cm³", matched: false },
+        { id: 1, text: "🐠 正方体鱼缸：从里面量棱长5dm，容积是多少？", correctVolume: "125 dm³", matched: false },
+        { id: 2, text: "🚰 长方体水箱：内部长8dm，宽5dm，高3dm，容积？", correctVolume: "120 dm³", matched: false },
+        { id: 3, text: "📦 正方体储物箱：内部棱长6dm，它的容积是？", correctVolume: "216 dm³", matched: false }
+    ];
+
+    // 答案货架数据 (容积值，并与问题ID关联)
+    const answersData = [
+        { id: "ans0", volumeValue: "240 cm³", matched: false, questionId: 0 },
+        { id: "ans1", volumeValue: "125 dm³", matched: false, questionId: 1 },
+        { id: "ans2", volumeValue: "120 dm³", matched: false, questionId: 2 },
+        { id: "ans3", volumeValue: "216 dm³", matched: false, questionId: 3 }
+    ];
+
+    let currentMatchCount = 0;
+    const totalQuestions = questionsData.length;
+    
+    // 拖拽全局变量
+    let dragActive = false;
+    let sourceCardElement = null;      // 被拖拽的卡片DOM
+    let sourceQuestionId = null;
+    let cloneElement = null;
+    let startClientX = 0, startClientY = 0;
+
+    // DOM 元素
+    const questionsContainer = document.getElementById('questionsContainer');
+    const answersContainer = document.getElementById('answersContainer');
+    const gameScoreSpan = document.getElementById('gameScore');
+    const resetBtn = document.getElementById('resetGameBtn');
+    const msgArea = document.getElementById('msgArea');
+
+    // 更新分数UI
+    function updateScoreUI() {
+        gameScoreSpan.innerText = `配对 ${currentMatchCount} / ${totalQuestions}`;
+        if (currentMatchCount === totalQuestions) {
+            msgArea.innerHTML = "🎉🎉 太厉害了！所有容积货物都正确匹配！你是容积小行家 🎉🎉<br> 🧃 1L=1dm³，你完全掌握啦！";
+            msgArea.style.background = "#D9F0C3";
+            msgArea.classList.add('win-glow');
+            setTimeout(() => msgArea.classList.remove('win-glow'), 800);
+        } else {
+            if (!msgArea.innerHTML.includes("错误") && !msgArea.innerHTML.includes("配对成功")) {
+                msgArea.innerHTML = "🐣 拖拽问题卡片，放到正确的容积货架上吧！";
+            }
+            msgArea.style.background = "#FFF3E2";
+        }
+    }
+
+    // 渲染整个游戏区域 (基于当前匹配状态)
+    function renderGame() {
+        // 1. 渲染未配对的问题卡片
+        questionsContainer.innerHTML = '';
+        questionsData.forEach(q => {
+            if (!q.matched) {
+                const card = document.createElement('div');
+                card.className = 'drag-question';
+                card.setAttribute('data-question-id', q.id);
+                card.setAttribute('data-correct-vol', q.correctVolume);
+                card.innerText = q.text;
+                questionsContainer.appendChild(card);
+            }
+        });
+
+        // 如果没有未配对卡片，显示可爱的完成提示
+        if (questionsContainer.children.length === 0 && currentMatchCount !== totalQuestions) {
+            // 防御性处理
+            console.log("All cards matched");
+        }
+
+        // 2. 渲染答案货架 (显示所有答案槽，已配对会带样式)
+        answersContainer.innerHTML = '';
+        answersData.forEach(ans => {
+            const slot = document.createElement('div');
+            slot.className = 'answer-slot';
+            if (ans.matched) slot.classList.add('matched');
+            slot.setAttribute('data-answer-id', ans.id);
+            slot.setAttribute('data-volume-value', ans.volumeValue);
+            slot.setAttribute('data-question-match', ans.questionId);
+            slot.innerHTML = `<span class="slot-value">${ans.volumeValue}</span>`;
+            answersContainer.appendChild(slot);
+        });
+    }
+
+    // 配对核心逻辑 (拖拽释放时调用)
+    function attemptMatch(dragCard, targetSlot) {
+        if (!dragCard || !targetSlot) return false;
+        
+        // 获取问题卡片数据
+        const qId = parseInt(dragCard.getAttribute('data-question-id'));
+        const correctVol = dragCard.getAttribute('data-correct-vol');
+        if (isNaN(qId)) return false;
+        
+        // 获取答案槽数据
+        const answerId = targetSlot.getAttribute('data-answer-id');
+        const slotVolume = targetSlot.getAttribute('data-volume-value');
+        const matchedQuestionId = parseInt(targetSlot.getAttribute('data-question-match'));
+        
+        if (isNaN(matchedQuestionId)) return false;
+        
+        // 检查问题是否已经配对过 (二次安全)
+        if (questionsData[qId] && questionsData[qId].matched) {
+            showTemporaryMessage("⛔ 这个问题已经被配对过了！不能再拖拽啦～", 1200);
+            return false;
+        }
+        
+        // 检查答案槽是否已经被配对
+        const ansObj = answersData.find(a => a.id === answerId);
+        if (ansObj && ansObj.matched) {
+            showTemporaryMessage("🧸 这个货架已经被占用了！选择其他容积试试吧", 1200);
+            return false;
+        }
+        
+        // 验证是否匹配: 问题对应的正确容积 必须等于 答案槽显示的容积，并且问题id和答案关联的问题id一致
+        if (correctVol !== slotVolume || qId !== matchedQuestionId) {
+            showTemporaryMessage("😲 配对错误！再检查一下容积计算～ 长×宽×高，记得单位哦！", 1300);
+            return false;
+        }
+        
+        // 配对成功！！！
+        // 更新数据状态
+        questionsData[qId].matched = true;
+        if (ansObj) ansObj.matched = true;
+        currentMatchCount++;
+        
+        // 重新渲染游戏界面（刷新卡片和货架）
+        renderGame();
+        updateScoreUI();
+        
+        // 显示成功提示
+        showTemporaryMessage("✅ 配对成功！ 商品正确上架！ 真棒！ ✅", 1000);
+        return true;
+    }
+    
+    // 短暂提示消息 (不覆盖胜利信息)
+    let msgTimeout = null;
+    function showTemporaryMessage(text, duration) {
+        if (msgTimeout) clearTimeout(msgTimeout);
+        const originalBg = msgArea.style.background;
+        msgArea.innerHTML = text;
+        msgArea.style.background = "#FFEBC4";
+        msgTimeout = setTimeout(() => {
+            if (currentMatchCount !== totalQuestions) {
+                msgArea.innerHTML = "🐣 继续拖拽卡片，把容积货物放到正确的货架上吧！";
+                msgArea.style.background = "#FFF3E2";
+            } else {
+                // 胜利时保持胜利消息
+                if (currentMatchCount === totalQuestions) {
+                    msgArea.innerHTML = "🎉🎉 太厉害了！所有容积货物都正确匹配！你是容积小行家 🎉🎉<br> 🧃 1L=1dm³，你完全掌握啦！";
+                    msgArea.style.background = "#D9F0C3";
+                } else {
+                    msgArea.innerHTML = "🐣 继续拖拽卡片，把容积货物放到正确的货架上吧！";
+                    msgArea.style.background = "#FFF3E2";
+                }
+            }
+        }, duration);
+    }
+    
+    // --------------------- 拖拽实现 (支持鼠标+触屏) ---------------------
+    function startDrag(e, cardElement) {
+        if (dragActive) return;
+        // 检查卡片是否有效（未被配对，且还在DOM中）
+        if (!cardElement.isConnected) return;
+        const qidAttr = cardElement.getAttribute('data-question-id');
+        if (qidAttr) {
+            const qid = parseInt(qidAttr);
+            if (questionsData[qid] && questionsData[qid].matched) {
+                e.preventDefault();
+                return;
+            }
+        } else {
+            return;
+        }
+        
+        e.preventDefault();
+        let clientX, clientY;
+        if (e.type === 'mousedown') {
+            clientX = e.clientX;
+            clientY = e.clientY;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        } else { // touchstart
+            const touch = e.touches[0];
+            clientX = touch.clientX;
+            clientY = touch.clientY;
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+            document.addEventListener('touchcancel', onTouchCancel);
+        }
+        
+        dragActive = true;
+        sourceCardElement = cardElement;
+        sourceQuestionId = parseInt(cardElement.getAttribute('data-question-id'));
+        
+        // 添加半透明样式
+        sourceCardElement.classList.add('dragging-source');
+        
+        // 创建克隆体
+        cloneElement = document.createElement('div');
+        cloneElement.className = 'drag-clone-vol';
+        cloneElement.innerText = cardElement.innerText;
+        cloneElement.style.left = (clientX - 40) + 'px';
+        cloneElement.style.top = (clientY - 30) + 'px';
+        cloneElement.style.width = cardElement.offsetWidth + 'px';
+        document.body.appendChild(cloneElement);
+        
+        startClientX = clientX;
+        startClientY = clientY;
+    }
+    
+    function onMouseMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        moveClone(e.clientX, e.clientY);
+    }
+    
+    function onTouchMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveClone(touch.clientX, touch.clientY);
+    }
+    
+    function moveClone(clientX, clientY) {
+        if (!cloneElement) return;
+        cloneElement.style.left = (clientX - cloneElement.offsetWidth / 2) + 'px';
+        cloneElement.style.top = (clientY - cloneElement.offsetHeight / 2) + 'px';
+    }
+    
+    function finishDrag(clientX, clientY) {
+        if (!dragActive) return;
+        // 获取释放点下方的元素
+        const elemUnderPoint = document.elementsFromPoint(clientX, clientY);
+        let targetSlot = null;
+        for (let el of elemUnderPoint) {
+            if (el.classList && el.classList.contains('answer-slot')) {
+                targetSlot = el;
+                break;
+            }
+        }
+        
+        let success = false;
+        if (targetSlot && sourceCardElement) {
+            // 检查答案槽是否已经被配对
+            const ansId = targetSlot.getAttribute('data-answer-id');
+            const ansMatched = answersData.find(a => a.id === ansId)?.matched;
+            if (ansMatched) {
+                showTemporaryMessage("🚫 这个货架已经配对过了！试试别的容积吧", 1000);
+            } else {
+                success = attemptMatch(sourceCardElement, targetSlot);
+            }
+        } else {
+            if (sourceCardElement) {
+                showTemporaryMessage("💡 要把问题卡片拖到「容积货架」上松手才算数哟！", 1000);
+            }
+        }
+        
+        // 清理拖拽痕迹
+        endDragCleanup(success);
+        if (!success && sourceCardElement) {
+            sourceCardElement.classList.remove('dragging-source');
+        }
+        if (currentMatchCount === totalQuestions) updateScoreUI();
+    }
+    
+    function onMouseUp(e) {
+        if (!dragActive) return;
+        finishDrag(e.clientX, e.clientY);
+    }
+    
+    function onTouchEnd(e) {
+        if (!dragActive) return;
+        let clientX, clientY;
+        if (e.changedTouches && e.changedTouches.length) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        } else {
+            clientX = startClientX;
+            clientY = startClientY;
+        }
+        finishDrag(clientX, clientY);
+    }
+    
+    function onTouchCancel(e) {
+        if (dragActive) endDragCleanup(false);
+    }
+    
+    function endDragCleanup(isSuccess) {
+        if (cloneElement && cloneElement.parentNode) cloneElement.remove();
+        if (sourceCardElement) sourceCardElement.classList.remove('dragging-source');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+        document.removeEventListener('touchcancel', onTouchCancel);
+        dragActive = false;
+        sourceCardElement = null;
+        cloneElement = null;
+        sourceQuestionId = null;
+    }
+    
+    // 事件委托绑定拖拽 (监听 questionsContainer)
+    function bindDragEvents() {
+        questionsContainer.addEventListener('mousedown', (e) => {
+            const card = e.target.closest('.drag-question');
+            if (!card) return;
+            e.preventDefault();
+            const qidAttr = card.getAttribute('data-question-id');
+            if (qidAttr) {
+                const qid = parseInt(qidAttr);
+                if (questionsData[qid] && questionsData[qid].matched) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+            startDrag(e, card);
+        });
+        
+        questionsContainer.addEventListener('touchstart', (e) => {
+            const card = e.target.closest('.drag-question');
+            if (!card) return;
+            e.preventDefault();
+            const qidAttr = card.getAttribute('data-question-id');
+            if (qidAttr) {
+                const qid = parseInt(qidAttr);
+                if (questionsData[qid] && questionsData[qid].matched) return;
+            }
+            startDrag(e, card);
+        }, { passive: false });
+    }
+    
+    // 重置游戏全部状态
+    function resetGame() {
+        if (dragActive) endDragCleanup(false);
+        // 重置全局配对状态
+        currentMatchCount = 0;
+        questionsData.forEach(q => { q.matched = false; });
+        answersData.forEach(a => { a.matched = false; });
+        // 重新渲染
+        renderGame();
+        updateScoreUI();
+        if (msgTimeout) clearTimeout(msgTimeout);
+        msgArea.innerHTML = "✨ 新的一趟送货之旅！把容积卡片拖到正确的货架上吧 ✨";
+        msgArea.style.background = "#FFF3E2";
+        msgArea.classList.remove('win-glow');
+    }
+    
+    // 初始化
+    function init() {
+        renderGame();
+        bindDragEvents();
+        updateScoreUI();
+        resetBtn.addEventListener('click', () => {
+            resetGame();
+        });
+    }
+    
+    init();
+</script>
+</body>
+</html>

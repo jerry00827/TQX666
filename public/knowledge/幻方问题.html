@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>✨ 幻方问题 | 九宫格魔法师</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: #F0F7EC;
+            font-family: 'Comic Neue', 'Segoe UI Emoji', 'Chalkboard SE', 'Poppins', 'Comic Sans MS', cursive, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .magic-lab {
+            max-width: 1350px;
+            width: 100%;
+            background: #FFFFFFF2;
+            backdrop-filter: blur(2px);
+            border-radius: 68px 52px 68px 52px;
+            box-shadow: 0 25px 40px rgba(70, 60, 40, 0.12);
+            overflow: hidden;
+        }
+
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .knowledge-side {
+            flex: 1.2;
+            min-width: 260px;
+            background: #FEFCF5;
+            padding: 32px 24px;
+            border-right: 4px dashed #D4E2C6;
+        }
+
+        .knowledge-side h2 {
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #79A85A, #B2D48B);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            border-left: 8px solid #8DC26F;
+            padding-left: 18px;
+        }
+
+        .info-card {
+            background: #F4F9EF;
+            border-radius: 40px 24px 40px 24px;
+            padding: 22px;
+            margin: 20px 0;
+            box-shadow: 0 8px 0 #DFEAD4;
+        }
+
+        .info-card p {
+            font-size: 1rem;
+            margin: 14px 0;
+            color: #3F5A2B;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .math-badge {
+            background: #E5F0DB;
+            padding: 5px 14px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #558C2F;
+            display: inline-block;
+            margin: 4px 4px 0 0;
+        }
+
+        .tip-area {
+            background: #FEF5E6;
+            border-radius: 32px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .tip-area li {
+            margin-left: 24px;
+            margin-bottom: 8px;
+            color: #A5662C;
+        }
+
+        .game-side {
+            flex: 2;
+            min-width: 300px;
+            background: #FFFCF7;
+            padding: 28px 24px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #E1F0D2;
+            padding-bottom: 12px;
+        }
+
+        .game-header h3 {
+            font-size: 1.8rem;
+            color: #6F9E3F;
+        }
+
+        .stats {
+            display: flex;
+            gap: 12px;
+            background: #F1F7EA;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #54862C;
+            align-items: center;
+        }
+
+        .check-btn, .reset-btn {
+            background: #F2E3CE;
+            border: none;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-family: inherit;
+            color: #9B6A3A;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: 8px;
+        }
+
+        .check-btn:active, .reset-btn:active {
+            transform: scale(0.96);
+            background: #EAD5B0;
+        }
+
+        /* 九宫格区域 */
+        .grid-container {
+            background: #FFF9F0;
+            border-radius: 56px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .magic-grid {
+            display: inline-grid;
+            grid-template-columns: repeat(3, 85px);
+            grid-template-rows: repeat(3, 85px);
+            gap: 12px;
+            background: #FFF4E8;
+            padding: 16px;
+            border-radius: 48px;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.05);
+        }
+
+        .grid-cell {
+            background: #FFFFFF;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #A76F3E;
+            border: 2px solid #F7DDB5;
+            transition: all 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.02);
+            cursor: pointer;
+        }
+
+        .grid-cell.filled {
+            background: #E4F3D6;
+            border-color: #8FC65A;
+            color: #427E1A;
+        }
+
+        .grid-cell.empty {
+            background: #FFF8F0;
+            color: #BF8F60;
+            font-size: 1rem;
+        }
+
+        /* 可拖拽卡片区 */
+        .cards-area {
+            background: #FEF5EA;
+            border-radius: 56px;
+            padding: 20px 16px;
+        }
+
+        .cards-title {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #AF6F3C;
+            margin-bottom: 16px;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: center;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #FFFFFF, #FFF1E2);
+            border-radius: 60px;
+            padding: 14px 24px;
+            min-width: 70px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.8rem;
+            color: #A5612A;
+            box-shadow: 0 12px 18px -6px rgba(100, 70, 30, 0.15);
+            cursor: grab;
+            transition: 0.05s linear;
+            border: 2px solid #FDD6A5;
+            touch-action: none;
+            font-family: monospace;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        .drag-card.dragging-source {
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+
+        .drag-card.matched-card {
+            display: none;
+        }
+
+        /* 克隆拖拽体 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0,0,0,0.25));
+            transform: scale(1.02) rotate(1deg);
+            pointer-events: none;
+            background: #FFFCF0;
+            border-radius: 60px;
+            padding: 14px 24px;
+            min-width: 70px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.8rem;
+            color: #A5612A;
+            border: 2px solid #FCC37A;
+            backdrop-filter: blur(6px);
+            font-family: monospace;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+        }
+
+        .message-panel {
+            background: #FFF1E2;
+            border-radius: 60px;
+            padding: 12px;
+            margin-top: 24px;
+            text-align: center;
+            font-weight: bold;
+            color: #C17A3E;
+            transition: 0.1s;
+        }
+
+        .win-glow {
+            animation: cheerPop 0.6s ease;
+            background: #DAEFC4 !important;
+        }
+
+        @keyframes cheerPop {
+            0% { transform: scale(1); background: #FFEAC6; }
+            50% { transform: scale(1.01); background: #FFE0AE; box-shadow: 0 0 0 5px rgba(150, 200, 100, 0.4);}
+            100% { transform: scale(1); }
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 14px;
+            background: #FBF8EF;
+            color: #BB8A60;
+        }
+
+        @media (max-width: 780px) {
+            .knowledge-side {
+                border-right: none;
+                border-bottom: 4px dashed #D4E2C6;
+            }
+            .magic-grid {
+                grid-template-columns: repeat(3, 70px);
+                grid-template-rows: repeat(3, 70px);
+                gap: 8px;
+                padding: 12px;
+            }
+            .grid-cell {
+                font-size: 1.6rem;
+            }
+            .drag-card {
+                padding: 10px 18px;
+                font-size: 1.4rem;
+                min-width: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="magic-lab">
+    <div class="flex-row">
+        <!-- 左侧知识点：幻方问题 -->
+        <div class="knowledge-side">
+            <h2>✨ 幻方问题 · 九宫格魔法</h2>
+            <div class="info-card">
+                <p>📌 <strong>什么是幻方？</strong><br>
+                把数字填入<span class="math-badge">n×n</span>方格中，使每行、每列和两条对角线上的数字和都相等，这样的方阵叫做幻方。</p>
+                <p>🎯 <strong>3阶幻方（九宫格）</strong><br>
+                将1~9填入九宫格，使每行、每列、对角线之和相等。<br>
+                这个相等的和叫做<span class="math-badge">幻和</span>。对于1~9，幻和 = 15。</p>
+                <p>✨ <strong>经典口诀</strong><br>
+                “戴九履一，左三右七，二四为肩，六八为足，五居中央。”<br>
+                这是最著名的三阶幻方填法。</p>
+                <p>🧸 右边游戏：把数字1~9拖拽到九宫格中，拼出幻方！</p>
+            </div>
+            <div class="tip-area">
+                <span>🧠 记忆小技巧：</span>
+                <ul>
+                    <li>🔢 中间数 = 5</li>
+                    <li>⚖️ 幻和 = (1+2+…+9)÷3 = 15</li>
+                    <li>📐 偶数角，奇数边</li>
+                </ul>
+                <p style="margin-top: 12px; background:#F8EFE2; border-radius: 28px; padding: 8px;">🎮 玩法：把数字卡片拖到九宫格空格中，然后点击“检查”验证幻和！</p>
+            </div>
+        </div>
+
+        <!-- 右侧游戏区 -->
+        <div class="game-side">
+            <div class="game-header">
+                <h3>🧩 九宫格幻方 · 拖拽配对</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="stats">📊 状态 <span id="statusText">未完成</span></span>
+                    <button class="check-btn" id="checkBtn">✅ 检查幻方</button>
+                    <button class="reset-btn" id="resetGameBtn">🔄 重置</button>
+                </div>
+            </div>
+
+            <!-- 九宫格区域 -->
+            <div class="grid-container">
+                <div class="magic-grid" id="magicGrid">
+                    <!-- 9个格子动态生成 -->
+                </div>
+            </div>
+
+            <!-- 可拖拽卡片区（数字1-9） -->
+            <div class="cards-area">
+                <div class="cards-title">🎴 可拖拽数字卡片（拖到九宫格中）</div>
+                <div class="cards-container" id="cardsContainer"></div>
+            </div>
+            <div id="gameMessage" class="message-panel">
+                🌟 把数字1~9拖到九宫格中，让每行、每列、对角线之和都等于15！
+            </div>
+        </div>
+    </div>
+    <footer>💡 小秘诀：中间是5，四角是偶数，边上中间是奇数。试试经典口诀“戴九履一，左三右七，二四为肩，六八为足”。</footer>
+</div>
+
+<script>
+    // ---------- 游戏状态 ----------
+    // 九宫格索引：0 1 2
+    //           3 4 5
+    //           6 7 8
+    let gridValues = new Array(9).fill(null);  // 存储每个格子的数字（1-9）或null
+    let usedNumbers = new Set();               // 已使用的数字
+    
+    // 拖拽全局变量
+    let dragActive = false;
+    let sourceCardElem = null;
+    let sourceCardValue = null;
+    let cloneElem = null;
+    let startX = 0, startY = 0;
+    
+    // DOM 元素
+    const magicGrid = document.getElementById('magicGrid');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const statusSpan = document.getElementById('statusText');
+    const checkBtn = document.getElementById('checkBtn');
+    const resetBtn = document.getElementById('resetGameBtn');
+    const gameMessage = document.getElementById('gameMessage');
+    
+    // 初始化九宫格显示
+    function renderGrid() {
+        magicGrid.innerHTML = '';
+        for (let i = 0; i < 9; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell';
+            const val = gridValues[i];
+            if (val !== null) {
+                cell.classList.add('filled');
+                cell.innerText = val;
+            } else {
+                cell.classList.add('empty');
+                cell.innerText = '?';
+            }
+            cell.setAttribute('data-index', i);
+            magicGrid.appendChild(cell);
+        }
+    }
+    
+    // 刷新可拖拽卡片（只显示未使用的数字）
+    function renderCards() {
+        cardsContainer.innerHTML = '';
+        for (let i = 1; i <= 9; i++) {
+            if (!usedNumbers.has(i)) {
+                const card = document.createElement('div');
+                card.className = 'drag-card';
+                card.setAttribute('data-value', i);
+                card.innerText = i;
+                cardsContainer.appendChild(card);
+            }
+        }
+    }
+    
+    // 检查幻方是否正确
+    function checkMagicSquare() {
+        // 检查是否全部填满
+        if (gridValues.some(v => v === null)) {
+            gameMessage.innerHTML = "⚠️ 九宫格还没有填满！请把1~9全部放入格子中。";
+            gameMessage.style.background = "#FFE0D0";
+            statusSpan.innerText = "未填满";
+            return false;
+        }
+        // 检查是否1~9各出现一次
+        const values = gridValues.slice().sort((a,b)=>a-b);
+        for (let i=0; i<9; i++) {
+            if (values[i] !== i+1) {
+                gameMessage.innerHTML = "❌ 数字不完整或重复！请确保每个数字恰好用一次。";
+                gameMessage.style.background = "#FFE0D0";
+                statusSpan.innerText = "数字错误";
+                return false;
+            }
+        }
+        // 计算行、列、对角线和
+        const rows = [
+            [0,1,2], [3,4,5], [6,7,8],
+            [0,3,6], [1,4,7], [2,5,8],
+            [0,4,8], [2,4,6]
+        ];
+        const sums = rows.map(row => gridValues[row[0]] + gridValues[row[1]] + gridValues[row[2]]);
+        const allEqual = sums.every(s => s === sums[0]);
+        if (allEqual && sums[0] === 15) {
+            gameMessage.innerHTML = "🎉🎉 太棒了！这是一个完美的三阶幻方！幻和=15 🎉🎉";
+            gameMessage.style.background = "#DAEFC4";
+            gameMessage.classList.add('win-glow');
+            statusSpan.innerText = "✨ 正确！ ✨";
+            setTimeout(() => gameMessage.classList.remove('win-glow'), 800);
+            return true;
+        } else {
+            gameMessage.innerHTML = `❌ 还不是幻方！请检查每行、每列、对角线之和是否都等于15。当前和：${sums.slice(0,3).join(',')} (行)`;
+            gameMessage.style.background = "#FFE0D0";
+            statusSpan.innerText = "❌ 不正确";
+            return false;
+        }
+    }
+    
+    // 将数字放入指定格子
+    function placeNumber(index, number) {
+        // 如果该格子已有数字，先移除旧数字
+        const oldVal = gridValues[index];
+        if (oldVal !== null) {
+            usedNumbers.delete(oldVal);
+            gridValues[index] = null;
+        }
+        // 检查数字是否已被使用
+        if (usedNumbers.has(number)) {
+            gameMessage.innerHTML = `⚠️ 数字 ${number} 已经被使用过了！请先移走再放。`;
+            gameMessage.style.background = "#FFE0D0";
+            return false;
+        }
+        gridValues[index] = number;
+        usedNumbers.add(number);
+        renderGrid();
+        renderCards();
+        gameMessage.innerHTML = `✅ 已将 ${number} 放入格子中。继续放置其他数字。`;
+        gameMessage.style.background = "#E0F2CE";
+        setTimeout(() => {
+            if (gameMessage.innerHTML.includes("已将")) {
+                gameMessage.innerHTML = "🌟 继续拖拽数字到九宫格中，全部填满后点击“检查幻方”！";
+                gameMessage.style.background = "#FFF1E2";
+            }
+        }, 1500);
+        return true;
+    }
+    
+    // 重置游戏（清空所有格子）
+    function resetGame() {
+        gridValues.fill(null);
+        usedNumbers.clear();
+        renderGrid();
+        renderCards();
+        gameMessage.innerHTML = "✨ 游戏已重置！把数字1~9拖拽到九宫格中，拼出幻方吧。";
+        gameMessage.style.background = "#FFF1E2";
+        gameMessage.classList.remove('win-glow');
+        statusSpan.innerText = "未完成";
+    }
+    
+    // ---------- 自定义拖拽实现 (支持鼠标+触摸) ----------
+    function startDrag(e, cardElem) {
+        if (dragActive) return;
+        const val = parseInt(cardElem.getAttribute('data-value'));
+        if (isNaN(val)) return;
+        e.preventDefault();
+        let clientX, clientY;
+        if (e.type === 'mousedown') {
+            clientX = e.clientX;
+            clientY = e.clientY;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        } else {
+            const touch = e.touches[0];
+            clientX = touch.clientX;
+            clientY = touch.clientY;
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+            document.addEventListener('touchcancel', onTouchCancel);
+        }
+        dragActive = true;
+        sourceCardElem = cardElem;
+        sourceCardValue = val;
+        sourceCardElem.classList.add('dragging-source');
+        
+        // 创建克隆体
+        cloneElem = document.createElement('div');
+        cloneElem.className = 'drag-clone';
+        cloneElem.innerText = cardElem.innerText;
+        cloneElem.style.left = (clientX - 30) + 'px';
+        cloneElem.style.top = (clientY - 30) + 'px';
+        cloneElem.style.width = sourceCardElem.offsetWidth + 'px';
+        document.body.appendChild(cloneElem);
+        startX = clientX;
+        startY = clientY;
+        
+        // 高亮所有未填满的格子
+        document.querySelectorAll('.grid-cell').forEach(cell => {
+            if (cell.classList.contains('empty')) {
+                cell.style.transform = 'scale(1.02)';
+                cell.style.transition = '0.1s';
+                cell.style.boxShadow = '0 0 0 3px #8FC65A';
+            }
+        });
+    }
+    
+    function onMouseMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        moveClone(e.clientX, e.clientY);
+    }
+    function onTouchMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveClone(touch.clientX, touch.clientY);
+    }
+    function moveClone(clientX, clientY) {
+        if (cloneElem) {
+            cloneElem.style.left = (clientX - cloneElem.offsetWidth / 2) + 'px';
+            cloneElem.style.top = (clientY - cloneElem.offsetHeight / 2) + 'px';
+        }
+    }
+    function finishDrag(clientX, clientY) {
+        if (!dragActive) return;
+        const elemUnder = document.elementsFromPoint(clientX, clientY);
+        let targetCell = null;
+        for (let el of elemUnder) {
+            if (el.classList && el.classList.contains('grid-cell')) {
+                targetCell = el;
+                break;
+            }
+        }
+        if (targetCell && sourceCardElem) {
+            const index = parseInt(targetCell.getAttribute('data-index'));
+            if (!isNaN(index)) {
+                placeNumber(index, sourceCardValue);
+            }
+        } else if (sourceCardElem) {
+            gameMessage.innerHTML = "💡 要把数字卡片拖拽到九宫格的格子里松手哦！";
+            gameMessage.style.background = "#FFE0D0";
+            setTimeout(() => {
+                if (gameMessage.innerHTML.includes("格子里")) {
+                    gameMessage.innerHTML = "🌟 继续拖拽数字卡片到九宫格中！";
+                    gameMessage.style.background = "#FFF1E2";
+                }
+            }, 1200);
+        }
+        endDragCleanup();
+    }
+    
+    function endDragCleanup() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.remove();
+        if (sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+        document.removeEventListener('touchcancel', onTouchCancel);
+        dragActive = false;
+        sourceCardElem = null;
+        cloneElem = null;
+        document.querySelectorAll('.grid-cell').forEach(cell => {
+            cell.style.transform = '';
+            cell.style.boxShadow = '';
+        });
+    }
+    
+    function onMouseUp(e) { if (dragActive) finishDrag(e.clientX, e.clientY); }
+    function onTouchEnd(e) {
+        if (!dragActive) return;
+        let clientX, clientY;
+        if (e.changedTouches && e.changedTouches.length) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        } else { clientX = startX; clientY = startY; }
+        finishDrag(clientX, clientY);
+    }
+    function onTouchCancel(e) { endDragCleanup(); }
+    
+    function bindDragEvents() {
+        cardsContainer.addEventListener('mousedown', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        });
+        cardsContainer.addEventListener('touchstart', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        }, { passive: false });
+    }
+    
+    // 初始化
+    function init() {
+        renderGrid();
+        renderCards();
+        bindDragEvents();
+        checkBtn.addEventListener('click', checkMagicSquare);
+        resetBtn.addEventListener('click', resetGame);
+    }
+    
+    init();
+</script>
+</body>
+</html>

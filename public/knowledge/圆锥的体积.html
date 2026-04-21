@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🎈 圆锥体积探险 | 拖拽配对学公式</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免拖拽时选中文字，提升触屏体验 */
+        }
+
+        body {
+            background: #F4F9F0;
+            font-family: 'Comic Neue', 'Segoe UI Emoji', 'Chalkboard SE', 'Poppins', 'Comic Sans MS', cursive, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 主容器 */
+        .volume-lab {
+            max-width: 1350px;
+            width: 100%;
+            background: #FFFFFFF2;
+            backdrop-filter: blur(2px);
+            border-radius: 68px 52px 68px 52px;
+            box-shadow: 0 25px 40px rgba(70, 60, 40, 0.12);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* 左右布局 */
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* 左侧知识点区域 */
+        .knowledge-side {
+            flex: 1.2;
+            min-width: 260px;
+            background: #FEFCF5;
+            padding: 32px 24px;
+            border-right: 4px dashed #D4E2C6;
+        }
+
+        .knowledge-side h2 {
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #79A85A, #B2D48B);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 8px solid #8DC26F;
+            padding-left: 18px;
+        }
+
+        .info-card {
+            background: #F4F9EF;
+            border-radius: 40px 24px 40px 24px;
+            padding: 22px;
+            margin: 20px 0;
+            box-shadow: 0 8px 0 #DFEAD4;
+        }
+
+        .info-card p {
+            font-size: 1rem;
+            margin: 14px 0;
+            color: #3F5A2B;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .math-badge {
+            background: #E5F0DB;
+            padding: 5px 14px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #558C2F;
+            display: inline-block;
+            margin: 4px 4px 0 0;
+        }
+
+        .tip-area {
+            background: #FEF5E6;
+            border-radius: 32px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .tip-area li {
+            margin-left: 24px;
+            margin-bottom: 8px;
+            color: #A5662C;
+        }
+
+        /* 右侧游戏区 */
+        .game-side {
+            flex: 2;
+            min-width: 300px;
+            background: #FFFCF7;
+            padding: 28px 24px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #E1F0D2;
+            padding-bottom: 12px;
+        }
+
+        .game-header h3 {
+            font-size: 1.8rem;
+            color: #6F9E3F;
+        }
+
+        .stats {
+            display: flex;
+            gap: 12px;
+            background: #F1F7EA;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #54862C;
+            align-items: center;
+        }
+
+        .reset-btn {
+            background: #F2E3CE;
+            border: none;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-family: inherit;
+            color: #9B6A3A;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: 8px;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.96);
+            background: #EAD5B0;
+        }
+
+        /* 圆锥题目卡片区域 (三个) */
+        .cones-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .cone-card {
+            background: #FFF9F0;
+            border-radius: 48px;
+            padding: 18px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+            border: 2px solid #FDE7CD;
+            transition: all 0.2s;
+        }
+
+        .cone-card.matched {
+            background: #E9F5DE;
+            border-color: #9FCD7A;
+            opacity: 0.9;
+        }
+
+        .cone-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 130px;
+        }
+
+        .cone-icon {
+            font-size: 2rem;
+        }
+
+        .cone-dim {
+            font-weight: bold;
+            color: #A8652E;
+            font-size: 0.9rem;
+        }
+
+        .cone-dim span {
+            background: #FFF0DF;
+            padding: 2px 10px;
+            border-radius: 30px;
+            margin-right: 6px;
+        }
+
+        .drop-zone-cone {
+            background: #FFF4E8;
+            border-radius: 60px;
+            padding: 12px 20px;
+            min-width: 140px;
+            text-align: center;
+            border: 2px dashed #F1C38F;
+            transition: all 0.2s;
+            font-weight: bold;
+            color: #BC7A3E;
+        }
+
+        .cone-card.matched .drop-zone-cone {
+            background: #D9F0C3;
+            border: 2px solid #8BC34A;
+            color: #467A1D;
+        }
+
+        .drop-zone-cone.active-drop {
+            background: #F3FCEB;
+            border-color: #7FB244;
+        }
+
+        /* 可拖拽卡片区 */
+        .cards-area {
+            background: #FEF9F0;
+            border-radius: 56px;
+            padding: 20px 16px;
+            margin-top: 16px;
+        }
+
+        .cards-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #AF6F3C;
+            margin-bottom: 16px;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: center;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #FFFFFF, #FFF1E2);
+            border-radius: 60px;
+            padding: 16px 24px;
+            min-width: 120px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #A5612A;
+            box-shadow: 0 10px 16px -6px rgba(100, 70, 30, 0.15);
+            cursor: grab;
+            transition: 0.05s linear;
+            border: 2px solid #FDD6A5;
+            touch-action: none;
+            font-family: monospace;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        .drag-card.dragging-source {
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+
+        .drag-card.matched-card {
+            visibility: hidden;
+            display: none;
+        }
+
+        /* 克隆拖拽体 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0,0,0,0.25));
+            transform: scale(1.02) rotate(1deg);
+            pointer-events: none;
+            background: #FFFCF0;
+            border-radius: 60px;
+            padding: 16px 24px;
+            min-width: 120px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #A5612A;
+            border: 2px solid #FCC37A;
+            backdrop-filter: blur(6px);
+            font-family: monospace;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+        }
+
+        .message-panel {
+            background: #FFF1E2;
+            border-radius: 60px;
+            padding: 12px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #C17A3E;
+            transition: 0.1s;
+        }
+
+        .win-glow {
+            animation: cheerPop 0.6s ease;
+            background: #DAEFC4 !important;
+        }
+
+        @keyframes cheerPop {
+            0% { transform: scale(1); background: #FFEAC6; }
+            50% { transform: scale(1.01); background: #FFE0AE; box-shadow: 0 0 0 5px rgba(150, 200, 100, 0.4);}
+            100% { transform: scale(1); }
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 14px;
+            background: #FBF8EF;
+            color: #BB8A60;
+        }
+
+        @media (max-width: 780px) {
+            .knowledge-side {
+                border-right: none;
+                border-bottom: 4px dashed #D4E2C6;
+            }
+            .cone-card {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .drag-card {
+                padding: 12px 18px;
+                font-size: 1rem;
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="volume-lab">
+    <div class="flex-row">
+        <!-- 左侧知识点：圆锥的体积 -->
+        <div class="knowledge-side">
+            <h2>🍦 圆锥的体积 · 魔法公式</h2>
+            <div class="info-card">
+                <p>📌 <strong>圆锥体积公式</strong><br> 体积 = 1/3 × 底面积 × 高</p>
+                <p>⚪ 底面积 = π × 半径² <br> 📐 所以 <span class="math-badge">V = 1/3 × π × r² × h</span></p>
+                <p>🎯 π 取 3.14，结果保留一位小数~</p>
+                <p>🧸 小故事：圆锥体积是等底等高圆柱体积的 <strong>1/3</strong>！</p>
+            </div>
+            <div class="tip-area">
+                <span>🧪 计算小步骤：</span>
+                <ul>
+                    <li>1️⃣ 先算底面积：π × r × r</li>
+                    <li>2️⃣ 再乘高：得到圆柱体积</li>
+                    <li>3️⃣ 最后除以3：就是圆锥体积啦！</li>
+                </ul>
+                <p style="margin-top: 12px; background:#F8EFE2; border-radius: 28px; padding: 8px;">🎮 右侧游戏：把正确的体积卡片拖拽到对应的圆锥上，全部配对成功你就是体积小英雄！</p>
+            </div>
+        </div>
+
+        <!-- 右侧游戏区：拖拽配对圆锥体积 -->
+        <div class="game-side">
+            <div class="game-header">
+                <h3>🎈 圆锥体积工坊 · 拖拽配对</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="stats">🏆 配对 <span id="matchCount">0</span> / <span id="totalCones">3</span></span>
+                    <button class="reset-btn" id="resetGameBtn">🔄 新的一局</button>
+                </div>
+            </div>
+
+            <!-- 三个圆锥题目卡片 -->
+            <div class="cones-area" id="conesArea"></div>
+
+            <!-- 可拖拽卡片池 -->
+            <div class="cards-area">
+                <div class="cards-title">🎴 可拖拽体积卡片（拖到上方圆锥的凹槽里）</div>
+                <div class="cards-container" id="cardsContainer"></div>
+            </div>
+            <div id="gameMessage" class="message-panel">
+                🌟 计算每个圆锥的体积，然后把正确的卡片拖到对应的「放置区」！
+            </div>
+        </div>
+    </div>
+    <footer>💡 小技巧：圆锥体积 = 1/3 × 3.14 × 半径² × 高，记得先算平方再乘π和高，最后除以3。拖拽卡片到正确位置就能得分~</footer>
+</div>
+
+<script>
+    // ---------- 圆锥题目数据 ----------
+    const conesData = [
+        { id: 0, r: 3, h: 5, volume: null, matched: false },   // 1/3*3.14*9*5 = 47.1
+        { id: 1, r: 4, h: 6, volume: null, matched: false },   // 1/3*3.14*16*6 = 100.48 ≈ 100.5
+        { id: 2, r: 2, h: 9, volume: null, matched: false }    // 1/3*3.14*4*9 = 37.68 ≈ 37.7
+    ];
+    const PI = 3.14;
+    // 计算体积并保留一位小数
+    for (let cone of conesData) {
+        let vol = (1/3) * PI * cone.r * cone.r * cone.h;
+        cone.volume = Math.round(vol * 10) / 10;
+    }
+
+    // 卡片数据：三个正确卡片 + 两个干扰项 (干扰项基于正确值范围)
+    // 为了游戏合理，我们生成三个正确卡片(每个圆锥对应一张)，外加两个干扰卡片，增加挑战。
+    // 每个正确卡片关联对应的圆锥ID
+    let cardsData = [];
+    // 正确卡片
+    conesData.forEach(cone => {
+        cardsData.push({
+            id: `card_correct_${cone.id}`,
+            volume: cone.volume,
+            targetConeId: cone.id,
+            matched: false,
+            displayText: `${cone.volume} cm³`
+        });
+    });
+    // 生成两个干扰卡片 (不同于任何正确体积，且为正数，保留一位小数)
+    const correctVolumes = conesData.map(c => c.volume);
+    let干扰值 = [];
+    while(干扰值.length < 2) {
+        let fake = Math.floor(Math.random() * 80) + 20; // 20~100 之间
+        let fakeVol = Math.round(fake * 10) / 10;
+        if (!correctVolumes.includes(fakeVol) && !干扰值.includes(fakeVol)) {
+            干扰值.push(fakeVol);
+        }
+    }
+    干扰值.forEach((val, idx) => {
+        cardsData.push({
+            id: `card_fake_${idx}`,
+            volume: val,
+            targetConeId: null,
+            matched: false,
+            displayText: `${val} cm³`
+        });
+    });
+    // 打乱卡片顺序
+    for (let i = cardsData.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cardsData[i], cardsData[j]] = [cardsData[j], cardsData[i]];
+    }
+
+    let currentMatchCount = 0;
+    const totalCones = conesData.length;
+
+    // 拖拽全局变量
+    let dragActive = false;
+    let sourceCardElem = null;
+    let sourceCardId = null;
+    let cloneElem = null;
+    let startX = 0, startY = 0;
+
+    // DOM 元素
+    const conesArea = document.getElementById('conesArea');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const matchCountSpan = document.getElementById('matchCount');
+    const totalConesSpan = document.getElementById('totalCones');
+    const resetBtn = document.getElementById('resetGameBtn');
+    const gameMessage = document.getElementById('gameMessage');
+
+    totalConesSpan.innerText = totalCones;
+
+    // 绘制圆锥小图标 (简单canvas图标，但为了简洁不重新canvas，用emoji)
+    // 直接显示文字即可
+
+    // 渲染所有圆锥卡片和卡片区
+    function renderGame() {
+        // 渲染圆锥卡片
+        conesArea.innerHTML = '';
+        conesData.forEach(cone => {
+            const coneCard = document.createElement('div');
+            coneCard.className = 'cone-card';
+            if (cone.matched) coneCard.classList.add('matched');
+            coneCard.setAttribute('data-cone-id', cone.id);
+            coneCard.setAttribute('data-correct-volume', cone.volume);
+            
+            // 左侧信息
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'cone-info';
+            infoDiv.innerHTML = `
+                <div class="cone-icon">🎩</div>
+                <div class="cone-dim"><span>📏 半径 = ${cone.r} cm</span> <span>📐 高 = ${cone.h} cm</span></div>
+                <div class="cone-dim">✨ 体积 = ? cm³</div>
+            `;
+            // 放置区
+            const dropZone = document.createElement('div');
+            dropZone.className = 'drop-zone-cone';
+            if (cone.matched) {
+                dropZone.innerHTML = `✅ 已配对 ${cone.volume} cm³`;
+            } else {
+                dropZone.innerHTML = `⬅️ 拖拽体积至此 ➡️`;
+            }
+            dropZone.setAttribute('data-drop-cone-id', cone.id);
+            
+            coneCard.appendChild(infoDiv);
+            coneCard.appendChild(dropZone);
+            conesArea.appendChild(coneCard);
+        });
+        
+        // 渲染可拖拽卡片 (未匹配的)
+        cardsContainer.innerHTML = '';
+        cardsData.forEach(card => {
+            if (!card.matched) {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'drag-card';
+                cardDiv.setAttribute('data-card-id', card.id);
+                cardDiv.setAttribute('data-volume', card.volume);
+                cardDiv.setAttribute('data-target-cone', card.targetConeId !== null ? card.targetConeId : '');
+                cardDiv.innerText = card.displayText;
+                cardsContainer.appendChild(cardDiv);
+            }
+        });
+        
+        // 更新计分板
+        matchCountSpan.innerText = currentMatchCount;
+        if (currentMatchCount === totalCones) {
+            gameMessage.innerHTML = "🎉🎉 太棒啦！ 圆锥体积全部配对成功！ 🎉🎉<br> ✨ 点击「新的一局」可以继续挑战 ✨";
+            gameMessage.style.background = "#DAEFC4";
+            gameMessage.classList.add('win-glow');
+            setTimeout(() => gameMessage.classList.remove('win-glow'), 800);
+        } else {
+            if (!gameMessage.innerHTML.includes("错误") && !gameMessage.innerHTML.includes("配对成功")) {
+                gameMessage.innerHTML = "🐣 计算每个圆锥的体积，把正确的卡片拖到对应圆锥的放置区！";
+                gameMessage.style.background = "#FFF1E2";
+            }
+        }
+    }
+    
+    // 配对逻辑: 卡片拖拽到圆锥的 drop zone
+    function attemptMatch(cardElem, coneDropZone) {
+        const cardId = cardElem.getAttribute('data-card-id');
+        const card = cardsData.find(c => c.id === cardId);
+        if (!card || card.matched) return false;
+        
+        const coneCard = coneDropZone.closest('.cone-card');
+        if (!coneCard) return false;
+        const coneId = parseInt(coneCard.getAttribute('data-cone-id'));
+        const cone = conesData.find(c => c.id === coneId);
+        if (!cone || cone.matched) return false;
+        
+        // 检查卡片的体积是否等于圆锥的正确体积，并且卡片关联的圆锥id匹配（正确卡片targetConeId对应，干扰卡片无targetConeId）
+        const cardVolume = card.volume;
+        const isCorrect = (card.targetConeId === cone.id && Math.abs(cardVolume - cone.volume) < 0.01);
+        if (!isCorrect) return false;
+        
+        // 配对成功
+        card.matched = true;
+        cone.matched = true;
+        currentMatchCount++;
+        renderGame();
+        gameMessage.innerHTML = `✅ 配对成功！ 圆锥 (r=${cone.r}, h=${cone.h}) 体积 = ${cone.volume} cm³ ✅`;
+        gameMessage.style.background = "#E0F2CE";
+        setTimeout(() => {
+            if (currentMatchCount !== totalCones) {
+                gameMessage.innerHTML = "🐣 继续拖拽其他卡片完成配对！";
+                gameMessage.style.background = "#FFF1E2";
+            } else {
+                gameMessage.innerHTML = "🎉🎉 太棒啦！ 圆锥体积全部配对成功！ 🎉🎉<br> ✨ 点击「新的一局」可以继续挑战 ✨";
+                gameMessage.style.background = "#DAEFC4";
+            }
+        }, 1300);
+        return true;
+    }
+    
+    // ---------- 拖拽实现 (完全支持鼠标+触摸) ----------
+    function startDrag(e, cardElem) {
+        if (dragActive) return;
+        const cardId = cardElem.getAttribute('data-card-id');
+        const card = cardsData.find(c => c.id === cardId);
+        if (!card || card.matched) return;
+        
+        e.preventDefault();
+        let clientX, clientY;
+        if (e.type === 'mousedown') {
+            clientX = e.clientX;
+            clientY = e.clientY;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        } else {
+            const touch = e.touches[0];
+            clientX = touch.clientX;
+            clientY = touch.clientY;
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+            document.addEventListener('touchcancel', onTouchCancel);
+        }
+        
+        dragActive = true;
+        sourceCardElem = cardElem;
+        sourceCardId = cardId;
+        sourceCardElem.classList.add('dragging-source');
+        
+        // 创建克隆体
+        cloneElem = document.createElement('div');
+        cloneElem.className = 'drag-clone';
+        cloneElem.innerText = cardElem.innerText;
+        cloneElem.style.left = (clientX - 35) + 'px';
+        cloneElem.style.top = (clientY - 30) + 'px';
+        cloneElem.style.width = sourceCardElem.offsetWidth + 'px';
+        document.body.appendChild(cloneElem);
+        
+        startX = clientX;
+        startY = clientY;
+        // 高亮所有放置区
+        document.querySelectorAll('.drop-zone-cone').forEach(zone => {
+            zone.classList.add('active-drop');
+        });
+    }
+    
+    function onMouseMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        moveClone(e.clientX, e.clientY);
+    }
+    
+    function onTouchMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveClone(touch.clientX, touch.clientY);
+    }
+    
+    function moveClone(clientX, clientY) {
+        if (!cloneElem) return;
+        cloneElem.style.left = (clientX - cloneElem.offsetWidth / 2) + 'px';
+        cloneElem.style.top = (clientY - cloneElem.offsetHeight / 2) + 'px';
+    }
+    
+    function finishDrag(clientX, clientY) {
+        if (!dragActive) return;
+        // 获取释放点下方的元素，寻找放置区
+        const elemUnderPointer = document.elementsFromPoint(clientX, clientY);
+        let targetDropZone = null;
+        for (let el of elemUnderPointer) {
+            if (el.classList && el.classList.contains('drop-zone-cone')) {
+                targetDropZone = el;
+                break;
+            }
+        }
+        
+        let success = false;
+        if (targetDropZone && sourceCardElem) {
+            const coneCard = targetDropZone.closest('.cone-card');
+            if (coneCard && !coneCard.classList.contains('matched')) {
+                success = attemptMatch(sourceCardElem, targetDropZone);
+                if (!success) {
+                    gameMessage.innerHTML = "😲 配对错误！ 这个体积和圆锥不匹配，再算一遍吧～";
+                    gameMessage.style.background = "#FFE0D0";
+                    setTimeout(() => {
+                        if (currentMatchCount !== totalCones) {
+                            gameMessage.innerHTML = "🐣 继续拖拽卡片，放到正确的圆锥放置区！";
+                            gameMessage.style.background = "#FFF1E2";
+                        }
+                    }, 1200);
+                }
+            } else {
+                gameMessage.innerHTML = "⛔ 这个圆锥已经配对过啦！不能重复配对";
+                gameMessage.style.background = "#FFE0D0";
+                setTimeout(() => {
+                    if (currentMatchCount !== totalCones) gameMessage.style.background = "#FFF1E2";
+                }, 1000);
+            }
+        } else {
+            if (sourceCardElem) {
+                gameMessage.innerHTML = "💡 要把卡片拖拽到圆锥下方的「放置区」上松手才算配对哦！";
+                setTimeout(() => {
+                    if (currentMatchCount !== totalCones && gameMessage.innerHTML.includes("放置区")) {
+                        gameMessage.innerHTML = "🐣 继续拖拽卡片，放到正确的圆锥放置区！";
+                        gameMessage.style.background = "#FFF1E2";
+                    }
+                }, 1000);
+            }
+        }
+        endDragCleanup();
+        if (!success && sourceCardElem) {
+            sourceCardElem.classList.remove('dragging-source');
+        }
+        if (currentMatchCount === totalCones) renderGame();
+    }
+    
+    function endDragCleanup() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.remove();
+        if (sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+        document.removeEventListener('touchcancel', onTouchCancel);
+        dragActive = false;
+        sourceCardElem = null;
+        cloneElem = null;
+        sourceCardId = null;
+        // 移除高亮
+        document.querySelectorAll('.drop-zone-cone').forEach(zone => {
+            zone.classList.remove('active-drop');
+        });
+    }
+    
+    function onMouseUp(e) {
+        if (!dragActive) return;
+        finishDrag(e.clientX, e.clientY);
+    }
+    
+    function onTouchEnd(e) {
+        if (!dragActive) return;
+        let clientX, clientY;
+        if (e.changedTouches && e.changedTouches.length) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        } else {
+            clientX = startX;
+            clientY = startY;
+        }
+        finishDrag(clientX, clientY);
+    }
+    
+    function onTouchCancel(e) {
+        if (dragActive) endDragCleanup();
+    }
+    
+    // 绑定拖拽事件委托 (卡片容器)
+    function bindDragEvents() {
+        cardsContainer.addEventListener('mousedown', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        });
+        cardsContainer.addEventListener('touchstart', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        }, { passive: false });
+    }
+    
+    // 重置游戏
+    function resetGame() {
+        if (dragActive) endDragCleanup();
+        // 重置配对状态
+        conesData.forEach(cone => { cone.matched = false; });
+        cardsData.forEach(card => { card.matched = false; });
+        currentMatchCount = 0;
+        // 重新打乱卡片顺序 (可选)
+        for (let i = cardsData.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [cardsData[i], cardsData[j]] = [cardsData[j], cardsData[i]];
+        }
+        renderGame();
+        gameMessage.innerHTML = "✨ 游戏已重置！ 重新计算圆锥体积并拖拽配对 ✨";
+        gameMessage.style.background = "#FFF1E2";
+        gameMessage.classList.remove('win-glow');
+    }
+    
+    // 初始化
+    function init() {
+        renderGame();
+        bindDragEvents();
+        resetBtn.addEventListener('click', resetGame);
+    }
+    
+    init();
+</script>
+</body>
+</html>

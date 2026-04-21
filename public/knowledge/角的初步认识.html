@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>角的初步认识 | 角分类小英雄 | 拖拽游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #fef5ea;
+            font-family: 'Comic Neue', 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI Emoji', system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .course-card {
+            max-width: 1400px;
+            width: 100%;
+            background: #fffffb;
+            border-radius: 70px 60px 70px 60px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.08), 0 8px 18px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .two-columns {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* 左侧知识点区 */
+        .knowledge-panel {
+            flex: 1.2;
+            min-width: 260px;
+            background: #fffef8;
+            padding: 28px 24px;
+            border-right: 4px solid #ffbc6e;
+        }
+
+        .knowledge-panel h1 {
+            font-size: 2rem;
+            color: #e67e22;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 14px solid #ffaa55;
+            padding-left: 18px;
+            margin-bottom: 8px;
+        }
+
+        .sub {
+            color: #c95a0f;
+            margin-bottom: 24px;
+            padding-left: 32px;
+            font-size: 1rem;
+        }
+
+        .intro-card {
+            background: #fff0e0;
+            border-radius: 48px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .angle-def {
+            display: flex;
+            justify-content: center;
+            margin: 12px 0;
+        }
+
+        .angle-svg {
+            background: #fff;
+            border-radius: 16px;
+            padding: 8px;
+        }
+
+        .rule-list {
+            background: #fff3e6;
+            border-radius: 36px;
+            padding: 16px 20px;
+            margin: 20px 0;
+        }
+
+        .rule-list p {
+            margin: 10px 0;
+            font-size: 1rem;
+            color: #7b3f00;
+        }
+
+        .example-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        .example-item {
+            background: white;
+            border-radius: 32px;
+            padding: 6px 16px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #c4410c;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .game-tip {
+            background: #ffe1b9;
+            border-radius: 30px;
+            padding: 14px 16px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #aa5a1c;
+        }
+
+        /* 右侧游戏区 */
+        .game-panel {
+            flex: 2;
+            min-width: 300px;
+            background: #fffbf5;
+            padding: 24px 22px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            background: #ffefdc;
+            border-radius: 50px;
+            padding: 10px 22px;
+            margin-bottom: 24px;
+            gap: 12px;
+        }
+
+        .score-board, .remain-board {
+            background: #f39c12;
+            border-radius: 40px;
+            padding: 6px 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: inset 0 -2px 0 #c56a00;
+        }
+
+        .remain-board {
+            background: #2ecc71;
+            box-shadow: inset 0 -2px 0 #1f8f4a;
+        }
+
+        .new-game-btn {
+            background: #3498db;
+            border: none;
+            font-size: 1rem;
+            padding: 8px 24px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 5px 0 #1f618d;
+            transition: 0.05s linear;
+        }
+
+        .new-game-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1f618d;
+        }
+
+        /* 拖拽卡片区 */
+        .drag-zone {
+            background: #fef3e8;
+            border-radius: 48px;
+            padding: 20px 16px;
+            margin-bottom: 28px;
+            border: 3px dashed #ffbc6e;
+            min-height: 260px;
+        }
+
+        .drag-zone p {
+            text-align: center;
+            font-weight: bold;
+            color: #b85c1a;
+            margin-bottom: 18px;
+            font-size: 1.1rem;
+        }
+
+        .cards-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #fff5e8, #ffe6d0);
+            width: 160px;
+            padding: 16px 8px;
+            text-align: center;
+            border-radius: 48px;
+            box-shadow: 0 10px 0 #e0a45a;
+            cursor: grab;
+            touch-action: none;
+            transition: 0.05s;
+            border: 2px solid #ffcd94;
+            font-weight: bold;
+            color: #c4410c;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        .drag-card canvas {
+            display: block;
+            margin: 0 auto;
+            background: #fffef5;
+            border-radius: 24px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .baskets-area {
+            background: #ffefdd;
+            border-radius: 48px;
+            padding: 18px 14px;
+        }
+
+        .baskets-area h3 {
+            text-align: center;
+            margin-bottom: 18px;
+            color: #c2410c;
+            font-size: 1.2rem;
+        }
+
+        .baskets-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 18px;
+        }
+
+        .basket {
+            background: #ffedd5;
+            width: 140px;
+            padding: 14px 8px;
+            text-align: center;
+            border-radius: 60px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #e67e22;
+            box-shadow: 0 6px 0 #d9b48b;
+            transition: 0.1s;
+            border: 2px solid #f7bc6c;
+            cursor: pointer;
+        }
+
+        .basket span {
+            display: block;
+            font-size: 0.7rem;
+            color: #a65d2a;
+        }
+
+        .message-area {
+            margin-top: 20px;
+            background: #f7e1b0;
+            border-radius: 36px;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            color: #b85c1a;
+            font-size: 0.95rem;
+        }
+
+        /* 拖拽克隆样式 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.25));
+            opacity: 0.9;
+            pointer-events: none;
+            transform: scale(1.05) rotate(2deg);
+            width: 160px;
+            background: linear-gradient(145deg, #fff5e8, #ffe6d0);
+            border-radius: 48px;
+            padding: 16px 8px;
+            border: 3px solid #ffb347;
+            font-weight: bold;
+            text-align: center;
+            color: #c4410c;
+        }
+
+        .drag-clone canvas {
+            display: block;
+            margin: 0 auto;
+            background: #fffef5;
+            border-radius: 24px;
+        }
+
+        /* 动画 */
+        .correct-pop {
+            animation: bounceHappy 0.35s ease;
+        }
+
+        @keyframes bounceHappy {
+            0% { transform: scale(1); background: #d9f0cd; }
+            70% { transform: scale(1.08); background: #b2e0a0; }
+            100% { transform: scale(1); background: #ffedd5; }
+        }
+
+        .wrong-shake {
+            animation: shakeBad 0.3s ease 0s 2;
+            background-color: #ffe0e0;
+        }
+
+        @keyframes shakeBad {
+            0%,100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* 响应式 */
+        @media (max-width: 850px) {
+            .knowledge-panel {
+                border-right: none;
+                border-bottom: 4px solid #ffbc6e;
+            }
+            .drag-card, .drag-clone {
+                width: 140px;
+            }
+            .basket {
+                width: 120px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .drag-card, .drag-clone {
+                width: 120px;
+            }
+            .basket {
+                width: 100px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="course-card">
+    <div class="two-columns">
+        <!-- 左侧：角的初步认识知识点 -->
+        <div class="knowledge-panel">
+            <h1>📐 角的初步认识</h1>
+            <div class="sub">—— 顶点、边、大小</div>
+            <div class="intro-card">
+                <div class="angle-def">
+                    <svg width="100" height="80" viewBox="0 0 100 80" class="angle-svg">
+                        <line x1="15" y1="70" x2="50" y2="20" stroke="#c4410c" stroke-width="3" />
+                        <line x1="15" y1="70" x2="85" y2="70" stroke="#c4410c" stroke-width="3" />
+                        <circle cx="15" cy="70" r="4" fill="#e67e22" />
+                        <text x="55" y="45" fill="#c4410c" font-size="12">顶点</text>
+                    </svg>
+                </div>
+                <p>✨ 角由一个<strong>顶点</strong>和两条<strong>边</strong>组成。</p>
+                <p>📖 角的大小与边的<strong>张口大小</strong>有关，与边的长短无关。</p>
+                <p>🎯 <strong>角的分类</strong>：<br>
+                ✔️ <span style="color:#e67e22;">锐角</span>：小于90°<br>
+                ✔️ <span style="color:#e67e22;">直角</span>：等于90°<br>
+                ✔️ <span style="color:#e67e22;">钝角</span>：大于90°小于180°</p>
+            </div>
+            <div class="rule-list">
+                <p>🎈 小口诀：</p>
+                <p>✔️ 一个顶点两条边，角的大小看张口。<br>
+                ✔️ 锐角小于90度，直角正好90度。<br>
+                ✔️ 钝角大于90度，分类清楚记心间。</p>
+                <div class="example-group">
+                    <div class="example-item">三角尺有直角</div>
+                    <div class="example-item">扇子打开是钝角</div>
+                    <div class="example-item">剪刀张开是锐角</div>
+                </div>
+            </div>
+            <div class="game-tip">
+                🎮 游戏玩法：<br>
+                右边每个卡片上有一个角（图形）。<br>
+                判断它是什么角，把卡片拖到下方正确的角分类篮子里。<br>
+                全部配对成功就胜利啦！✨ 成为角分类小英雄！
+            </div>
+        </div>
+
+        <!-- 右侧：拖拽配对游戏区 -->
+        <div class="game-panel">
+            <div class="game-header">
+                <div class="score-board">⭐ 配对: <span id="scoreValue">0</span></div>
+                <div class="remain-board">🎯 剩余: <span id="remainValue">0</span></div>
+                <button class="new-game-btn" id="resetGameBtn">🔄 新的一关</button>
+            </div>
+
+            <div class="drag-zone">
+                <p>🐣 按住角卡片，拖到正确的分类篮子里！</p>
+                <div id="cardsContainer" class="cards-grid">
+                    <!-- 动态生成角图形卡片 -->
+                </div>
+            </div>
+
+            <div class="baskets-area">
+                <h3>📦 角分类篮子 (拖到这里配对)</h3>
+                <div class="baskets-grid">
+                    <div class="basket" data-type="acute">🔺 锐角<span>小于90°</span></div>
+                    <div class="basket" data-type="right">📐 直角<span>等于90°</span></div>
+                    <div class="basket" data-type="obtuse">🔻 钝角<span>大于90°</span></div>
+                </div>
+            </div>
+
+            <div id="gameMessage" class="message-area">
+                🧸 观察角的开口大小，拖到正确的分类篮子里！
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- 游戏核心：角的分类配对（角图形卡片 -> 锐角/直角/钝角）----------
+    // 定义角的数据：名称、类型、角度、图标
+    const ANGLES = [
+        { name: "锐角", type: "acute", degrees: 35, icon: "📐", canvasId: "acuteCanvas" },
+        { name: "直角", type: "right", degrees: 90, icon: "📏", canvasId: "rightCanvas" },
+        { name: "钝角", type: "obtuse", degrees: 125, icon: "📐", canvasId: "obtuseCanvas" }
+    ];
+
+    // 绘制角的函数 (在canvas上绘制指定度数的角，带圆弧标记)
+    function drawAngle(canvas, degrees) {
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        
+        // 设定顶点坐标 (左下角附近，留边距)
+        const vertexX = 30;
+        const vertexY = h - 25;
+        // 根据角度计算另一条边的方向 (起始边水平向右)
+        const startRad = 0;
+        const endRad = degrees * Math.PI / 180;
+        
+        // 边的长度
+        const lineLen = 85;
+        // 计算终点的坐标
+        const endX = vertexX + lineLen * Math.cos(endRad);
+        const endY = vertexY - lineLen * Math.sin(endRad);
+        
+        // 绘制两条边
+        ctx.beginPath();
+        ctx.moveTo(vertexX, vertexY);
+        ctx.lineTo(vertexX + lineLen, vertexY);
+        ctx.lineTo(endX, endY);
+        ctx.strokeStyle = '#c4410c';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
+        // 绘制顶点小圆点
+        ctx.beginPath();
+        ctx.arc(vertexX, vertexY, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = '#e67e22';
+        ctx.fill();
+        
+        // 绘制圆弧标记 (半径30)
+        const arcRadius = 35;
+        // 圆弧起始弧度0，结束弧度endRad
+        ctx.beginPath();
+        ctx.arc(vertexX, vertexY, arcRadius, startRad, endRad, false);
+        ctx.strokeStyle = '#ffaa55';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // 如果是直角，绘制直角符号 (小正方形)
+        if (Math.abs(degrees - 90) < 0.1) {
+            const squareSize = 18;
+            const squareStartX = vertexX + 10;
+            const squareStartY = vertexY - 10;
+            ctx.beginPath();
+            ctx.moveTo(squareStartX, vertexY);
+            ctx.lineTo(squareStartX, squareStartY);
+            ctx.lineTo(vertexX + 10, squareStartY);
+            ctx.strokeStyle = '#2ecc71';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            // 加一个小直角标记
+            ctx.beginPath();
+            ctx.moveTo(squareStartX, vertexY);
+            ctx.lineTo(squareStartX, squareStartY);
+            ctx.lineTo(vertexX + 10, squareStartY);
+            ctx.stroke();
+        }
+        
+        // 在角内部添加角度数值提示（可选，不干扰判断）
+        // 为了不影响小朋友判断，不加数值，只靠图形。
+    }
+    
+    // 生成卡片数组 (每个角类型一张卡片，一共3张)
+    function getAngleCards() {
+        return ANGLES.map(angle => ({
+            type: angle.type,
+            degrees: angle.degrees,
+            icon: angle.icon,
+            name: angle.name
+        }));
+    }
+    
+    let currentCards = [];      // 未配对卡片 { type, degrees, icon, name, element }
+    let currentScore = 0;
+    let totalCount = 0;
+    
+    // DOM 元素
+    const cardsContainer = document.getElementById('cardsContainer');
+    const baskets = document.querySelectorAll('.basket');
+    const scoreSpan = document.getElementById('scoreValue');
+    const remainSpan = document.getElementById('remainValue');
+    const messageDiv = document.getElementById('gameMessage');
+    const resetBtn = document.getElementById('resetGameBtn');
+    
+    // 洗牌函数
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+    
+    // 重置游戏
+    function resetAndNewGame() {
+        const rawCards = getAngleCards();
+        currentCards = rawCards.map((item, idx) => ({
+            type: item.type,
+            degrees: item.degrees,
+            icon: item.icon,
+            name: item.name,
+            id: idx
+        }));
+        currentCards = shuffleArray(currentCards);
+        currentScore = 0;
+        totalCount = currentCards.length;
+        renderGame();
+        messageDiv.innerHTML = '🎈 新的一关！ 观察角的开口大小，拖到正确的分类篮子！ 🎈';
+        messageDiv.style.background = '#f7e1b0';
+        if (isDragging) stopDrag();
+    }
+    
+    // 渲染卡片和篮子
+    function renderGame() {
+        // 渲染卡片
+        cardsContainer.innerHTML = '';
+        currentCards.forEach(card => {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'drag-card';
+            cardDiv.setAttribute('data-type', card.type);
+            cardDiv.setAttribute('data-name', card.name);
+            // 创建canvas并绘制角
+            const canvas = document.createElement('canvas');
+            canvas.width = 120;
+            canvas.height = 110;
+            canvas.style.width = '100%';
+            canvas.style.height = 'auto';
+            canvas.style.maxWidth = '120px';
+            drawAngle(canvas, card.degrees);
+            cardDiv.appendChild(canvas);
+            // 添加文字提示
+            const label = document.createElement('div');
+            label.innerText = '这个角是 ?';
+            label.style.fontSize = '0.8rem';
+            label.style.marginTop = '8px';
+            label.style.color = '#b85c1a';
+            cardDiv.appendChild(label);
+            cardsContainer.appendChild(cardDiv);
+        });
+        
+        const remainCount = currentCards.length;
+        remainSpan.innerText = remainCount;
+        scoreSpan.innerText = currentScore;
+        
+        if (remainCount === 0 && totalCount > 0) {
+            messageDiv.innerHTML = '🎉🎉 完美！ 你完全掌握了角的分类！ 点“新的一关”继续挑战 🎉🎉';
+            messageDiv.style.background = '#c8f0d1';
+        } else {
+            if (messageDiv.innerHTML.includes('完美')) {
+                messageDiv.innerHTML = '🐣 继续拖拽配对，成为角分类小英雄！';
+                messageDiv.style.background = '#f7e1b0';
+            }
+        }
+        bindDragEvents();
+    }
+    
+    // ---------- 自定义拖拽系统 (鼠标+触摸) ----------
+    let isDragging = false;
+    let draggedCardElem = null;
+    let cloneElem = null;
+    let draggedType = null;
+    
+    function removeClone() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.parentNode.removeChild(cloneElem);
+        cloneElem = null;
+    }
+    
+    function stopDrag() {
+        if (!isDragging) return;
+        isDragging = false;
+        removeClone();
+        document.removeEventListener('mousemove', onGlobalMove);
+        document.removeEventListener('mouseup', onGlobalUp);
+        document.removeEventListener('touchmove', onGlobalTouchMove);
+        document.removeEventListener('touchend', onGlobalTouchEnd);
+        document.body.style.userSelect = '';
+        draggedCardElem = null;
+        draggedType = null;
+    }
+    
+    function onGlobalMove(e) {
+        if (!cloneElem) return;
+        e.preventDefault();
+        const x = e.clientX;
+        const y = e.clientY;
+        cloneElem.style.left = (x - cloneElem.offsetWidth / 2) + 'px';
+        cloneElem.style.top = (y - cloneElem.offsetHeight / 2) + 'px';
+    }
+    
+    function onGlobalTouchMove(e) {
+        if (!cloneElem) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const x = touch.clientX;
+        const y = touch.clientY;
+        cloneElem.style.left = (x - cloneElem.offsetWidth / 2) + 'px';
+        cloneElem.style.top = (y - cloneElem.offsetHeight / 2) + 'px';
+    }
+    
+    function finishDrag(endX, endY) {
+        if (!draggedCardElem || !isDragging) {
+            stopDrag();
+            return;
+        }
+        
+        const elemUnderPointer = document.elementsFromPoint(endX, endY);
+        let targetBasket = null;
+        for (let el of elemUnderPointer) {
+            if (el.classList && el.classList.contains('basket')) {
+                targetBasket = el;
+                break;
+            }
+        }
+        
+        let isCorrect = false;
+        if (targetBasket) {
+            const basketType = targetBasket.getAttribute('data-type');
+            if (basketType === draggedType) {
+                isCorrect = true;
+                // 从 currentCards 中移除该卡片
+                const cardIndex = currentCards.findIndex(c => c.type === draggedType);
+                if (cardIndex !== -1) {
+                    currentCards.splice(cardIndex, 1);
+                    currentScore++;
+                    // 篮子不消失（固定篮子）
+                    targetBasket.classList.add('correct-pop');
+                    setTimeout(() => targetBasket.classList.remove('correct-pop'), 350);
+                    messageDiv.innerHTML = `✅ 正确！ 这个角是 ${draggedType === 'acute' ? '锐角' : (draggedType === 'right' ? '直角' : '钝角')}  ✅ +1分`;
+                    messageDiv.style.background = '#c8e6b5';
+                    setTimeout(() => {
+                        if (currentCards.length !== 0) messageDiv.style.background = '#f7e1b0';
+                        else messageDiv.innerHTML = '🏆 全对！ 角分类小英雄就是你！ 🏆';
+                    }, 900);
+                    renderGame();
+                } else {
+                    messageDiv.innerHTML = '🤔 卡片不见了，请点新游戏~';
+                }
+            } else {
+                messageDiv.innerHTML = `❌ 不对哦！ 这个角不是 ${basketType === 'acute' ? '锐角' : (basketType === 'right' ? '直角' : '钝角')}，再观察开口大小~ ❌`;
+                messageDiv.style.background = '#ffe0e0';
+                setTimeout(() => {
+                    if (currentCards.length !== 0 && messageDiv.innerHTML.includes('不对哦')) messageDiv.style.background = '#f7e1b0';
+                }, 1000);
+                draggedCardElem.classList.add('wrong-shake');
+                setTimeout(() => draggedCardElem.classList.remove('wrong-shake'), 500);
+            }
+        } else {
+            messageDiv.innerHTML = '🧸 要把角卡片拖到分类篮子上方再松开哟！ 试试看~';
+            messageDiv.style.background = '#ffefcf';
+            setTimeout(() => {
+                if (currentCards.length !== 0 && messageDiv.innerHTML.includes('拖到篮子')) messageDiv.style.background = '#f7e1b0';
+            }, 800);
+        }
+        stopDrag();
+    }
+    
+    function onGlobalUp(e) {
+        if (!isDragging) return;
+        finishDrag(e.clientX, e.clientY);
+    }
+    
+    function onGlobalTouchEnd(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        const touch = e.changedTouches[0];
+        finishDrag(touch.clientX, touch.clientY);
+    }
+    
+    function startDrag(cardElement, startX, startY) {
+        if (isDragging) stopDrag();
+        draggedCardElem = cardElement;
+        // 获取卡片对应的角类型
+        const typeAttr = cardElement.getAttribute('data-type');
+        if (typeAttr) {
+            draggedType = typeAttr;
+        } else {
+            // fallback: 根据卡片内canvas的角度特征？但数据中已设置data-type，确保有。
+            // 如果没有，从当前Cards中找（通过顺序不靠谱）
+            // 由于我们在渲染时已经设置data-type，应该存在
+            const found = currentCards.find(c => c.element === cardElement);
+            if (found) draggedType = found.type;
+        }
+        if (!draggedType) return;
+        
+        const rect = cardElement.getBoundingClientRect();
+        cloneElem = cardElement.cloneNode(true);
+        cloneElem.classList.add('drag-clone');
+        cloneElem.style.position = 'fixed';
+        cloneElem.style.left = rect.left + 'px';
+        cloneElem.style.top = rect.top + 'px';
+        cloneElem.style.width = rect.width + 'px';
+        cloneElem.style.margin = '0';
+        cloneElem.style.pointerEvents = 'none';
+        document.body.appendChild(cloneElem);
+        
+        isDragging = true;
+        document.addEventListener('mousemove', onGlobalMove);
+        document.addEventListener('mouseup', onGlobalUp);
+        document.addEventListener('touchmove', onGlobalTouchMove, { passive: false });
+        document.addEventListener('touchend', onGlobalTouchEnd);
+        document.body.style.userSelect = 'none';
+    }
+    
+    function bindDragEvents() {
+        const cards = document.querySelectorAll('.drag-card');
+        cards.forEach(card => {
+            card.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                startDrag(card, e.clientX, e.clientY);
+            });
+            card.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                startDrag(card, touch.clientX, touch.clientY);
+            });
+            card.addEventListener('dragstart', (e) => e.preventDefault());
+        });
+    }
+    
+    // 初始化
+    resetAndNewGame();
+    resetBtn.addEventListener('click', () => {
+        if (isDragging) stopDrag();
+        resetAndNewGame();
+    });
+</script>
+</body>
+</html>

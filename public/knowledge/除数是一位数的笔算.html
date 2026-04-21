@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>除数是一位数笔算 | 竖式填空小英雄 | 拖拽游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #fef5ea;
+            font-family: 'Comic Neue', 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI Emoji', system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .course-card {
+            max-width: 1300px;
+            width: 100%;
+            background: #fffffb;
+            border-radius: 70px 60px 70px 60px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.08), 0 8px 18px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .two-columns {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* 左侧知识点区 */
+        .knowledge-panel {
+            flex: 1.2;
+            min-width: 260px;
+            background: #fffef8;
+            padding: 28px 24px;
+            border-right: 4px solid #ffbc6e;
+        }
+
+        .knowledge-panel h1 {
+            font-size: 2rem;
+            color: #e67e22;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 14px solid #ffaa55;
+            padding-left: 18px;
+            margin-bottom: 8px;
+        }
+
+        .sub {
+            color: #c95a0f;
+            margin-bottom: 24px;
+            padding-left: 32px;
+            font-size: 1rem;
+        }
+
+        .rule-card {
+            background: #fff0e0;
+            border-radius: 48px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .big-example {
+            font-size: 1.2rem;
+            text-align: center;
+            margin: 12px 0;
+            color: #e67e22;
+            font-weight: bold;
+            background: #fff3e6;
+            padding: 10px;
+            border-radius: 32px;
+        }
+
+        .rule-list {
+            background: #fff3e6;
+            border-radius: 36px;
+            padding: 16px 20px;
+            margin: 20px 0;
+        }
+
+        .rule-list p {
+            margin: 10px 0;
+            font-size: 1rem;
+            color: #7b3f00;
+        }
+
+        .example-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        .example-item {
+            background: white;
+            border-radius: 32px;
+            padding: 6px 16px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #c4410c;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .game-tip {
+            background: #ffe1b9;
+            border-radius: 30px;
+            padding: 14px 16px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #aa5a1c;
+        }
+
+        /* 右侧游戏区 */
+        .game-panel {
+            flex: 2;
+            min-width: 300px;
+            background: #fffbf5;
+            padding: 24px 22px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            background: #ffefdc;
+            border-radius: 50px;
+            padding: 10px 22px;
+            margin-bottom: 24px;
+            gap: 12px;
+        }
+
+        .score-board, .remain-board {
+            background: #f39c12;
+            border-radius: 40px;
+            padding: 6px 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: inset 0 -2px 0 #c56a00;
+        }
+
+        .remain-board {
+            background: #2ecc71;
+            box-shadow: inset 0 -2px 0 #1f8f4a;
+        }
+
+        .new-game-btn {
+            background: #3498db;
+            border: none;
+            font-size: 1rem;
+            padding: 8px 24px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 5px 0 #1f618d;
+            transition: 0.05s linear;
+        }
+
+        .new-game-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1f618d;
+        }
+
+        /* 竖式填空游戏区 */
+        .questions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+            margin-bottom: 30px;
+        }
+
+        .question-item {
+            background: #fef3e8;
+            border-radius: 48px;
+            padding: 20px;
+            border: 2px solid #ffcd94;
+        }
+
+        .question-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #c4410c;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .division-box {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        /* 竖式样式 */
+        .vertical-div {
+            font-family: monospace;
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: #fff8f0;
+            padding: 15px 20px;
+            border-radius: 32px;
+            display: inline-block;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .vertical-div table {
+            border-collapse: collapse;
+        }
+
+        .vertical-div td {
+            padding: 4px 8px;
+            text-align: center;
+        }
+
+        .divider {
+            border-top: 3px solid #c4410c;
+        }
+
+        .blank {
+            display: inline-block;
+            min-width: 40px;
+            background: #fff0dd;
+            border-radius: 12px;
+            border: 2px dashed #f7bc6c;
+            padding: 4px 12px;
+            margin: 0 2px;
+            font-family: monospace;
+            font-size: 1.3rem;
+            color: #e67e22;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .blank.filled {
+            background: #d9f0cd;
+            border: 2px solid #2ecc71;
+            color: #2c6e2c;
+        }
+
+        .drag-numbers-area {
+            background: #ffefdd;
+            border-radius: 48px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .drag-numbers-area p {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #b85c1a;
+        }
+
+        .numbers-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .drag-number {
+            background: linear-gradient(145deg, #fff5e8, #ffe6d0);
+            width: 70px;
+            padding: 12px 0;
+            text-align: center;
+            border-radius: 48px;
+            box-shadow: 0 8px 0 #e0a45a;
+            cursor: grab;
+            touch-action: none;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #c4410c;
+            border: 2px solid #ffcd94;
+            transition: 0.05s;
+        }
+
+        .drag-number:active {
+            cursor: grabbing;
+        }
+
+        .message-area {
+            margin-top: 20px;
+            background: #f7e1b0;
+            border-radius: 36px;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            color: #b85c1a;
+            font-size: 0.95rem;
+        }
+
+        /* 拖拽克隆样式 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.25));
+            opacity: 0.9;
+            pointer-events: none;
+            transform: scale(1.05) rotate(2deg);
+            width: 70px;
+            background: linear-gradient(145deg, #fff5e8, #ffe6d0);
+            border-radius: 48px;
+            padding: 12px 0;
+            border: 3px solid #ffb347;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+            color: #c4410c;
+        }
+
+        /* 动画 */
+        .correct-pop {
+            animation: bounceHappy 0.35s ease;
+        }
+
+        @keyframes bounceHappy {
+            0% { transform: scale(1); background: #d9f0cd; }
+            70% { transform: scale(1.08); background: #b2e0a0; }
+            100% { transform: scale(1); background: #ffedd5; }
+        }
+
+        .wrong-shake {
+            animation: shakeBad 0.3s ease 0s 2;
+            background-color: #ffe0e0;
+        }
+
+        @keyframes shakeBad {
+            0%,100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .reset-btn-small {
+            background: #e67e22;
+            border: none;
+            font-size: 0.9rem;
+            padding: 4px 12px;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            margin-left: 12px;
+        }
+
+        /* 响应式 */
+        @media (max-width: 850px) {
+            .knowledge-panel {
+                border-right: none;
+                border-bottom: 4px solid #ffbc6e;
+            }
+            .drag-number {
+                width: 60px;
+                font-size: 1.5rem;
+            }
+            .vertical-div {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .drag-number {
+                width: 55px;
+                font-size: 1.3rem;
+            }
+            .blank {
+                min-width: 35px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="course-card">
+    <div class="two-columns">
+        <!-- 左侧：除数是一位数笔算知识点 -->
+        <div class="knowledge-panel">
+            <h1>📐 除数是一位数笔算</h1>
+            <div class="sub">—— 从高位除起，一位一位往下除</div>
+            <div class="rule-card">
+                <div class="big-example">
+                    8 4 ÷ 2 = 4 2<br>
+                    竖式步骤：<br>
+                    ① 被除数最高位8÷2=4，写在十位。<br>
+                    ② 2×4=8，8-8=0。<br>
+                    ③ 落下个位4，4÷2=2，写在个位。<br>
+                    ④ 2×2=4，4-4=0。
+                </div>
+                <p>✨ <strong>笔算规则</strong>：</p>
+                <p>1️⃣ 从被除数的最高位除起。<br>
+                2️⃣ 除到被除数的哪一位，商就写在那一位上面。<br>
+                3️⃣ 每次除后余数必须比除数小。<br>
+                4️⃣ 落下下一位继续除，直到除完为止。</p>
+            </div>
+            <div class="rule-list">
+                <p>🎈 小口诀：</p>
+                <p>✔️ 高位除起，一位一位落。<br>
+                ✔️ 商对位，余数小，落位继续除。<br>
+                ✔️ 竖式写整齐，笔算不出错。</p>
+                <div class="example-group">
+                    <div class="example-item">96÷3=32</div>
+                    <div class="example-item">75÷5=15</div>
+                    <div class="example-item">128÷4=32</div>
+                </div>
+            </div>
+            <div class="game-tip">
+                🎮 游戏玩法：<br>
+                下面有3个不完整的除法竖式，空缺了数字。<br>
+                右边有数字卡片，把数字拖拽到正确的空缺位置。<br>
+                全部填对就胜利啦！✨ 成为笔算小英雄！
+            </div>
+        </div>
+
+        <!-- 右侧：拖拽填空游戏区 -->
+        <div class="game-panel">
+            <div class="game-header">
+                <div class="score-board">⭐ 完成: <span id="scoreValue">0</span> / <span id="totalValue">0</span></div>
+                <div class="remain-board">🎯 剩余空缺: <span id="remainValue">0</span></div>
+                <button class="new-game-btn" id="resetGameBtn">🔄 新的一关</button>
+            </div>
+
+            <div id="questionsContainer" class="questions-container">
+                <!-- 动态生成竖式题目 -->
+            </div>
+
+            <div class="drag-numbers-area">
+                <p>🐣 拖拽下方数字到竖式的空格中</p>
+                <div id="numbersContainer" class="numbers-grid">
+                    <!-- 动态生成可拖拽数字卡片 -->
+                </div>
+            </div>
+
+            <div id="gameMessage" class="message-area">
+                🧸 观察竖式，把正确的数字拖到空缺处！
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- 游戏核心：除数是一位数笔算竖式填空 ----------
+    // 预定义题目数据：每个题目包含除数、被除数、竖式结构中空缺位置及其正确答案
+    // 为了简化实现，我们定义每个空缺的标识和正确值，并动态渲染竖式
+    const QUESTIONS_DATA = [
+        {
+            divisor: 2,
+            dividend: 84,
+            // 空缺描述: 每个空缺的标识 (商十位、商个位、第一次积、第一次余数等)
+            blanks: [
+                { id: "q1_quotient_tens", label: "商的十位", correct: 4, position: "商十位" },
+                { id: "q1_quotient_ones", label: "商的个位", correct: 2, position: "商个位" },
+                { id: "q1_product1", label: "第一次乘积", correct: 8, position: "积" },
+                { id: "q1_remainder1", label: "第一次余数", correct: 0, position: "余数" }
+            ],
+            // 辅助显示
+            dividendStr: "84",
+            divisorStr: "2"
+        },
+        {
+            divisor: 3,
+            dividend: 96,
+            blanks: [
+                { id: "q2_quotient_tens", label: "商的十位", correct: 3, position: "商十位" },
+                { id: "q2_quotient_ones", label: "商的个位", correct: 2, position: "商个位" },
+                { id: "q2_product1", label: "第一次乘积", correct: 9, position: "积" },
+                { id: "q2_remainder1", label: "第一次余数", correct: 0, position: "余数" }
+            ],
+            dividendStr: "96",
+            divisorStr: "3"
+        },
+        {
+            divisor: 4,
+            dividend: 128,
+            blanks: [
+                { id: "q3_quotient_hundreds", label: "商的百位", correct: 3, position: "商百位" },
+                { id: "q3_quotient_tens", label: "商的十位", correct: 2, position: "商十位" },
+                { id: "q3_product1", label: "第一次乘积", correct: 12, position: "积" },
+                { id: "q3_remainder1", label: "第一次余数", correct: 0, position: "余数" },
+                { id: "q3_quotient_ones", label: "商的个位", correct: 0, position: "商个位" }  // 128÷4=32，个位0？不对128÷4=32，个位是2，调整
+            ]
+        }
+    ];
+    // 修正第三个题目数据 (128÷4=32)
+    QUESTIONS_DATA[2].blanks = [
+        { id: "q3_quotient_hundreds", label: "商的百位", correct: 3, position: "商百位" },
+        { id: "q3_quotient_tens", label: "商的十位", correct: 2, position: "商十位" },
+        { id: "q3_product1", label: "第一次乘积", correct: 12, position: "积" },
+        { id: "q3_remainder1", label: "第一次余数", correct: 0, position: "余数" },
+        { id: "q3_quotient_ones", label: "商的个位", correct: 2, position: "商个位" }  // 32的个位是2
+    ];
+    // 补充题目
+    const EXTRA_QUESTION = {
+        divisor: 5,
+        dividend: 75,
+        blanks: [
+            { id: "q4_quotient_tens", label: "商的十位", correct: 1, position: "商十位" },
+            { id: "q4_quotient_ones", label: "商的个位", correct: 5, position: "商个位" },
+            { id: "q4_product1", label: "第一次乘积", correct: 5, position: "积" },
+            { id: "q4_remainder1", label: "第一次余数", correct: 2, position: "余数" },
+            { id: "q4_product2", label: "第二次乘积", correct: 25, position: "积2" }
+        ],
+        dividendStr: "75",
+        divisorStr: "5"
+    };
+    QUESTIONS_DATA.push(EXTRA_QUESTION);
+
+    // 实际题目数量
+    const ACTUAL_QUESTIONS = QUESTIONS_DATA;
+
+    // 游戏状态
+    let currentBlanks = [];     // 存储所有空缺 { id, correct, currentValue, questionIndex, element, blankKey }
+    let currentScore = 0;
+    let totalBlanks = 0;
+    let filledCount = 0;
+    let dragEnabled = true;
+
+    // DOM 元素
+    const questionsContainer = document.getElementById('questionsContainer');
+    const numbersContainer = document.getElementById('numbersContainer');
+    const scoreSpan = document.getElementById('scoreValue');
+    const totalSpan = document.getElementById('totalValue');
+    const remainSpan = document.getElementById('remainValue');
+    const messageDiv = document.getElementById('gameMessage');
+    const resetBtn = document.getElementById('resetGameBtn');
+
+    // 存储所有可拖拽的数字（去重后）
+    let availableNumbers = [];
+    let numberElements = [];
+
+    // 渲染竖式（基于题目数据）
+    function renderDivision(qData, qIndex) {
+        const divisor = qData.divisor;
+        const dividend = qData.dividend;
+        const dividendStr = dividend.toString();
+        const quotient = Math.floor(dividend / divisor);
+        const quotientStr = quotient.toString();
+        
+        // 构建竖式HTML (简单模拟)
+        // 为了填空，我们动态创建空缺位置span
+        // 使用表格布局
+        let html = `<div class="vertical-div">`;
+        html += `<table>`;
+        // 第一行: 商的位置
+        html += `<tr><td style="border-bottom:2px solid #c4410c;" colspan="2">`;
+        // 商的每个数字做成可填空
+        for (let i = 0; i < quotientStr.length; i++) {
+            const digit = quotientStr[i];
+            // 查找该位置的空缺
+            const blankId = `q${qIndex}_quotient_${i===0?'hundreds':(i===1?'tens':'ones')}`;
+            const blank = currentBlanks.find(b => b.id === blankId);
+            if (blank) {
+                html += `<span class="blank" data-blank-id="${blank.id}" data-question="${qIndex}">${blank.currentValue !== undefined ? blank.currentValue : '?'}</span>`;
+            } else {
+                html += `<span style="display:inline-block; min-width:30px;">${digit}</span>`;
+            }
+        }
+        html += `</td></tr>`;
+        // 除数行
+        html += `<tr><td>${divisor}</td><td style="border-left:2px solid #c4410c;">${dividend}</td></tr>`;
+        // 第一次乘积行
+        const firstProduct = (Math.floor(dividend / 10) || 0) * divisor;
+        const firstProductBlank = currentBlanks.find(b => b.id === `q${qIndex}_product1`);
+        if (firstProductBlank) {
+            html += `<tr><td></td><td><span class="blank" data-blank-id="${firstProductBlank.id}" data-question="${qIndex}">${firstProductBlank.currentValue !== undefined ? firstProductBlank.currentValue : '?'}</span></td></tr>`;
+        } else {
+            html += `<tr><td></td><td>${firstProduct}</td></tr>`;
+        }
+        // 横线
+        html += `<tr><td colspan="2"><div class="divider"></div></td></tr>`;
+        // 第一次余数
+        const firstRemainder = (dividend % 100) - firstProduct;
+        const firstRemainderBlank = currentBlanks.find(b => b.id === `q${qIndex}_remainder1`);
+        if (firstRemainderBlank) {
+            html += `<tr><td></td><td><span class="blank" data-blank-id="${firstRemainderBlank.id}" data-question="${qIndex}">${firstRemainderBlank.currentValue !== undefined ? firstRemainderBlank.currentValue : '?'}</span></td></tr>`;
+        } else {
+            html += `<tr><td></td><td>${firstRemainder}</td></tr>`;
+        }
+        // 如果有第二次乘积和余数（例如三位数除一位数）
+        if (quotientStr.length > 1) {
+            const secondProduct = (quotient % 10) * divisor;
+            const secondProductBlank = currentBlanks.find(b => b.id === `q${qIndex}_product2`);
+            if (secondProductBlank) {
+                html += `<tr><td></td><td><span class="blank" data-blank-id="${secondProductBlank.id}" data-question="${qIndex}">${secondProductBlank.currentValue !== undefined ? secondProductBlank.currentValue : '?'}</span></td></tr>`;
+                html += `<tr><td colspan="2"><div class="divider"></div></td></tr>`;
+                const secondRemainderBlank = currentBlanks.find(b => b.id === `q${qIndex}_remainder2`);
+                if (secondRemainderBlank) {
+                    html += `<tr><td></td><td><span class="blank" data-blank-id="${secondRemainderBlank.id}" data-question="${qIndex}">${secondRemainderBlank.currentValue !== undefined ? secondRemainderBlank.currentValue : '?'}</span></td></tr>`;
+                }
+            } else {
+                html += `<tr><td></td><td>${secondProduct}</td></tr>`;
+                html += `<tr><td colspan="2"><div class="divider"></div></td></tr>`;
+                html += `<tr><td></td><td>0</td></tr>`;
+            }
+        }
+        html += `</table></div>`;
+        return html;
+    }
+
+    // 初始化所有空缺和数字池
+    function initGame() {
+        currentBlanks = [];
+        let allCorrectValues = [];
+        ACTUAL_QUESTIONS.forEach((q, idx) => {
+            q.blanks.forEach(blank => {
+                const blankObj = {
+                    id: blank.id,
+                    correct: blank.correct,
+                    currentValue: null,
+                    questionIndex: idx,
+                    element: null
+                };
+                currentBlanks.push(blankObj);
+                allCorrectValues.push(blank.correct);
+            });
+        });
+        // 去重数字池
+        availableNumbers = [...new Set(allCorrectValues)];
+        availableNumbers.sort((a,b)=>a-b);
+        
+        totalBlanks = currentBlanks.length;
+        totalSpan.innerText = totalBlanks;
+        filledCount = 0;
+        currentScore = 0;
+        updateScore();
+        renderQuestions();
+        renderNumbers();
+        bindDragToNumbers();
+        messageDiv.innerHTML = '🧸 把数字拖到竖式的空格中，全部填对就胜利！';
+        messageDiv.style.background = '#f7e1b0';
+    }
+
+    function renderQuestions() {
+        questionsContainer.innerHTML = '';
+        ACTUAL_QUESTIONS.forEach((q, idx) => {
+            const qDiv = document.createElement('div');
+            qDiv.className = 'question-item';
+            qDiv.innerHTML = `<div class="question-title">✨ ${q.dividend} ÷ ${q.divisor} ✨</div>`;
+            const verticalHtml = renderDivision(q, idx);
+            qDiv.innerHTML += verticalHtml;
+            questionsContainer.appendChild(qDiv);
+        });
+        // 重新绑定空缺元素
+        document.querySelectorAll('.blank').forEach(blankSpan => {
+            const blankId = blankSpan.getAttribute('data-blank-id');
+            const blank = currentBlanks.find(b => b.id === blankId);
+            if (blank) {
+                blank.element = blankSpan;
+                if (blank.currentValue !== null) {
+                    blankSpan.innerText = blank.currentValue;
+                    blankSpan.classList.add('filled');
+                } else {
+                    blankSpan.innerText = '?';
+                    blankSpan.classList.remove('filled');
+                }
+            }
+        });
+    }
+
+    function renderNumbers() {
+        numbersContainer.innerHTML = '';
+        numberElements = [];
+        availableNumbers.forEach(num => {
+            const numDiv = document.createElement('div');
+            numDiv.className = 'drag-number';
+            numDiv.setAttribute('data-value', num);
+            numDiv.innerText = num;
+            numbersContainer.appendChild(numDiv);
+            numberElements.push(numDiv);
+        });
+    }
+
+    function updateScore() {
+        scoreSpan.innerText = currentScore;
+        const remain = totalBlanks - filledCount;
+        remainSpan.innerText = remain;
+        if (filledCount === totalBlanks && totalBlanks > 0) {
+            messageDiv.innerHTML = '🎉🎉 完美！ 你完全掌握了除数是一位数的笔算！ 点“新的一关”继续挑战 🎉🎉';
+            messageDiv.style.background = '#c8f0d1';
+        } else {
+            if (messageDiv.innerHTML.includes('完美')) {
+                messageDiv.innerHTML = '🐣 继续拖拽数字填空，成为笔算小英雄！';
+                messageDiv.style.background = '#f7e1b0';
+            }
+        }
+    }
+
+    // 拖拽系统
+    let isDragging = false;
+    let draggedNumberElem = null;
+    let cloneElem = null;
+    let draggedValue = null;
+
+    function removeClone() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.parentNode.removeChild(cloneElem);
+        cloneElem = null;
+    }
+
+    function stopDrag() {
+        if (!isDragging) return;
+        isDragging = false;
+        removeClone();
+        document.removeEventListener('mousemove', onGlobalMove);
+        document.removeEventListener('mouseup', onGlobalUp);
+        document.removeEventListener('touchmove', onGlobalTouchMove);
+        document.removeEventListener('touchend', onGlobalTouchEnd);
+        document.body.style.userSelect = '';
+        draggedNumberElem = null;
+        draggedValue = null;
+    }
+
+    function onGlobalMove(e) {
+        if (!cloneElem) return;
+        e.preventDefault();
+        const x = e.clientX;
+        const y = e.clientY;
+        cloneElem.style.left = (x - cloneElem.offsetWidth / 2) + 'px';
+        cloneElem.style.top = (y - cloneElem.offsetHeight / 2) + 'px';
+    }
+
+    function onGlobalTouchMove(e) {
+        if (!cloneElem) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const x = touch.clientX;
+        const y = touch.clientY;
+        cloneElem.style.left = (x - cloneElem.offsetWidth / 2) + 'px';
+        cloneElem.style.top = (y - cloneElem.offsetHeight / 2) + 'px';
+    }
+
+    function finishDrag(endX, endY) {
+        if (!draggedNumberElem || !isDragging) {
+            stopDrag();
+            return;
+        }
+
+        const elemUnderPointer = document.elementsFromPoint(endX, endY);
+        let targetBlank = null;
+        for (let el of elemUnderPointer) {
+            if (el.classList && el.classList.contains('blank')) {
+                targetBlank = el;
+                break;
+            }
+        }
+
+        let isCorrect = false;
+        if (targetBlank) {
+            const blankId = targetBlank.getAttribute('data-blank-id');
+            const blank = currentBlanks.find(b => b.id === blankId);
+            if (blank && blank.currentValue === null) {
+                if (draggedValue === blank.correct) {
+                    isCorrect = true;
+                    blank.currentValue = draggedValue;
+                    filledCount++;
+                    currentScore++;
+                    updateScore();
+                    targetBlank.innerText = draggedValue;
+                    targetBlank.classList.add('filled');
+                    targetBlank.classList.add('correct-pop');
+                    setTimeout(() => targetBlank.classList.remove('correct-pop'), 350);
+                    messageDiv.innerHTML = `✅ 正确！ 填入了 ${draggedValue} ✅ +1分`;
+                    messageDiv.style.background = '#c8e6b5';
+                    setTimeout(() => {
+                        if (filledCount !== totalBlanks) messageDiv.style.background = '#f7e1b0';
+                    }, 900);
+                    // 移除该数字卡片（如果数字池中该数字还有剩余？实际简单处理：用完即消失，但可能一个数字需要多次使用，所以不能直接移除。改为减少可用数量？为了简单，数字卡片不消失，但允许重复使用。为了避免重复填充同一个空，每个空只能填一次。所以数字卡片保留。
+                    // 检查是否全部完成
+                    if (filledCount === totalBlanks) {
+                        messageDiv.innerHTML = '🎉🎉 胜利！ 笔算小英雄就是你！ 🎉🎉';
+                        messageDiv.style.background = '#c8f0d1';
+                    }
+                } else {
+                    messageDiv.innerHTML = `❌ 不对哦！ ${draggedValue} 不是这个位置需要的数字，再想想笔算步骤~ ❌`;
+                    messageDiv.style.background = '#ffe0e0';
+                    setTimeout(() => {
+                        if (filledCount !== totalBlanks) messageDiv.style.background = '#f7e1b0';
+                    }, 1000);
+                    targetBlank.classList.add('wrong-shake');
+                    setTimeout(() => targetBlank.classList.remove('wrong-shake'), 500);
+                }
+            } else if (blank && blank.currentValue !== null) {
+                messageDiv.innerHTML = '🧸 这个位置已经填过了！不能重复填哟~';
+                messageDiv.style.background = '#ffefcf';
+                setTimeout(() => {
+                    if (filledCount !== totalBlanks) messageDiv.style.background = '#f7e1b0';
+                }, 800);
+            } else {
+                messageDiv.innerHTML = '🧸 拖拽到正确的空缺上！';
+            }
+        } else {
+            messageDiv.innerHTML = '🧸 要把数字拖到竖式的空格上哟！';
+        }
+        stopDrag();
+    }
+
+    function onGlobalUp(e) {
+        if (!isDragging) return;
+        finishDrag(e.clientX, e.clientY);
+    }
+
+    function onGlobalTouchEnd(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        const touch = e.changedTouches[0];
+        finishDrag(touch.clientX, touch.clientY);
+    }
+
+    function startDrag(numberElement, startX, startY) {
+        if (isDragging) stopDrag();
+        draggedNumberElem = numberElement;
+        draggedValue = parseInt(numberElement.getAttribute('data-value'));
+        const rect = numberElement.getBoundingClientRect();
+        cloneElem = numberElement.cloneNode(true);
+        cloneElem.classList.add('drag-clone');
+        cloneElem.style.position = 'fixed';
+        cloneElem.style.left = rect.left + 'px';
+        cloneElem.style.top = rect.top + 'px';
+        cloneElem.style.width = rect.width + 'px';
+        cloneElem.style.margin = '0';
+        cloneElem.style.pointerEvents = 'none';
+        document.body.appendChild(cloneElem);
+
+        isDragging = true;
+        document.addEventListener('mousemove', onGlobalMove);
+        document.addEventListener('mouseup', onGlobalUp);
+        document.addEventListener('touchmove', onGlobalTouchMove, { passive: false });
+        document.addEventListener('touchend', onGlobalTouchEnd);
+        document.body.style.userSelect = 'none';
+    }
+
+    function bindDragToNumbers() {
+        const numbers = document.querySelectorAll('.drag-number');
+        numbers.forEach(num => {
+            num.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                startDrag(num, e.clientX, e.clientY);
+            });
+            num.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                startDrag(num, touch.clientX, touch.clientY);
+            });
+            num.addEventListener('dragstart', (e) => e.preventDefault());
+        });
+    }
+
+    function resetGame() {
+        if (isDragging) stopDrag();
+        initGame();
+    }
+
+    // 初始化
+    initGame();
+    resetBtn.addEventListener('click', () => {
+        resetGame();
+    });
+</script>
+</body>
+</html>

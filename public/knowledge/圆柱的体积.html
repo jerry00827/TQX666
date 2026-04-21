@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🥫 圆柱体积探险 | 拖拽配对学公式</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免拖拽时选中文字，提升触屏体验 */
+        }
+
+        body {
+            background: #F2F8EE;
+            font-family: 'Comic Neue', 'Segoe UI Emoji', 'Chalkboard SE', 'Poppins', 'Comic Sans MS', cursive, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 主课程卡片 */
+        .volume-lab {
+            max-width: 1350px;
+            width: 100%;
+            background: #FFFFFFF0;
+            backdrop-filter: blur(2px);
+            border-radius: 68px 52px 68px 52px;
+            box-shadow: 0 25px 40px rgba(70, 60, 40, 0.12);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* 左右布局 */
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* 左侧知识点区域 */
+        .knowledge-side {
+            flex: 1.2;
+            min-width: 260px;
+            background: #FEFCF5;
+            padding: 32px 24px;
+            border-right: 4px dashed #D4E2C6;
+        }
+
+        .knowledge-side h2 {
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #79A85A, #B2D48B);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 8px solid #8DC26F;
+            padding-left: 18px;
+        }
+
+        .info-card {
+            background: #F4F9EF;
+            border-radius: 40px 24px 40px 24px;
+            padding: 22px;
+            margin: 20px 0;
+            box-shadow: 0 8px 0 #DFEAD4;
+        }
+
+        .info-card p {
+            font-size: 1rem;
+            margin: 14px 0;
+            color: #3F5A2B;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .math-badge {
+            background: #E5F0DB;
+            padding: 5px 14px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #558C2F;
+            display: inline-block;
+            margin: 4px 4px 0 0;
+        }
+
+        .tip-area {
+            background: #FEF5E6;
+            border-radius: 32px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .tip-area li {
+            margin-left: 24px;
+            margin-bottom: 8px;
+            color: #A5662C;
+        }
+
+        /* 右侧游戏区 */
+        .game-side {
+            flex: 2;
+            min-width: 300px;
+            background: #FFFCF7;
+            padding: 28px 24px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #E1F0D2;
+            padding-bottom: 12px;
+        }
+
+        .game-header h3 {
+            font-size: 1.8rem;
+            color: #6F9E3F;
+        }
+
+        .stats {
+            display: flex;
+            gap: 12px;
+            background: #F1F7EA;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #54862C;
+            align-items: center;
+        }
+
+        .reset-btn {
+            background: #F2E3CE;
+            border: none;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-family: inherit;
+            color: #9B6A3A;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: 8px;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.96);
+            background: #EAD5B0;
+        }
+
+        /* 圆柱展示区 */
+        .cylinder-show {
+            background: #FFF9F0;
+            border-radius: 56px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 28px;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.04);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background: #FFFFFF;
+            border-radius: 32px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+            width: 100%;
+            height: auto;
+            max-width: 240px;
+        }
+
+        .dimension {
+            margin-top: 12px;
+            background: #FFF2E4;
+            display: inline-flex;
+            gap: 20px;
+            padding: 8px 20px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #A76F3E;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* 拖拽放置区 */
+        .drop-zone {
+            background: #FEF3E6;
+            border-radius: 56px;
+            padding: 18px;
+            margin: 20px 0;
+            text-align: center;
+            border: 3px dashed #E6C99C;
+            transition: all 0.2s;
+        }
+
+        .drop-zone.active {
+            background: #F3FCEB;
+            border-color: #8FC65A;
+        }
+
+        .drop-box {
+            background: #FFF6E8;
+            border-radius: 48px;
+            padding: 18px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #C08748;
+            transition: 0.1s;
+        }
+
+        /* 可拖拽卡片区域 */
+        .cards-area {
+            background: #FEF9F0;
+            border-radius: 56px;
+            padding: 20px 16px;
+            margin-top: 16px;
+        }
+
+        .cards-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #AF6F3C;
+            margin-bottom: 16px;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: center;
+        }
+
+        .drag-card {
+            background: linear-gradient(145deg, #FFFFFF, #FFF1E2);
+            border-radius: 60px;
+            padding: 16px 24px;
+            min-width: 130px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #A5612A;
+            box-shadow: 0 10px 16px -6px rgba(100, 70, 30, 0.15);
+            cursor: grab;
+            transition: 0.05s linear;
+            border: 2px solid #FDD6A5;
+            touch-action: none;
+            font-family: monospace;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+        }
+
+        .drag-card.dragging-source {
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+
+        /* 克隆拖拽体 */
+        .drag-clone {
+            position: fixed;
+            z-index: 9999;
+            filter: drop-shadow(0 12px 20px rgba(0,0,0,0.25));
+            transform: scale(1.02) rotate(1deg);
+            pointer-events: none;
+            background: #FFFCF0;
+            border-radius: 60px;
+            padding: 16px 24px;
+            min-width: 130px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #A5612A;
+            border: 2px solid #FCC37A;
+            backdrop-filter: blur(6px);
+            font-family: monospace;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+        }
+
+        .message-panel {
+            background: #FFF1E2;
+            border-radius: 60px;
+            padding: 12px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #C17A3E;
+            transition: 0.1s;
+        }
+
+        .win-glow {
+            animation: cheerPop 0.6s ease;
+            background: #DAEFC4 !important;
+        }
+
+        @keyframes cheerPop {
+            0% { transform: scale(1); background: #FFEAC6; }
+            50% { transform: scale(1.01); background: #FFE0AE; box-shadow: 0 0 0 5px rgba(150, 200, 100, 0.4);}
+            100% { transform: scale(1); }
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 14px;
+            background: #FBF8EF;
+            color: #BB8A60;
+        }
+
+        @media (max-width: 780px) {
+            .knowledge-side {
+                border-right: none;
+                border-bottom: 4px dashed #D4E2C6;
+            }
+            .drag-card {
+                min-width: 110px;
+                font-size: 1rem;
+                padding: 12px 18px;
+            }
+            .drop-box {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="volume-lab">
+    <div class="flex-row">
+        <!-- 左侧知识点：圆柱的体积 -->
+        <div class="knowledge-side">
+            <h2>🥫 圆柱的体积 · 魔法公式</h2>
+            <div class="info-card">
+                <p>📌 <strong>圆柱体积公式</strong><br> 体积 = 底面积 × 高</p>
+                <p>⚪ 底面积 = π × 半径² <br> 📐 所以 <span class="math-badge">V = π × r² × h</span></p>
+                <p>🎯 小提示：π ≈ 3.14，结果可以保留整数或一位小数~</p>
+                <p>🧸 例子：圆柱半径3cm，高5cm，体积 = 3.14×9×5 = 141.3 cm³</p>
+            </div>
+            <div class="tip-area">
+                <span>🧪 体积小秘诀：</span>
+                <ul>
+                    <li>🍩 圆柱体积就像叠了很多个圆形薄片。</li>
+                    <li>✂️ 先算底面积，再乘高，就能得到体积啦！</li>
+                    <li>🎮 右侧游戏：把正确的体积卡片拖拽到「答案收集箱」里，全部答对就能获得圆柱大师称号！</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 右侧游戏区：拖拽配对体积 -->
+        <div class="game-side">
+            <div class="game-header">
+                <h3>🎈 圆柱体积工坊 · 拖拽配对</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="stats">⭐ 得分 <span id="scoreValue">0</span> / <span id="totalQuestions">5</span></span>
+                    <button class="reset-btn" id="resetGameBtn">🔄 重来冒险</button>
+                </div>
+            </div>
+
+            <!-- 圆柱示意图 + 当前半径/高 -->
+            <div class="cylinder-show">
+                <canvas id="cylinderCanvas" width="220" height="180" style="width:220px; height:180px;"></canvas>
+                <div class="dimension">
+                    <span>📏 半径 r = <strong id="radiusVal">3</strong> cm</span>
+                    <span>📐 高 h = <strong id="heightVal">5</strong> cm</span>
+                    <span>π = 3.14</span>
+                </div>
+            </div>
+
+            <!-- 放置区 (拖拽到这里配对) -->
+            <div class="drop-zone" id="dropZone">
+                <div class="drop-box">📦 把正确的体积卡片拖拽到这里 →</div>
+            </div>
+
+            <!-- 可拖拽卡片区 (三个选项) -->
+            <div class="cards-area">
+                <div class="cards-title">🎴 可拖拽体积卡片（只有一个是正确的）</div>
+                <div class="cards-container" id="cardsContainer"></div>
+            </div>
+
+            <div id="gameMessage" class="message-panel">
+                🌟 观察圆柱的半径和高，计算体积，然后把正确的卡片拖到「答案箱」里！
+            </div>
+        </div>
+    </div>
+    <footer>💡 小技巧：体积 = 3.14 × 半径 × 半径 × 高。拖拽正确的卡片到黄色区域松手，配对成功会自动进入下一题！</footer>
+</div>
+
+<script>
+    // ---------- 题目库 (半径, 高, 正确体积) ----------
+    const QUESTION_SET = [
+        { r: 3, h: 5, volume: null },   // 3.14*9*5 = 141.3
+        { r: 4, h: 6, volume: null },   // 3.14*16*6 = 301.44 ≈301.4
+        { r: 2, h: 8, volume: null },   // 3.14*4*8 = 100.48 ≈100.5
+        { r: 5, h: 4, volume: null },   // 3.14*25*4 = 314
+        { r: 6, h: 3, volume: null }    // 3.14*36*3 = 339.12 ≈339.1
+    ];
+    const PI = 3.14;
+    // 计算每个题目的正确体积（保留一位小数）
+    for (let q of QUESTION_SET) {
+        let vol = PI * q.r * q.r * q.h;
+        q.volume = Math.round(vol * 10) / 10;
+    }
+    const TOTAL_QS = QUESTION_SET.length;
+
+    // 游戏状态
+    let currentIndex = 0;          // 当前第几题 (0~4)
+    let currentScore = 0;          // 已答对题数
+    let gameCompleted = false;      // 是否通关
+    let currentCorrectVolume = QUESTION_SET[0].volume;
+
+    // 拖拽全局变量
+    let dragActive = false;
+    let sourceCardElem = null;
+    let sourceCardValue = null;
+    let cloneElem = null;
+    let startX = 0, startY = 0;
+
+    // DOM 元素
+    const canvas = document.getElementById('cylinderCanvas');
+    const ctx = canvas.getContext('2d');
+    const radiusSpan = document.getElementById('radiusVal');
+    const heightSpan = document.getElementById('heightVal');
+    const scoreSpan = document.getElementById('scoreValue');
+    const totalSpan = document.getElementById('totalQuestions');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const dropZone = document.getElementById('dropZone');
+    const gameMessageDiv = document.getElementById('gameMessage');
+    const resetBtn = document.getElementById('resetGameBtn');
+
+    totalSpan.innerText = TOTAL_QS;
+
+    // 绘制圆柱示意图 (带半径高标注)
+    function drawCylinder(r_val, h_val) {
+        const w = canvas.width;
+        const h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = "#FFF9F0";
+        ctx.fillRect(0, 0, w, h);
+        const topY = 30;
+        const bottomY = 130;
+        const radiusX = 65;
+        const radiusY = 16;
+        const centerX = w/2;
+        // 侧面矩形
+        ctx.fillStyle = "#FFEEDD";
+        ctx.fillRect(centerX - radiusX, topY, radiusX*2, bottomY - topY);
+        // 上底椭圆
+        ctx.beginPath();
+        ctx.ellipse(centerX, topY, radiusX, radiusY, 0, 0, Math.PI*2);
+        ctx.fillStyle = "#FFE2C1";
+        ctx.fill();
+        ctx.strokeStyle = "#DBA576";
+        ctx.stroke();
+        // 下底椭圆
+        ctx.beginPath();
+        ctx.ellipse(centerX, bottomY, radiusX, radiusY, 0, 0, Math.PI*2);
+        ctx.fillStyle = "#FAD6AC";
+        ctx.fill();
+        ctx.stroke();
+        // 侧边线
+        ctx.beginPath();
+        ctx.moveTo(centerX - radiusX, topY);
+        ctx.lineTo(centerX - radiusX, bottomY);
+        ctx.moveTo(centerX + radiusX, topY);
+        ctx.lineTo(centerX + radiusX, bottomY);
+        ctx.stroke();
+        // 文字标注
+        ctx.font = "bold 12px 'Segoe UI Emoji'";
+        ctx.fillStyle = "#B45F2A";
+        ctx.fillText("r", centerX + radiusX - 12, topY + 25);
+        ctx.fillText("h", centerX + radiusX + 8, (topY+bottomY)/2);
+        ctx.font = "10px monospace";
+        ctx.fillStyle = "#A76F3E";
+        ctx.fillText(`${r_val}cm`, centerX + radiusX - 10, topY + 35);
+        ctx.fillText(`${h_val}cm`, centerX + radiusX + 12, (topY+bottomY)/2 + 4);
+    }
+
+    // 生成三个卡片: 一个正确值 + 两个不同干扰项 (与正确值差距较大且为正)
+    function generateCardValues(correctVol) {
+        let options = new Set();
+        options.add(correctVol);
+        // 干扰项范围: 正确值±偏移 且大于0，且不重复
+        while(options.size < 3) {
+            let offset = Math.floor(Math.random() * 30) + 15; // 15~45偏移
+            let sign = Math.random() > 0.5 ? 1 : -1;
+            let candidate = correctVol + sign * offset;
+            if (candidate < 5) candidate = correctVol + 20;
+            // 保留一位小数
+            candidate = Math.round(candidate * 10) / 10;
+            if (candidate !== correctVol && candidate > 0) options.add(candidate);
+        }
+        // 转为数组并打乱顺序
+        let arr = Array.from(options);
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // 根据当前题目刷新UI (圆柱数据，卡片选项)
+    function refreshGame() {
+        if (gameCompleted) return;
+        const q = QUESTION_SET[currentIndex];
+        currentCorrectVolume = q.volume;
+        radiusSpan.innerText = q.r;
+        heightSpan.innerText = q.h;
+        drawCylinder(q.r, q.h);
+        
+        // 生成卡片数值 (三个选项)
+        const cardValues = generateCardValues(currentCorrectVolume);
+        // 渲染卡片
+        cardsContainer.innerHTML = '';
+        cardValues.forEach(val => {
+            const card = document.createElement('div');
+            card.className = 'drag-card';
+            card.setAttribute('data-volume', val);
+            card.innerText = val + ' cm³';
+            cardsContainer.appendChild(card);
+        });
+        
+        // 更新得分显示
+        scoreSpan.innerText = currentScore;
+        // 重置拖拽高亮
+        dropZone.classList.remove('active');
+        // 消息重置 (如果未完成)
+        if (currentScore !== TOTAL_QS) {
+            gameMessageDiv.innerHTML = `🎯 第${currentIndex+1}题：计算体积，拖拽正确的卡片到答案箱！`;
+            gameMessageDiv.style.background = "#FFF1E2";
+            gameMessageDiv.classList.remove('win-glow');
+        }
+    }
+
+    // 配对成功 -> 加分，进入下一题或完成游戏
+    function handleMatchSuccess(cardElem, matchedVolume) {
+        if (gameCompleted) return;
+        // 检查是否和当前题目正确体积一致
+        if (Math.abs(matchedVolume - currentCorrectVolume) < 0.01) {
+            // 正确！
+            currentScore++;
+            scoreSpan.innerText = currentScore;
+            // 播放正确动画
+            gameMessageDiv.innerHTML = "✅ 配对正确！ 圆柱体积大师 +1分 ✅";
+            gameMessageDiv.style.background = "#DAEFC4";
+            gameMessageDiv.classList.add('win-glow');
+            setTimeout(() => gameMessageDiv.classList.remove('win-glow'), 500);
+            
+            // 判断是否通关
+            if (currentScore === TOTAL_QS) {
+                gameCompleted = true;
+                gameMessageDiv.innerHTML = "🎉🎉 太厉害了！ 你完全掌握了圆柱体积！ 🎉🎉<br> 🌟 点击「重来冒险」可以再玩一次 🌟";
+                gameMessageDiv.style.background = "#DAEFC4";
+                gameMessageDiv.classList.add('win-glow');
+                // 清空卡片容器，显示胜利状态，不可再拖拽配对
+                cardsContainer.innerHTML = '<div style="text-align:center; padding:20px;">✨ 通关啦！ ✨</div>';
+                return;
+            } else {
+                // 下一题
+                currentIndex++;
+                refreshGame();
+            }
+        } else {
+            // 配对错误
+            gameMessageDiv.innerHTML = "😲 配对错误！ 再算一遍体积吧～ 记得公式 V = π × r² × h 😲";
+            gameMessageDiv.style.background = "#FFE0D0";
+            setTimeout(() => {
+                if (!gameCompleted && currentScore !== TOTAL_QS) {
+                    gameMessageDiv.innerHTML = `🎯 第${currentIndex+1}题：继续拖拽正确的体积卡片到答案箱！`;
+                    gameMessageDiv.style.background = "#FFF1E2";
+                }
+            }, 1200);
+        }
+    }
+
+    // ---------- 自定义拖拽实现 (支持鼠标+触屏) ----------
+    function startDrag(e, card) {
+        if (gameCompleted) return;
+        if (dragActive) return;
+        const volumeVal = parseFloat(card.getAttribute('data-volume'));
+        if (isNaN(volumeVal)) return;
+        
+        e.preventDefault();
+        let clientX, clientY;
+        if (e.type === 'mousedown') {
+            clientX = e.clientX;
+            clientY = e.clientY;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        } else {
+            const touch = e.touches[0];
+            clientX = touch.clientX;
+            clientY = touch.clientY;
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+            document.addEventListener('touchcancel', onTouchCancel);
+        }
+        
+        dragActive = true;
+        sourceCardElem = card;
+        sourceCardValue = volumeVal;
+        sourceCardElem.classList.add('dragging-source');
+        
+        // 创建克隆体
+        cloneElem = document.createElement('div');
+        cloneElem.className = 'drag-clone';
+        cloneElem.innerText = card.innerText;
+        cloneElem.style.left = (clientX - 35) + 'px';
+        cloneElem.style.top = (clientY - 30) + 'px';
+        cloneElem.style.width = sourceCardElem.offsetWidth + 'px';
+        document.body.appendChild(cloneElem);
+        
+        startX = clientX;
+        startY = clientY;
+        // 高亮放置区
+        dropZone.classList.add('active');
+    }
+    
+    function onMouseMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        moveClone(e.clientX, e.clientY);
+    }
+    
+    function onTouchMove(e) {
+        if (!dragActive) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveClone(touch.clientX, touch.clientY);
+    }
+    
+    function moveClone(clientX, clientY) {
+        if (!cloneElem) return;
+        cloneElem.style.left = (clientX - cloneElem.offsetWidth / 2) + 'px';
+        cloneElem.style.top = (clientY - cloneElem.offsetHeight / 2) + 'px';
+    }
+    
+    function finishDrag(clientX, clientY) {
+        if (!dragActive) return;
+        // 获取释放点下方的元素，检查是否在 dropZone 内
+        const elemUnderPointer = document.elementsFromPoint(clientX, clientY);
+        let isOverDrop = false;
+        for (let el of elemUnderPointer) {
+            if (el === dropZone || dropZone.contains(el)) {
+                isOverDrop = true;
+                break;
+            }
+        }
+        if (isOverDrop && sourceCardElem && !gameCompleted) {
+            handleMatchSuccess(sourceCardElem, sourceCardValue);
+        } else if (!gameCompleted) {
+            gameMessageDiv.innerHTML = "💡 要把卡片拖拽到「答案箱」黄色区域上松手才算配对哦！";
+            gameMessageDiv.style.background = "#FFE0D0";
+            setTimeout(() => {
+                if (!gameCompleted && currentScore !== TOTAL_QS) {
+                    gameMessageDiv.innerHTML = `🎯 第${currentIndex+1}题：继续拖拽正确的体积卡片到答案箱！`;
+                    gameMessageDiv.style.background = "#FFF1E2";
+                }
+            }, 1000);
+        }
+        // 清理拖拽效果
+        endDragCleanup();
+    }
+    
+    function endDragCleanup() {
+        if (cloneElem && cloneElem.parentNode) cloneElem.remove();
+        if (sourceCardElem) sourceCardElem.classList.remove('dragging-source');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+        document.removeEventListener('touchcancel', onTouchCancel);
+        dragActive = false;
+        sourceCardElem = null;
+        cloneElem = null;
+        dropZone.classList.remove('active');
+    }
+    
+    function onMouseUp(e) {
+        if (!dragActive) return;
+        finishDrag(e.clientX, e.clientY);
+    }
+    
+    function onTouchEnd(e) {
+        if (!dragActive) return;
+        let clientX, clientY;
+        if (e.changedTouches && e.changedTouches.length) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        } else {
+            clientX = startX;
+            clientY = startY;
+        }
+        finishDrag(clientX, clientY);
+    }
+    
+    function onTouchCancel(e) {
+        if (dragActive) endDragCleanup();
+    }
+    
+    // 绑定拖拽事件委托 (卡片容器)
+    function bindDragEvents() {
+        cardsContainer.addEventListener('mousedown', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        });
+        cardsContainer.addEventListener('touchstart', (e) => {
+            const card = e.target.closest('.drag-card');
+            if (!card) return;
+            e.preventDefault();
+            startDrag(e, card);
+        }, { passive: false });
+    }
+    
+    // 重置游戏全部状态
+    function resetGame() {
+        if (dragActive) endDragCleanup();
+        // 重置变量
+        currentIndex = 0;
+        currentScore = 0;
+        gameCompleted = false;
+        currentCorrectVolume = QUESTION_SET[0].volume;
+        // 刷新界面
+        refreshGame();
+        gameMessageDiv.innerHTML = "✨ 游戏已重置！ 计算圆柱体积，拖拽正确卡片到答案箱吧 ✨";
+        gameMessageDiv.style.background = "#FFF1E2";
+        gameMessageDiv.classList.remove('win-glow');
+    }
+    
+    // 初始化游戏
+    function init() {
+        refreshGame();
+        bindDragEvents();
+        resetBtn.addEventListener('click', () => resetGame());
+        // 窗口resize重绘
+        window.addEventListener('resize', () => {
+            if (!gameCompleted) {
+                const q = QUESTION_SET[currentIndex];
+                drawCylinder(q.r, q.h);
+            }
+        });
+    }
+    
+    init();
+</script>
+</body>
+</html>
